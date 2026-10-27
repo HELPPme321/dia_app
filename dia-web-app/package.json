@@ -10,8 +10,10 @@
     "admin:provision": "node scripts/provision-admin.js",
     "demo:seed": "node scripts/seed-demo-accounts.js",
     "demo:disable": "node scripts/disable-demo-accounts.js",
-    "check": "node --check src/server.js && node --check src/db.js && node --check src/products.js && node --check scripts/provision-admin.js && node --check scripts/seed-demo-accounts.js && node --check scripts/disable-demo-accounts.js && node --check auth.js && node --check admin.js && node --check test/auth.test.js && node --check test/api-routing.test.js && node --check test/deployment.test.js && node --check test/demo-accounts.test.js",
-    "test": "node --test"
+    "check": "node --check src/server.js && node --check src/store-routes.js && node --check src/db.js && node --check src/products.js && node --check scripts/provision-admin.js && node --check scripts/seed-demo-accounts.js && node --check scripts/disable-demo-accounts.js && node --check scripts/seed-sample-products.js && node --check auth.js && node --check admin.js && node --check test/auth.test.js && node --check test/api-routing.test.js && node --check test/deployment.test.js && node --check test/demo-accounts.test.js && node --check test/store-api.test.js",
+    "test": "node --test",
+    "products:seed": "node scripts/seed-sample-products.js",
+    "demo:setup": "npm run products:seed && npm run demo:seed"
   },
   "engines": {
     "node": ">=20"
