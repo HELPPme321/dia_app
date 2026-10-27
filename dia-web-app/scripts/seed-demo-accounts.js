@@ -9,7 +9,7 @@ const DEFAULTS = Object.freeze({
   user: Object.freeze({ email: 'demo@example.com', password: 'DemoUser2026!', name: 'Demo User', role: 'user' }),
   admin: Object.freeze({ email: 'admin@example.com', password: 'AdminDemo2026!', name: 'Demo Administrator', role: 'admin' })
 });
-const validEmail = (value) => value.length <= 254 && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value);
+const validEmail = (value) => value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const validPassword = (value, minimum) => typeof value === 'string' &&
   value.length >= minimum && value.length <= 1024 && /[A-Za-z]/.test(value) && /[0-9]/.test(value);
 
