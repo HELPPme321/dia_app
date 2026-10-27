@@ -10,9 +10,28 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <script src="script.js" defer></script>
+  <script src="script.js" defer></script>\n  <script src="auth.js" defer></script>
 </head>
-<body>
+<body>\n
+  <main id="diaAuth" class="dia-auth" hidden>
+    <section class="dia-auth-art">
+      <div class="dia-auth-brand"><span class="dia-mark">D<span>✦</span></span><span>dia<span>+</span></span></div>
+      <div class="dia-auth-copy"><p class="dia-kicker">CONSIDERED ESSENTIALS · DROP Nº 01</p><h1>Wear your<br><em>own story.</em></h1><p>Good pieces. Quiet confidence. The essentials you reach for, made to feel like you.</p><div class="dia-auth-line"><span></span>MADE FOR EVERYDAY, NOT EVERYONE.</div></div>
+      <div class="dia-orbit dia-orbit-one"></div><div class="dia-orbit dia-orbit-two"></div><div class="dia-auth-bottom"><span>01 / THE DIA EDIT</span><span>CEBU · PHILIPPINES</span></div>
+    </section>
+    <section class="dia-auth-panel"><div class="dia-auth-card">
+      <div class="dia-auth-mobile-brand">dia<span>+</span></div><p class="dia-kicker dark">YOUR DIA+ ACCOUNT</p><h2>Good to have<br>you <em>here.</em></h2>
+      <p class="dia-auth-description">Sign in to explore the collection, save your favorites, and keep your bag close.</p>
+      <div id="diaAuthNotice" class="dia-auth-notice" role="status" aria-live="polite" hidden></div>
+      <div id="googleButton" class="dia-google-wrap"></div>
+      <p id="googleHint" class="dia-auth-hint" hidden>Google sign-in needs to be configured by the app administrator.</p>
+      <div class="dia-auth-divider"><span>SECURE SIGN-IN</span></div>
+      <div class="dia-trust"><span>✦</span><p>Your account is protected with verified sign-in and secure sessions.</p></div>
+      <a class="dia-admin-link" href="/admin"><span>Managing Dia+?</span><strong>Administrator sign-in ↗</strong></a>
+      <p class="dia-legal">Your Google password is never shared with Dia+. By continuing, you agree to use your account responsibly.</p>
+    </div><footer class="dia-auth-footer"><span>© <span id="diaAuthYear"></span> DIA+</span><span>LESS, BUT BETTER.</span></footer></section>
+  </main>
+
   <main class="app-stage">
     <div class="ambient ambient-left" aria-hidden="true"></div>
     <div class="ambient ambient-right" aria-hidden="true"></div>

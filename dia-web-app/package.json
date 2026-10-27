@@ -1,0 +1,29 @@
+{
+  "name": "dia-plus-web-app",
+  "version": "2.1.0",
+  "private": true,
+  "description": "Dia+ storefront with verified Google sign-in and a secure administrator console.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "admin:provision": "node scripts/provision-admin.js",
+    "check": "node --check src/server.js && node --check src/db.js && node --check src/products.js && node --check scripts/provision-admin.js && node --check auth.js && node --check admin.js && node --check test/auth.test.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^12.2.0",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "google-auth-library": "^10.1.0",
+    "helmet": "^8.1.0"
+  },
+  "devDependencies": {
+    "supertest": "^7.1.4"
+  }
+}
