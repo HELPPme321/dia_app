@@ -14,27 +14,49 @@
 <body class="admin-body">
 <main class="admin-wrap">
   <section id="adminLogin" class="admin-login">
-    <a class="admin-brand" href="/">dia<span>+</span><small>ADMIN CONSOLE</small></a>
-    <p class="admin-kicker">SECURE ADMINISTRATION</p>
-    <h1>Good work<br><em>starts here.</em></h1>
-    <p class="admin-lede">Sign in with your administrator credentials to manage the Dia+ storefront.</p>
-    <div id="adminNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
-    <form id="adminLoginForm">
-      <label for="adminEmail">EMAIL ADDRESS</label>
-      <input id="adminEmail" type="email" autocomplete="username" required maxlength="254">
-      <label for="adminPassword">PASSWORD</label>
-      <div class="admin-password"><input id="adminPassword" type="password" autocomplete="current-password" required maxlength="1024"><button type="button" id="togglePassword" aria-label="Show password">Show</button></div>
-      <button id="adminSubmit" class="admin-primary" type="submit">Sign in securely <span>↗</span></button>
-    </form>
-    <a class="admin-back" href="/">← Back to Dia+</a>
+    <div class="admin-login-story">
+      <a class="admin-brand" href="/">dia<span>+</span><small>STUDIO / ADMIN</small></a>
+      <p class="admin-kicker">THE DIA+ CONTROL ROOM</p>
+      <h1>Quietly<br><em>in control.</em></h1>
+      <p class="admin-lede">A considered space to manage your collection, understand demand, and keep every detail moving.</p>
+      <div class="admin-story-foot"><span>01 / OPERATIONS</span><span>BUILT FOR THE DETAILS</span></div>
+    </div>
+    <div class="admin-login-form-panel">
+      <div class="admin-mobile-brand"><a class="admin-brand" href="/">dia<span>+</span></a><span>ADMIN ACCESS</span></div>
+      <p class="admin-kicker">SECURE ADMINISTRATION</p>
+      <h2>Welcome back.</h2>
+      <p class="admin-form-intro">Sign in with your provisioned administrator account.</p>
+      <div id="adminNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
+      <form id="adminLoginForm">
+        <label for="adminEmail">EMAIL ADDRESS</label>
+        <input id="adminEmail" type="email" autocomplete="username" required maxlength="254" placeholder="admin@yourstore.com">
+        <label for="adminPassword">PASSWORD</label>
+        <div class="admin-password"><input id="adminPassword" type="password" autocomplete="current-password" required maxlength="1024" placeholder="Enter your password"><button type="button" id="togglePassword" aria-label="Show password">Show</button></div>
+        <button id="adminSubmit" class="admin-primary" type="submit">Enter dashboard <span aria-hidden="true">↗</span></button>
+      </form>
+      <a class="admin-back" href="/">← Return to storefront</a>
+      <p class="admin-security-note"><span>✦</span> Protected by server-verified roles and secure sessions.</p>
+    </div>
   </section>
 
   <section id="adminDashboard" hidden>
     <header class="admin-top">
-      <a class="admin-brand" href="/">dia<span>+</span><small>ADMIN CONSOLE</small></a>
-      <div><span id="adminIdentity"></span><button id="adminLogout" class="admin-secondary" type="button">Sign out</button></div>
+      <a class="admin-brand" href="/">dia<span>+</span><small>STUDIO / ADMIN</small></a>
+      <div><span class="admin-live-indicator">LIVE STORE DATA</span><span id="adminIdentity"></span><button id="adminLogout" class="admin-secondary" type="button">Sign out ↗</button></div>
     </header>
-    <div class="admin-hero">
+    <div class="admin-dashboard-shell">
+      <aside class="admin-sidebar" aria-label="Dashboard navigation">
+        <p class="admin-sidebar-label">WORKSPACE</p>
+        <a href="#admin-overview"><span>⌂</span> Overview</a>
+        <a href="#admin-analytics"><span>↗</span> Analytics</a>
+        <a href="#admin-products"><span>◈</span> Products</a>
+        <a href="#admin-orders"><span>▤</span> Orders</a>
+        <a href="#admin-users"><span>♙</span> Customers</a>
+        <div class="admin-sidebar-bottom"><span class="admin-sidebar-dot"></span><span>Data synced from SQLite</span></div>
+        <a class="admin-store-link" href="/">← View storefront</a>
+      </aside>
+      <div class="admin-dashboard-main">
+    <div class="admin-hero" id="admin-overview">
       <p class="admin-kicker">DIA+ / OVERVIEW</p>
       <h1>Your store,<br><em>considered.</em></h1>
       <p>Database-backed users, catalog, inventory, and order records.</p>
@@ -108,6 +130,8 @@
       <div class="admin-pagination"><span id="pageLabel">—</span><div><button id="prevPage" class="admin-secondary" type="button">Previous</button><button id="nextPage" class="admin-secondary" type="button">Next</button></div></div>
     </section>
     <footer class="admin-footer">DIA+ · LESS, BUT BETTER.</footer>
+      </div>
+    </div>
   </section>
 </main>
 <dialog id="adminConfirm"><form method="dialog"><p class="admin-kicker">CONFIRM ACCOUNT CHANGE</p><h2 id="confirmTitle">Review this change.</h2><p id="confirmText"></p><label id="promoteLabel" for="promotePassword" hidden>NEW ADMIN PASSWORD (14+ CHARACTERS)</label><input id="promotePassword" type="password" minlength="14" autocomplete="new-password" hidden><div class="admin-dialog-actions"><button id="cancelConfirm" class="admin-secondary" value="cancel">Cancel</button><button id="applyConfirm" class="admin-primary" value="confirm">Confirm change</button></div></form></dialog>
