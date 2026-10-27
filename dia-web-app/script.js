@@ -55,10 +55,31 @@
     }
   }
 
+  function apiFailureMessage(response, data, method, url, fallback) {
+    const requestPath = (() => {
+      try { return new URL(url, window.location.href).pathname; }
+      catch { return String(url).split('?')[0]; }
+    })();
+    const contentType = response.headers.get('content-type') || 'unknown content type';
+    if (response.status === 404) {
+      const apiError = data?.error;
+      if (apiError?.code === 'ENDPOINT_NOT_FOUND') {
+        const build = apiError.version
+          ? `; ${apiError.service || 'Dia+'} v${apiError.version}${apiError.buildCommit ? ' (' + String(apiError.buildCommit).slice(0, 7) + ')' : ''}`
+          : '; server build unknown';
+        return `${apiError.message || 'API endpoint not found.'} [${apiError.method || method} ${apiError.path || requestPath}${build}]`;
+      }
+      const serverMessage = apiError?.message || data?.message;
+      if (serverMessage) return `${serverMessage} [${method} ${requestPath}; HTTP 404; ${contentType}]`;
+      return `API endpoint request failed: ${method} ${requestPath} returned HTTP 404 (${contentType}). Verify this page is served by the current Dia+ Express app, not a static host or stale deployment.`;
+    }
+    return data?.error?.message || data?.message || fallback;
+  }
+
   async function getStoreCsrf() {
     const response = await fetch('/api/auth/csrf', { credentials: 'same-origin' });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || !data.csrfToken) throw new Error('Could not start a secure store session. Refresh and try again.');
+    if (!response.ok || !data.csrfToken) throw new Error(apiFailureMessage(response, data, 'GET', '/api/auth/csrf', 'Could not start a secure store session. Refresh and try again.'));
     storeCsrf = data.csrfToken;
     return storeCsrf;
   }
@@ -74,7 +95,7 @@
     const response = await fetch(url, { ...options, method, headers, credentials: 'same-origin' });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      const error = new Error(data?.error?.message || 'The store request failed. Please try again.');
+      const error = new Error(apiFailureMessage(response, data, method, url, 'The store request failed. Please try again.'));
       error.status = response.status;
       error.code = data?.error?.code;
       throw error;
@@ -88,7 +109,7 @@
       const params = new URLSearchParams({ sort: sortMode });
       const response = await fetch('/api/products?' + params.toString(), { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data?.error?.message || 'Could not load the clothing catalog.');
+      if (!response.ok) throw new Error(apiFailureMessage(response, data, 'GET', '/api/products', 'Could not load the clothing catalog.'));
       PRODUCTS = Array.isArray(data.products) ? data.products : [];
       productsError = '';
       productsLoaded = true;
