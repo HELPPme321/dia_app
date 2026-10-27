@@ -96,7 +96,10 @@ test('health, config, products, and protected endpoints return their expected be
     });
 
     const health = await request(app).get('/api/health').expect(200);
-    assert.deepEqual(health.body, { status: 'ok' });
+    assert.equal(health.body.status, 'ok');
+    assert.equal(health.body.service, 'dia-plus-api');
+    assert.equal(health.body.version, require('../package.json').version);
+    assert.equal(health.body.buildCommit, null);
 
     const config = await request(app).get('/api/config').expect(200);
     assert.deepEqual(config.body, { googleClientId: '' });
@@ -135,6 +138,9 @@ test('API 404 reports the exact method and path without exposing query parameter
       .expect(404);
 
     assert.equal(missing.body.error.code, 'ENDPOINT_NOT_FOUND');
+    assert.equal(missing.body.error.service, 'dia-plus-api');
+    assert.equal(missing.body.error.version, require('../package.json').version);
+    assert.equal(missing.body.error.buildCommit, null);
     assert.equal(missing.body.error.method, 'GET');
     assert.equal(missing.body.error.path, '/api/not-a-real-endpoint');
     assert.equal(missing.body.error.message, 'No API endpoint is registered for GET /api/not-a-real-endpoint.');
