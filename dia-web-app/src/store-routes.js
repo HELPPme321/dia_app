@@ -19,14 +19,13 @@ function jsonArray(value, fallback = []) {
     return fallback;
   }
 }
-function publicProduct(row) {
-  return {
+function publicProduct(row, includeCost = false) {
+  const product = {
     id: row.id,
     name: row.name,
     category: row.category,
     description: row.description,
     price: row.price,
-    costPrice: row.cost_price ?? null,
     color: row.color,
     sizes: jsonArray(row.sizes_json),
     image: row.image_url,
@@ -38,6 +37,9 @@ function publicProduct(row) {
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
+  // Product cost is business-sensitive and is returned only to an authorized administrator.
+  if (includeCost) product.costPrice = row.cost_price ?? null;
+  return product;
 }
 function publicOrder(row) {
   return {
@@ -186,7 +188,7 @@ function registerStoreRoutes(app, { db, auth, admin, csrf }) {
       name: 'name COLLATE NOCASE ASC'
     })[req.query.sort] || 'tag ASC,name ASC';
     const rows = db.prepare('SELECT * FROM products WHERE ' + clauses.join(' AND ') + ' ORDER BY ' + orderBy).all(...params);
-    res.json({ products: rows.map(publicProduct) });
+    res.json({ products: rows.map((row) => publicProduct(row, true)) });
   });
 
   app.get('/api/products/:id', (req, res) => {
@@ -341,7 +343,7 @@ function registerStoreRoutes(app, { db, auth, admin, csrf }) {
       "VALUES(?,?,?,?,?,?,?,?,?,?,?,?, 'active',0,?,?)"
     ).run(id, p.name, p.category, p.description, p.price, p.costPrice, p.color, JSON.stringify(p.sizes), p.image, p.imagePosition, p.tag, p.stock, now, now);
     const row = db.prepare('SELECT * FROM products WHERE id=?').get(id);
-    return res.status(201).json({ product: publicProduct(row) });
+    return res.status(201).json({ product: publicProduct(row, true) });
   });
 
   app.patch('/api/admin/products/:id', csrf, auth, admin, (req, res) => {
@@ -355,7 +357,7 @@ function registerStoreRoutes(app, { db, auth, admin, csrf }) {
     db.prepare(
       'UPDATE products SET name=?,category=?,description=?,price=?,cost_price=?,color=?,sizes_json=?,image_url=?,image_position=?,tag=?,stock=?,updated_at=? WHERE id=?'
     ).run(p.name, p.category, p.description, p.price, p.costPrice, p.color, JSON.stringify(p.sizes), p.image, p.imagePosition, p.tag, p.stock, now, id);
-    return res.json({ product: publicProduct(db.prepare('SELECT * FROM products WHERE id=?').get(id)) });
+    return res.json({ product: publicProduct(db.prepare('SELECT * FROM products WHERE id=?').get(id), true) });
   });
 
   app.delete('/api/admin/products/:id', csrf, auth, admin, (req, res) => {
