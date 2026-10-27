@@ -5,6 +5,7 @@ const request=require('supertest');
 const bcrypt=require('bcryptjs');
 const {createDatabase}=require('../src/db');
 const {createApp}=require('../src/server');
+const {provisionAdmin}=require('../scripts/provision-admin');
 
 let db,agent,app;
 const valid='valid-google-id-token-sentinel-for-a-mocked-verifier';
@@ -72,6 +73,27 @@ test('state-changing authentication endpoints require CSRF',async()=>{
   await csrf();
   const r=await agent.post('/api/auth/register').send({name:'No CSRF',email:'no-csrf@example.net',password:'A-strong-password-123',confirmPassword:'A-strong-password-123'}).expect(403);
   assert.equal(r.body.error.code,'CSRF_VALIDATION_FAILED');
+});
+test('admin provisioning creates a hashed account that can log in and access database-backed dashboard APIs',async()=>{
+  const email='store-owner@dia.test';
+  const password='A-secure-admin-password-2026!';
+  const quiet={log(){}};
+  const result=await provisionAdmin({env:{ADMIN_EMAIL:email,ADMIN_PASSWORD:password},db,logger:quiet});
+  assert.equal(result.action,'created');
+  const saved=db.prepare('SELECT password_hash,role,status FROM users WHERE email=?').get(email);
+  assert.equal(saved.role,'admin');
+  assert.equal(saved.status,'active');
+  assert.equal(await bcrypt.compare(password,saved.password_hash),true);
+  const token=await csrf();
+  await agent.post('/api/auth/admin-login')
+    .set('x-csrf-token',token)
+    .send({email,password})
+    .expect(200);
+  const me=await agent.get('/api/auth/me').expect(200);
+  assert.equal(me.body.user.role,'admin');
+  assert.equal(me.body.authMethod,'admin');
+  const stats=await agent.get('/api/admin/stats').expect(200);
+  assert.equal(stats.body.stats.administrators,1);
 });
 test('customer session cannot access administrator API',async()=>{
   assert.equal((await register(agent)).status,201);
