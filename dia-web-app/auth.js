@@ -9,6 +9,26 @@
   function message(text, success = false) { notice.textContent=text; notice.classList.toggle('success',success); notice.hidden=!text; }
   function showAuth(text) { auth.hidden=false; app.style.display='none'; if(text)message(text); }
   function showApp(successMessage='') { auth.hidden=true; app.style.display=''; document.dispatchEvent(new CustomEvent('dia:auth-success')); if(successMessage){const toast=$('#toast');toast.textContent=successMessage;toast.classList.add('is-visible');window.setTimeout(()=>toast.classList.remove('is-visible'),2800);} }
+  function apiFailureMessage(response, data, method, url, fallback) {
+    const requestPath = (() => {
+      try { return new URL(url, window.location.href).pathname; }
+      catch { return String(url).split('?')[0]; }
+    })();
+    const contentType = response.headers.get('content-type') || 'unknown content type';
+    if (response.status === 404) {
+      const apiError = data?.error;
+      if (apiError?.code === 'ENDPOINT_NOT_FOUND') {
+        const build = apiError.version
+          ? `; ${apiError.service || 'Dia+'} v${apiError.version}${apiError.buildCommit ? ' (' + String(apiError.buildCommit).slice(0, 7) + ')' : ''}`
+          : '; server build unknown';
+        return `${apiError.message || 'API endpoint not found.'} [${apiError.method || method} ${apiError.path || requestPath}${build}]`;
+      }
+      const serverMessage = apiError?.message || data?.message;
+      if (serverMessage) return `${serverMessage} [${method} ${requestPath}; HTTP 404; ${contentType}]`;
+      return `API endpoint request failed: ${method} ${requestPath} returned HTTP 404 (${contentType}). Verify this page is served by the current Dia+ Express app, not a static host or stale deployment.`;
+    }
+    return data?.error?.message || data?.message || fallback;
+  }
   function setMode(mode) {
     const signup=mode==='signup';
     $('#loginPanel').hidden=signup;$('#signupPanel').hidden=!signup;
@@ -18,13 +38,13 @@
     $('#diaAuthDescription').textContent=signup?'Create your Dia+ account with any valid email address. No Google account required.':'Sign in to explore the collection, save your favorites, and keep your bag close.';
     message('');auth.dataset.mode=mode;
   }
-  async function csrfToken(){const r=await fetch('/api/auth/csrf',{credentials:'same-origin'}),d=await r.json().catch(()=>({}));if(!r.ok||!d.csrfToken)throw Error('Could not start a secure session. Refresh and try again.');csrf=d.csrfToken;return csrf;}
+  async function csrfToken(){const r=await fetch('/api/auth/csrf',{credentials:'same-origin'}),d=await r.json().catch(()=>({}));if(!r.ok||!d.csrfToken)throw Error(apiFailureMessage(r,d,'GET','/api/auth/csrf','Could not start a secure session. Refresh and try again.'));csrf=d.csrfToken;return csrf;}
   async function api(url,options={}){
     const method=(options.method||'GET').toUpperCase(),headers={Accept:'application/json',...(options.headers||{})};
     if(options.body)headers['Content-Type']='application/json';
     if(!['GET','HEAD','OPTIONS'].includes(method)){if(!csrf)await csrfToken();headers['X-CSRF-Token']=csrf;}
     const r=await fetch(url,{...options,method,headers,credentials:'same-origin'}),d=await r.json().catch(()=>({}));
-    if(!r.ok){const e=Error(d&&d.error&&d.error.message?d.error.message:'Authentication failed. Please try again.');e.status=r.status;e.code=d&&d.error?d.error.code:undefined;throw e;}
+    if(!r.ok){const e=Error(apiFailureMessage(r,d,method,url,'Authentication failed. Please try again.'));e.status=r.status;e.code=d&&d.error?d.error.code:undefined;throw e;}
     if(d.csrfToken)csrf=d.csrfToken;return d;
   }
   function setBusy(button,active,loadingText){button.disabled=active;if(active){button.dataset.originalLabel=button.innerHTML;button.textContent=loadingText;}else{button.innerHTML=button.dataset.originalLabel||button.innerHTML;delete button.dataset.originalLabel;}}
