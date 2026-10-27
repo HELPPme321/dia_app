@@ -350,13 +350,18 @@ function registerStoreRoutes(app, { db, auth, admin, csrf }) {
     const id = String(req.params.id).slice(0, 100);
     const existing = db.prepare('SELECT * FROM products WHERE id=?').get(id);
     if (!existing) return apiError(res, 404, 'PRODUCT_NOT_FOUND', 'That product was not found.');
+    const requestedStatus = req.body && Object.hasOwn(req.body, 'status') ? req.body.status : existing.status;
+    if (!['active','archived'].includes(requestedStatus)) return apiError(res, 400, 'INVALID_PRODUCT_STATUS', 'Choose active or archived status.');
     const parsed = productInput(req.body, existing);
     if (parsed.error) return apiError(res, 400, parsed.error.code, parsed.error.message);
     const p = parsed.value;
     const now = new Date().toISOString();
-    db.prepare(
-      'UPDATE products SET name=?,category=?,description=?,price=?,cost_price=?,color=?,sizes_json=?,image_url=?,image_position=?,tag=?,stock=?,updated_at=? WHERE id=?'
-    ).run(p.name, p.category, p.description, p.price, p.costPrice, p.color, JSON.stringify(p.sizes), p.image, p.imagePosition, p.tag, p.stock, now, id);
+    db.transaction(() => {
+      db.prepare(
+        'UPDATE products SET name=?,category=?,description=?,price=?,cost_price=?,color=?,sizes_json=?,image_url=?,image_position=?,tag=?,stock=?,status=?,updated_at=? WHERE id=?'
+      ).run(p.name, p.category, p.description, p.price, p.costPrice, p.color, JSON.stringify(p.sizes), p.image, p.imagePosition, p.tag, p.stock, requestedStatus, now, id);
+      if (requestedStatus === 'archived') db.prepare('DELETE FROM cart_items WHERE product_id=?').run(id);
+    })();
     return res.json({ product: publicProduct(db.prepare('SELECT * FROM products WHERE id=?').get(id), true) });
   });
 
