@@ -66,7 +66,6 @@
       const error = new Error(apiFailureMessage(response, data, method, url, 'Request failed. Please try again.'));
       error.status = response.status;
       error.code = data?.error?.code;
-      if (error.code === 'ENDPOINT_NOT_FOUND') error.message += ' [' + method + ' ' + (data?.error?.path || url) + ']';
       throw error;
     }
     if (data.csrfToken) csrf = data.csrfToken;
