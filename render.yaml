@@ -17,7 +17,7 @@ services:
       name: dia-sqlite-data
       mountPath: /var/data
       sizeGB: 1
-    initialDeployHook: npm run admin:provision
+    initialDeployHook: npm run admin:provision && npm run products:seed
     envVars:
       - key: NODE_ENV
         value: production
