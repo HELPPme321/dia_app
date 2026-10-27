@@ -78,6 +78,22 @@ test('customer session cannot access administrator API',async()=>{
   const r=await agent.get('/api/admin/stats').expect(403);
   assert.equal(r.body.error.code,'ADMIN_ACCESS_REQUIRED');
 });
+test('customer can open admin sign-in shell and switch to a server-authorized admin session',async()=>{
+  const password=admin();
+  assert.equal((await register(agent,'switcher@example.net')).status,201);
+  await agent.get('/admin').expect(200);
+  await agent.get('/api/admin/stats').expect(403);
+  const c=await csrf();
+  const loginResponse=await agent.post('/api/auth/admin-login')
+    .set('x-csrf-token',c)
+    .send({email:'admin@example.com',password})
+    .expect(200);
+  assert.equal(loginResponse.body.authenticated,true);
+  assert.equal(loginResponse.body.user.role,'admin');
+  assert.equal((await agent.get('/api/auth/me').expect(200)).body.authMethod,'admin');
+  await agent.get('/admin').expect(200);
+  await agent.get('/api/admin/stats').expect(200);
+});
 test('admin session accesses live database statistics',async()=>{
   const password=admin(),c=await csrf();
   await agent.post('/api/auth/admin-login').set('x-csrf-token',c).send({email:'admin@example.com',password}).expect(200);
