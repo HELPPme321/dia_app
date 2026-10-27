@@ -14,8 +14,8 @@ The Blueprint is configured to track `main` so reviewed and merged changes can b
 2. Connect/authorize GitHub access if asked, then choose `HELPPme321/dia_app` and branch `main`.
 3. Review the resource summary. The SQLite disk requires a paid web-service plan. Do not select a free plan for this Blueprint because free Render web services have ephemeral filesystems.
 4. During setup, provide an administrator email and a unique password at least 14 characters long when prompted for `ADMIN_EMAIL` and `ADMIN_PASSWORD`. Do not put these values into GitHub.
-5. Approve creation and wait for the first deployment and the one-time `npm run admin:provision` hook to complete.
-6. Open the service's generated `https://…onrender.com` URL. Test `/api/health` before creating a normal customer account.
+5. Approve creation and wait for the first deployment and the one-time hook (`npm run admin:provision && npm run products:seed`) to complete. The catalog seed imports only the four pre-existing definitions from src/products.js and marks each row as sample inventory; sample unit costs remain unknown.
+6. Open the service's generated `https://…onrender.com` URL. Test `/api/health` and `/api/products` to confirm the backend and sample catalog respond before registering a normal customer account.
 7. Once the administrator has been provisioned, remove `ADMIN_PASSWORD` (and the no-longer-needed `ADMIN_EMAIL`) from the Render service environment settings, then save/redeploy. Keep the administrator credentials in a safe password manager; never put them in source control.
 8. The generated Render URL is assigned by Render only after service creation. Do not assume the service name is available as a public hostname before Render confirms it.
 
@@ -30,7 +30,7 @@ Render provides `RENDER_EXTERNAL_URL`, used automatically by the application for
 
 Google sign-in is optional. To enable it, create a Web OAuth client ID in Google Cloud Console, set the public `GOOGLE_CLIENT_ID` environment variable in Render, and add the exact HTTPS site origin to Google OAuth's **Authorized JavaScript origins**. The current implementation uses Google Identity Services ID-token verification, so configure the JavaScript origin; no separate redirect URI is used by this frontend callback flow. Email/password login works without Google.
 
-There is no email delivery provider configured, so password-reset emails are not available. Do not rely on the “Forgot password?” notice for automatic recovery. Product catalog, cart and demo-order APIs use SQLite; checkout writes an order but does not collect payment, ship items, or send email. Run `npm run products:seed` once to import the existing sample catalog. Run the demo account seed only when you deliberately want the public demo credentials enabled.
+For a service created from this current Blueprint, sample product seeding is part of the initial deploy hook. If the Render service already existed before that change, the hook will not run retroactively: run `npm run products:seed` once from the service shell after deploying the updated code. The seeder skips existing product IDs and never overwrites their inventory or prices. There is no email delivery provider configured, so password-reset emails are not available. Do not rely on the “Forgot password?” notice for automatic recovery. Product catalog, cart and demo-order APIs use SQLite; checkout writes an order but does not collect payment, ship items, or send email. Run `npm run products:seed` once to import the existing sample catalog. Run the demo account seed only when you deliberately want the public demo credentials enabled.
 
 ## Costs and free-tier trade-offs
 
