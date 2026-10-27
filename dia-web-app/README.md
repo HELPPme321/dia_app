@@ -2,6 +2,12 @@
 
 The application keeps the existing Dia+ storefront and adds normal email/password registration and login, optional Google Identity Services login, and a separate administrator login with a protected dashboard.
 
+## Important: run the backend server
+
+This app is not a static-only website. The frontend uses relative same-origin API paths (for example, `/api/auth/login`) which are registered by the Express server in `src/server.js`. Do not open `index.html` directly and do not run this version with VS Code Live Server. Either method serves files without providing the authentication API.
+
+From this `dia-web-app` directory, run `npm.cmd install`, `npm.cmd run check`, `npm.cmd test`, then `npm.cmd start`; open `http://localhost:3000`. For production, deploy this Node.js application to a Node-capable host that runs the Express server and serves the frontend and `/api/*` routes on the same origin. No provider-specific production deployment configuration is present in this repository. See [API_ROUTES.md](API_ROUTES.md) for the endpoint inventory, expected status codes, and production environment requirements.
+
 ## Run locally
 
 Requirements: Node.js 20 or newer. In PowerShell:
