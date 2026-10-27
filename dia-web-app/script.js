@@ -3,52 +3,17 @@
   "use strict";
 
   const STORAGE_KEYS = { cart: "dia-plus-cart-v1", saved: "dia-plus-saved-v1" };
-  const PRODUCTS = [
-    {
-      id: "essential-hoodie",
-      name: "Essential Hoodie",
-      category: "Tops",
-      price: 1890,
-      tag: "Bestseller",
-      color: "Forest",
-      sizes: ["S", "M", "L", "XL"],
-      position: "center 43%",
-      description: "A relaxed, heavyweight layer designed for repeat wear. Soft brushed fleece, an easy dropped shoulder, and a small signature sparkle."
-    },
-    {
-      id: "everyday-tee",
-      name: "Everyday Tee",
-      category: "Tops",
-      price: 890,
-      tag: "New arrival",
-      color: "Oat",
-      sizes: ["S", "M", "L", "XL"],
-      position: "76% 39%",
-      description: "A clean-cut, easygoing cotton tee in a warm oat shade. Made to sit comfortably on its own or layer under your favorite hoodie."
-    },
-    {
-      id: "core-cap",
-      name: "Core Cap",
-      category: "Headwear",
-      price: 650,
-      tag: "Everyday staple",
-      color: "Washed black",
-      sizes: ["One size"],
-      position: "36% 81%",
-      description: "An understated six-panel cap with a curved brim and an embroidered sparkle. Adjustable at the back for an easy, everyday fit."
-    },
-    {
-      id: "weekend-layer",
-      name: "Weekend Layer",
-      category: "Tops",
-      price: 1590,
-      tag: "Limited drop",
-      color: "Deep olive",
-      sizes: ["S", "M", "L", "XL"],
-      position: "41% 53%",
-      description: "A roomy, slightly structured layer in our signature deep olive. Minimal detailing lets the fabric, shape, and feel do the talking."
-    }
-  ];
+  let PRODUCTS = [];
+  let productsLoaded = false;
+  let productsError = '';
+  let storeCsrf = '';
+  let checkoutAttemptId = '';
+  let sortMode = 'featured';
+  let priceRange = 'all';
+  let legacyCartMigrated = false;
+  let orderHistory = [];
+  let ordersLoading = false;
+  let ordersError = '';
 
   const appScreen = document.getElementById("appScreen");
   const homeView = document.getElementById("homeView");
@@ -68,8 +33,9 @@
   let activeProductId = null;
   let selectedSize = "";
   let toastTimeout = null;
-  let cart = readStorage(STORAGE_KEYS.cart, []);
+  let cart = [];
   let saved = readStorage(STORAGE_KEYS.saved, []);
+  let legacyCart = readStorage(STORAGE_KEYS.cart, []);
 
   function readStorage(key, fallback) {
     try {
@@ -83,12 +49,130 @@
 
   function saveStorage() {
     try {
-      localStorage.setItem(STORAGE_KEYS.cart, JSON.stringify(cart));
       localStorage.setItem(STORAGE_KEYS.saved, JSON.stringify(saved));
     } catch (error) {
-      console.warn("Storage is unavailable. Changes will last for this session only.", error);
+      console.warn("Storage is unavailable. Saved items will last for this session only.", error);
     }
   }
+
+  async function getStoreCsrf() {
+    const response = await fetch('/api/auth/csrf', { credentials: 'same-origin' });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.csrfToken) throw new Error('Could not start a secure store session. Refresh and try again.');
+    storeCsrf = data.csrfToken;
+    return storeCsrf;
+  }
+
+  async function storeApi(url, options = {}) {
+    const method = (options.method || 'GET').toUpperCase();
+    const headers = { Accept: 'application/json', ...(options.headers || {}) };
+    if (options.body) headers['Content-Type'] = 'application/json';
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+      if (!storeCsrf) await getStoreCsrf();
+      headers['X-CSRF-Token'] = storeCsrf;
+    }
+    const response = await fetch(url, { ...options, method, headers, credentials: 'same-origin' });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const error = new Error(data?.error?.message || 'The store request failed. Please try again.');
+      error.status = response.status;
+      error.code = data?.error?.code;
+      throw error;
+    }
+    if (data.csrfToken) storeCsrf = data.csrfToken;
+    return data;
+  }
+
+  async function loadProducts() {
+    try {
+      const params = new URLSearchParams({ sort: sortMode });
+      const response = await fetch('/api/products?' + params.toString(), { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data?.error?.message || 'Could not load the clothing catalog.');
+      PRODUCTS = Array.isArray(data.products) ? data.products : [];
+      productsError = '';
+      productsLoaded = true;
+      if (currentPage !== 'home') renderPage();
+      return PRODUCTS;
+    } catch (error) {
+      productsError = error.message || 'Could not load the clothing catalog.';
+      productsLoaded = true;
+      if (currentPage !== 'home') renderPage();
+      throw error;
+    }
+  }
+
+  async function refreshCart() {
+    const data = await storeApi('/api/cart');
+    cart = Array.isArray(data.items) ? data.items.map((item) => ({
+      productId: item.productId, size: item.size, quantity: item.quantity
+    })) : [];
+    updateCartBadges();
+    return cart;
+  }
+
+  async function loadOrders() {
+    ordersLoading = true;
+    ordersError = '';
+    if (currentPage === 'orders') renderPage();
+    try {
+      const data = await storeApi('/api/orders');
+      orderHistory = Array.isArray(data.orders) ? data.orders : [];
+    } catch (error) {
+      ordersError = error.message || 'Could not load order history.';
+    } finally {
+      ordersLoading = false;
+      if (currentPage === 'orders') renderPage();
+    }
+  }
+
+  async function migrateLegacyCart() {
+    if (legacyCartMigrated) return;
+    const legacy = Array.isArray(legacyCart) ? legacyCart : [];
+    try {
+      await refreshCart();
+      let changed = false;
+      for (const oldItem of legacy) {
+        const product = productById(oldItem?.productId);
+        const quantity = Number(oldItem?.quantity);
+        if (!product || !product.sizes.includes(oldItem?.size) || !Number.isSafeInteger(quantity) || quantity < 1) continue;
+        const existing = cart.find((item) => item.productId === product.id && item.size === oldItem.size);
+        const nextQuantity = Math.min(product.stock, (existing?.quantity || 0) + quantity);
+        if (nextQuantity < 1) continue;
+        if (existing) {
+          await storeApi('/api/cart/items', { method: 'PUT', body: JSON.stringify({ productId: product.id, size: oldItem.size, quantity: nextQuantity }) });
+        } else {
+          await storeApi('/api/cart/items', { method: 'POST', body: JSON.stringify({ productId: product.id, size: oldItem.size, quantity: nextQuantity }) });
+        }
+        changed = true;
+        await refreshCart();
+      }
+      localStorage.removeItem(STORAGE_KEYS.cart);
+      legacyCartMigrated = true;
+      if (changed) await refreshCart();
+    } catch (error) {
+      console.warn('Existing browser cart could not be fully migrated; it remains saved locally.', error);
+    }
+  }
+
+  document.addEventListener('dia:auth-success', async () => {
+    try {
+      await loadProducts();
+      await migrateLegacyCart();
+      await refreshCart();
+      navigate('shop');
+    } catch (error) {
+      showToast(error.message || 'The store is temporarily unavailable.');
+      navigate('shop');
+    }
+  });
+  document.addEventListener('dia:auth-logout', () => {
+    storeCsrf = '';
+    cart = [];
+    orderHistory = [];
+    updateCartBadges();
+    openHome();
+  });
 
   function formatPrice(value) {
     return new Intl.NumberFormat("en-PH", {
@@ -159,12 +243,13 @@
       openHome();
       return;
     }
-    currentPage = ["shop", "saved", "bag"].includes(page) ? page : "shop";
+    currentPage = ["shop", "saved", "bag", "orders"].includes(page) ? page : "shop";
     homeView.hidden = true;
     homeView.classList.remove("is-active");
     storeView.hidden = false;
     storeView.classList.add("is-active");
     renderPage();
+    if (currentPage === 'orders') loadOrders();
   }
 
   function closeOverlays() {
@@ -181,63 +266,83 @@
     if (currentPage === "bag") {
       return `<div class="page-heading"><p class="page-kicker">A GOOD CHOICE</p><h1 class="page-title">Your bag.</h1><p class="page-subtitle">A few considered essentials, picked just for you.</p></div>`;
     }
+    if (currentPage === "orders") {
+      return `<div class="page-heading"><p class="page-kicker">YOUR DIA+ ACCOUNT</p><h1 class="page-title">Your orders.</h1><p class="page-subtitle">A record of orders placed through this account. Demo orders do not collect payment.</p></div>`;
+    }
     return `<div class="page-heading"><p class="page-kicker">THE DIA EDIT · DROP Nº 01</p><h1 class="page-title">Find your form.</h1><p class="page-subtitle">Everyday essentials. Quietly different, made to be worn your way.</p></div>`;
   }
 
   function productCard(product) {
     const isSaved = saved.includes(product.id);
+    const name = escapeHtml(product.name);
+    const color = escapeHtml(product.color);
+    const category = escapeHtml(product.category);
+    const image = escapeHtml(product.image || '/assets/dia-editorial.webp');
+    const position = escapeHtml(product.position || 'center center');
+    const tag = escapeHtml(product.tag || 'Everyday essential');
+    const unavailable = Number(product.stock) <= 0;
     return `
-      <article class="product-card" data-product-card="${product.id}">
-        <div class="product-image-wrap" role="button" tabindex="0" data-action="open-product" data-product-id="${product.id}" aria-label="View ${product.name} details">
-          <img class="product-image" src="assets/dia-editorial.webp" alt="${product.name} in ${product.color}" loading="lazy" style="object-position:${product.position}" />
-          <span class="product-tag">${product.tag}</span>
-          <button class="heart-button ${isSaved ? "is-saved" : ""}" data-action="toggle-saved" data-product-id="${product.id}" aria-label="${isSaved ? "Remove from" : "Add to"} saved items" aria-pressed="${isSaved}">${icon("heart")}</button>
+      <article class="product-card" data-product-card="${escapeHtml(product.id)}">
+        <div class="product-image-wrap" role="button" tabindex="0" data-action="open-product" data-product-id="${escapeHtml(product.id)}" aria-label="View ${name} details">
+          <img class="product-image" src="${image}" alt="${name} in ${color}" loading="lazy" style="object-position:${position}" />
+          <span class="product-tag">${unavailable ? 'Out of stock' : tag}</span>
+          <button class="heart-button ${isSaved ? "is-saved" : ""}" data-action="toggle-saved" data-product-id="${escapeHtml(product.id)}" aria-label="${isSaved ? "Remove from" : "Add to"} saved items" aria-pressed="${isSaved}">${icon("heart")}</button>
         </div>
         <div class="product-meta">
-          <h3 class="product-name" role="button" tabindex="0" data-action="open-product" data-product-id="${product.id}">${product.name}</h3>
+          <h3 class="product-name" role="button" tabindex="0" data-action="open-product" data-product-id="${escapeHtml(product.id)}">${name}</h3>
           <p class="product-price">${formatPrice(product.price)}</p>
         </div>
-        <p class="product-category">${product.color} · ${product.category}</p>
-        <button class="quick-add" data-action="open-product" data-product-id="${product.id}">Quick view ${icon("arrow")}</button>
+        <p class="product-category">${color} · ${category}</p>
+        <button class="quick-add" data-action="open-product" data-product-id="${escapeHtml(product.id)}">Quick view ${icon("arrow")}</button>
       </article>`;
   }
 
-  function getVisibleProducts() {
+    function getVisibleProducts() {
     let list = [...PRODUCTS];
     if (currentPage === "saved") list = list.filter((product) => saved.includes(product.id));
-    if (activeCategory !== "All" && currentPage === "shop") {
-      list = list.filter((product) => product.category === activeCategory);
-    }
+    if (activeCategory !== "All" && currentPage === "shop") list = list.filter((product) => product.category === activeCategory);
     const query = searchQuery.trim().toLowerCase();
-    if (query) {
-      list = list.filter((product) => `${product.name} ${product.category} ${product.color} ${product.tag}`.toLowerCase().includes(query));
-    }
+    if (query) list = list.filter((product) => `${product.name} ${product.category} ${product.color} ${product.tag} ${product.description}`.toLowerCase().includes(query));
+    if (priceRange === 'under-1000') list = list.filter((product) => product.price < 1000);
+    if (priceRange === '1000-2000') list = list.filter((product) => product.price >= 1000 && product.price <= 2000);
+    if (priceRange === 'over-2000') list = list.filter((product) => product.price > 2000);
+    if (sortMode === 'price-asc') list.sort((a,b) => a.price-b.price);
+    else if (sortMode === 'price-desc') list.sort((a,b) => b.price-a.price);
+    else if (sortMode === 'newest') list.sort((a,b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    else list.sort((a,b) => String(a.tag || '').localeCompare(String(b.tag || '')));
     return list;
   }
 
-  function renderGrid() {
+    function renderGrid() {
+    if (!productsLoaded) return `<div class="empty-state"><h3>Loading the collection…</h3><p>Getting the current catalog from Dia+.</p></div>`;
+    if (productsError && PRODUCTS.length === 0) return `<div class="empty-state"><h3>The collection could not be loaded.</h3><p>${escapeHtml(productsError)}</p><button class="secondary-button" data-action="retry-products">Try again</button></div>`;
     const products = getVisibleProducts();
     const title = currentPage === "saved" ? "Your favorites" : "The collection";
     const countText = `${products.length} ${products.length === 1 ? "piece" : "pieces"}`;
     if (!products.length) {
       const isSavedEmpty = currentPage === "saved" && !searchQuery.trim();
-      return `<div class="empty-state">${icon(isSavedEmpty ? "heart" : "search")}<h3>${isSavedEmpty ? "Nothing saved just yet." : "No pieces found."}</h3><p>${isSavedEmpty ? "Tap the little heart on anything that feels like you." : "Try another search or choose a different category."}</p>${isSavedEmpty ? '<button class="primary-button" data-action="navigate" data-page="shop">Explore the collection</button>' : '<button class="secondary-button" data-action="clear-filters">Clear filters</button>'}</div>`;
+      const emptyMessage = currentPage === "saved"
+        ? "Tap the little heart on anything that feels like you."
+        : (PRODUCTS.length ? "Try another search, price range, or category." : "The catalog is empty. An administrator can add products or run the documented sample-catalog seed.");
+      return `<div class="empty-state">${icon(isSavedEmpty ? "heart" : "search")}<h3>${isSavedEmpty ? "Nothing saved just yet." : (PRODUCTS.length ? "No pieces found." : "The collection is waiting for products.")}</h3><p>${emptyMessage}</p>${isSavedEmpty ? '<button class="primary-button" data-action="navigate" data-page="shop">Explore the collection</button>' : '<button class="secondary-button" data-action="clear-filters">Clear filters</button>'}</div>`;
     }
     return `<div class="section-label-row"><h2 class="section-label">${title}</h2><span class="section-count">${countText}</span></div><div class="product-grid">${products.map(productCard).join("")}</div>`;
   }
 
-  function renderShop() {
-    const categories = ["All", "Tops", "Headwear"];
+    function renderShop() {
+    const categories = ["All", ...new Set(PRODUCTS.map((product) => product.category).filter(Boolean))];
     return `${pageHeader()}
       <label class="search-box">${icon("search")}<input type="search" id="productSearch" autocomplete="off" value="${escapeHtml(searchQuery)}" placeholder="Search your next favorite..." aria-label="Search products" /></label>
       <div class="filter-row" role="group" aria-label="Filter products by category">
-        ${categories.map((category) => `<button class="filter-chip ${activeCategory === category ? "is-active" : ""}" data-action="filter-category" data-category="${category}" aria-pressed="${activeCategory === category}">${category}</button>`).join("")}
+        ${categories.map((category) => `<button class="filter-chip ${activeCategory === category ? "is-active" : ""}" data-action="filter-category" data-category="${escapeHtml(category)}" aria-pressed="${activeCategory === category}">${escapeHtml(category)}</button>`).join("")}
       </div>
+      <div class="store-selectors"><label for="productSort">Sort <select id="productSort"><option value="featured" ${sortMode === 'featured' ? 'selected' : ''}>Featured</option><option value="price-asc" ${sortMode === 'price-asc' ? 'selected' : ''}>Price: low to high</option><option value="price-desc" ${sortMode === 'price-desc' ? 'selected' : ''}>Price: high to low</option><option value="newest" ${sortMode === 'newest' ? 'selected' : ''}>Newest</option></select></label>
+        <label for="priceRange">Price <select id="priceRange"><option value="all" ${priceRange === 'all' ? 'selected' : ''}>Any price</option><option value="under-1000" ${priceRange === 'under-1000' ? 'selected' : ''}>Under ₱1,000</option><option value="1000-2000" ${priceRange === '1000-2000' ? 'selected' : ''}>₱1,000–₱2,000</option><option value="over-2000" ${priceRange === 'over-2000' ? 'selected' : ''}>Over ₱2,000</option></select></label></div>
       <div id="productGridArea">${renderGrid()}</div>
       <p class="shipping-note">${icon("truck")} Thoughtful pieces, delivered with care. Free shipping on orders over ₱2,500.</p>`;
   }
 
-  function renderSaved() {
+    function renderSaved() {
     return `${pageHeader()}
       <label class="search-box">${icon("search")}<input type="search" id="productSearch" autocomplete="off" value="${escapeHtml(searchQuery)}" placeholder="Search saved pieces..." aria-label="Search saved products" /></label>
       <div style="height:16px"></div><div id="productGridArea">${renderGrid()}</div>`;
@@ -247,29 +352,35 @@
     if (!cart.length) {
       return `${pageHeader()}<div class="empty-state">${icon("bag")}<h3>Your bag is taking a breather.</h3><p>Good things are worth finding. Explore the collection and start with one piece you love.</p><button class="primary-button" data-action="navigate" data-page="shop">Explore the collection ${icon("arrow")}</button></div>`;
     }
-
     const items = cart.map((item) => {
       const product = productById(item.productId);
       if (!product) return "";
       return `<article class="bag-item">
-        <img class="bag-item-image" src="assets/dia-editorial.webp" alt="${product.name}" style="object-position:${product.position}" />
+        <img class="bag-item-image" src="${escapeHtml(product.image || '/assets/dia-editorial.webp')}" alt="${escapeHtml(product.name)}" style="object-position:${escapeHtml(product.position || 'center center')}" />
         <div class="bag-item-info">
-          <div class="bag-item-top"><div><h3 class="bag-item-name">${product.name}</h3><p class="bag-item-size">${product.color} · ${item.size}</p></div><button class="remove-item" data-action="remove-item" data-product-id="${product.id}" data-size="${item.size}" aria-label="Remove ${product.name}">${icon("trash")}</button></div>
-          <div class="bag-item-bottom"><div class="quantity-control" aria-label="Quantity controls"><button data-action="change-quantity" data-delta="-1" data-product-id="${product.id}" data-size="${item.size}" aria-label="Decrease quantity">−</button><span>${item.quantity}</span><button data-action="change-quantity" data-delta="1" data-product-id="${product.id}" data-size="${item.size}" aria-label="Increase quantity">+</button></div><p class="bag-item-price">${formatPrice(product.price * item.quantity)}</p></div>
+          <div class="bag-item-top"><div><h3 class="bag-item-name">${escapeHtml(product.name)}</h3><p class="bag-item-size">${escapeHtml(product.color)} · ${escapeHtml(item.size)}</p><p class="product-category">Available stock: ${product.stock}</p></div><button class="remove-item" data-action="remove-item" data-product-id="${escapeHtml(product.id)}" data-size="${escapeHtml(item.size)}" aria-label="Remove ${escapeHtml(product.name)}">${icon("trash")}</button></div>
+          <div class="bag-item-bottom"><div class="quantity-control" aria-label="Quantity controls"><button data-action="change-quantity" data-delta="-1" data-product-id="${escapeHtml(product.id)}" data-size="${escapeHtml(item.size)}" aria-label="Decrease quantity">−</button><span>${item.quantity}</span><button data-action="change-quantity" data-delta="1" data-product-id="${escapeHtml(product.id)}" data-size="${escapeHtml(item.size)}" aria-label="Increase quantity" ${item.quantity >= product.stock ? 'disabled' : ''}>+</button></div><p class="bag-item-price">${formatPrice(product.price * item.quantity)}</p></div>
         </div>
       </article>`;
     }).join("");
-
     const subtotal = cartSubtotal();
     const shipping = subtotal >= 2500 ? 0 : 120;
     const total = subtotal + shipping;
     return `${pageHeader()}<div class="bag-list">${items}</div>
       <div class="order-summary"><p class="summary-line"><span>Subtotal</span><strong>${formatPrice(subtotal)}</strong></p><p class="summary-line"><span>Shipping</span><strong>${shipping === 0 ? "Free" : formatPrice(shipping)}</strong></p><p class="summary-line total"><span>Total</span><strong>${formatPrice(total)}</strong></p></div>
       <p class="shipping-note">${icon("truck")} ${shipping === 0 ? "You've unlocked complimentary shipping." : `Add ${formatPrice(2500 - subtotal)} more for free shipping.`}</p>
+      <p class="product-category">Checkout creates a pending demonstration order. No payment will be collected.</p>
       <div class="bag-actions"><button class="primary-button full-width" data-action="checkout">Continue to checkout ${icon("arrow")}</button><button class="secondary-button full-width" data-action="navigate" data-page="shop">Continue shopping</button></div>`;
   }
 
-  function renderPage() {
+  function renderOrders() {
+    if (ordersLoading) return `${pageHeader()}<div class="empty-state"><h3>Loading your orders…</h3></div>`;
+    if (ordersError) return `${pageHeader()}<div class="empty-state"><h3>Order history could not be loaded.</h3><p>${escapeHtml(ordersError)}</p><button class="secondary-button" data-action="retry-orders">Try again</button></div>`;
+    if (!orderHistory.length) return `${pageHeader()}<div class="empty-state"><h3>No orders yet.</h3><p>Orders you place through checkout will appear here.</p><button class="primary-button" data-action="navigate" data-page="shop">Explore the collection</button></div>`;
+    return `${pageHeader()}<div class="order-history">${orderHistory.map((order) => `<article class="order-history-card"><div class="order-history-top"><strong>${escapeHtml(order.orderNumber)}</strong><span class="admin-status">${escapeHtml(order.status)}</span></div><p>${new Date(order.createdAt).toLocaleString()} · ${order.items.reduce((sum, item) => sum + item.quantity, 0)} item(s)</p><ul>${order.items.map((item) => `<li>${escapeHtml(item.name)} · ${escapeHtml(item.size)} × ${item.quantity} — ${formatPrice(item.lineTotal)}</li>`).join('')}</ul><strong class="order-history-total">${formatPrice(order.total)}</strong><p class="product-category">Payment: ${escapeHtml(order.paymentStatus)}. Demo orders do not collect payment.</p></article>`).join('')}</div>`;
+  }
+
+    function renderPage() {
     updateCartBadges();
     document.querySelectorAll(".nav-item").forEach((button) => {
       button.classList.toggle("is-current", button.dataset.page === currentPage);
@@ -278,6 +389,7 @@
     });
     if (currentPage === "bag") pageContent.innerHTML = renderBag();
     else if (currentPage === "saved") pageContent.innerHTML = renderSaved();
+    else if (currentPage === "orders") pageContent.innerHTML = renderOrders();
     else pageContent.innerHTML = renderShop();
     pageContent.scrollTop = 0;
   }
@@ -288,22 +400,25 @@
     activeProductId = id;
     selectedSize = "";
     const isSaved = saved.includes(id);
+    const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+    const outOfStock = Number(product.stock) <= 0;
     productModalContent.innerHTML = `
-      <div class="detail-image-wrap"><img class="detail-image" src="assets/dia-editorial.webp" alt="${product.name} in ${product.color}" style="object-position:${product.position}" /></div>
+      <div class="detail-image-wrap"><img class="detail-image" src="${escapeHtml(product.image || '/assets/dia-editorial.webp')}" alt="${escapeHtml(product.name)} in ${escapeHtml(product.color)}" style="object-position:${escapeHtml(product.position || 'center center')}" /></div>
       <div class="detail-copy">
-        <p class="page-kicker">${product.tag} · ${product.category}</p>
-        <div class="detail-title-row"><h2 class="detail-name" id="detailName">${product.name}</h2><p class="detail-price">${formatPrice(product.price)}</p></div>
-        <p class="detail-description">${product.description}</p>
-        <p class="option-title"><span>Choose your size</span><span class="option-hint">Color: ${product.color}</span></p>
-        <div class="size-options" role="group" aria-label="Choose a size">${product.sizes.map((size) => `<button class="size-option" data-action="select-size" data-size="${size}" aria-pressed="false">${size}</button>`).join("")}</div>
+        <p class="page-kicker">${escapeHtml(product.tag || 'Everyday essential')} · ${escapeHtml(product.category)}</p>
+        <div class="detail-title-row"><h2 class="detail-name" id="detailName">${escapeHtml(product.name)}</h2><p class="detail-price">${formatPrice(product.price)}</p></div>
+        <p class="detail-description">${escapeHtml(product.description)}</p>
+        <p class="option-title"><span>Choose your size</span><span class="option-hint">Color: ${escapeHtml(product.color)}</span></p>
+        <div class="size-options" role="group" aria-label="Choose a size">${sizes.map((size) => `<button class="size-option" data-action="select-size" data-size="${escapeHtml(size)}" aria-pressed="false">${escapeHtml(size)}</button>`).join("")}</div>
+        <p class="product-category">${outOfStock ? 'Currently out of stock' : Number(product.stock) + ' available'}</p>
         <p class="form-error" id="sizeError" aria-live="polite"></p>
-        <div class="detail-actions"><button class="icon-button detail-heart ${isSaved ? "is-saved" : ""}" data-action="toggle-saved-detail" data-product-id="${product.id}" aria-label="${isSaved ? "Remove from saved items" : "Save item"}" aria-pressed="${isSaved}">${icon("heart")}</button><button class="primary-button" data-action="add-to-bag" data-product-id="${product.id}">Add to bag · ${formatPrice(product.price)}</button></div>
+        <div class="detail-actions"><button class="icon-button detail-heart ${isSaved ? "is-saved" : ""}" data-action="toggle-saved-detail" data-product-id="${escapeHtml(product.id)}" aria-label="${isSaved ? "Remove from saved items" : "Save item"}" aria-pressed="${isSaved}">${icon("heart")}</button><button class="primary-button" data-action="add-to-bag" data-product-id="${escapeHtml(product.id)}" ${outOfStock ? 'disabled' : ''}>${outOfStock ? 'Out of stock' : 'Add to bag · ' + formatPrice(product.price)}</button></div>
       </div>`;
     productModal.hidden = false;
     productModal.querySelector(".modal-panel").scrollTop = 0;
   }
 
-  function toggleSaved(id) {
+    function toggleSaved(id) {
     const product = productById(id);
     if (!product) return;
     if (saved.includes(id)) {
@@ -318,38 +433,51 @@
     else if (activeProductId === id) openProduct(id);
   }
 
-  function addToCart(productId, size) {
+  async function addToCart(productId, size) {
     const product = productById(productId);
-    if (!product) return;
-    const existing = cart.find((item) => item.productId === productId && item.size === size);
-    if (existing) existing.quantity += 1;
-    else cart.push({ productId, size, quantity: 1 });
-    saveStorage();
-    updateCartBadges();
-    productModal.hidden = true;
-    activeProductId = null;
-    showToast(`${product.name} added to your bag`);
-    if (currentPage === "bag") renderPage();
+    if (!product || !size) return;
+    try {
+      await storeApi('/api/cart/items', { method: 'POST', body: JSON.stringify({ productId, size, quantity: 1 }) });
+      await refreshCart();
+      productModal.hidden = true;
+      activeProductId = null;
+      showToast(`${product.name} added to your bag`);
+      if (currentPage === "bag") renderPage();
+    } catch (error) {
+      showToast(error.message || 'That item could not be added.');
+    }
   }
 
-  function changeQuantity(productId, size, delta) {
+  async function changeQuantity(productId, size, delta) {
     const item = cart.find((entry) => entry.productId === productId && entry.size === size);
     if (!item) return;
-    item.quantity += delta;
-    if (item.quantity <= 0) cart = cart.filter((entry) => entry !== item);
-    saveStorage();
-    renderPage();
+    const quantity = item.quantity + delta;
+    try {
+      if (quantity <= 0) {
+        await storeApi('/api/cart/items', { method: 'DELETE', body: JSON.stringify({ productId, size }) });
+      } else {
+        await storeApi('/api/cart/items', { method: 'PUT', body: JSON.stringify({ productId, size, quantity }) });
+      }
+      await refreshCart();
+      renderPage();
+    } catch (error) {
+      showToast(error.message || 'Bag quantity could not be updated.');
+    }
   }
 
-  function removeItem(productId, size) {
+  async function removeItem(productId, size) {
     const product = productById(productId);
-    cart = cart.filter((item) => !(item.productId === productId && item.size === size));
-    saveStorage();
-    renderPage();
-    if (product) showToast(`${product.name} removed from your bag`);
+    try {
+      await storeApi('/api/cart/items', { method: 'DELETE', body: JSON.stringify({ productId, size }) });
+      await refreshCart();
+      renderPage();
+      if (product) showToast(`${product.name} removed from your bag`);
+    } catch (error) {
+      showToast(error.message || 'The bag item could not be removed.');
+    }
   }
 
-  function updateProductGrid() {
+    function updateProductGrid() {
     const area = document.getElementById("productGridArea");
     if (area) area.innerHTML = renderGrid();
   }
@@ -359,12 +487,14 @@
       showToast("Your bag is empty");
       return;
     }
+    checkoutAttemptId = (window.crypto && typeof window.crypto.randomUUID === 'function')
+      ? window.crypto.randomUUID() : 'dia-' + Date.now() + '-' + Math.random().toString(16).slice(2);
     checkoutContent.innerHTML = `
-      <p class="checkout-intro">Almost yours</p><h2 class="checkout-title" id="checkoutTitle">Checkout.</h2><p class="checkout-description">Add your delivery details to place a demo order. No payment will be collected.</p>
+      <p class="checkout-intro">Almost yours</p><h2 class="checkout-title" id="checkoutTitle">Checkout.</h2><p class="checkout-description">This creates a pending demonstration order. No payment will be collected.</p>
       <form class="checkout-form" id="checkoutForm" novalidate>
-        <div class="form-field"><label for="customerName">Full name</label><input id="customerName" name="customerName" autocomplete="name" placeholder="Your full name" required minlength="2" /></div>
-        <div class="form-field"><label for="customerEmail">Email address</label><input id="customerEmail" name="customerEmail" type="email" autocomplete="email" placeholder="you@example.com" required /></div>
-        <div class="form-field"><label for="customerAddress">Delivery address</label><input id="customerAddress" name="customerAddress" autocomplete="street-address" placeholder="House no., street, city" required minlength="6" /></div>
+        <div class="form-field"><label for="customerName">Full name</label><input id="customerName" name="customerName" autocomplete="name" placeholder="Your full name" required minlength="2" maxlength="120" /></div>
+        <div class="form-field"><label for="customerEmail">Email address</label><input id="customerEmail" name="customerEmail" type="email" autocomplete="email" placeholder="you@example.com" required maxlength="254" /></div>
+        <div class="form-field"><label for="customerAddress">Delivery address</label><input id="customerAddress" name="customerAddress" autocomplete="street-address" placeholder="House no., street, city" required minlength="6" maxlength="500" /></div>
         <p class="form-error" id="checkoutError" role="alert"></p>
         <div class="checkout-total"><span>Order total · ${cartCount()} ${cartCount() === 1 ? "item" : "items"}</span><strong>${formatPrice(cartSubtotal() + (cartSubtotal() >= 2500 ? 0 : 120))}</strong></div>
         <button class="primary-button full-width" type="submit">Place demo order ${icon("arrow")}</button>
@@ -373,11 +503,12 @@
     window.setTimeout(() => document.getElementById("customerName")?.focus(), 80);
   }
 
-  function placeDemoOrder(form) {
+  async function placeDemoOrder(form) {
     const name = form.elements.customerName.value.trim();
     const email = form.elements.customerEmail.value.trim();
     const address = form.elements.customerAddress.value.trim();
     const error = document.getElementById("checkoutError");
+    const button = form.querySelector('button[type="submit"]');
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     if (name.length < 2) {
       error.textContent = "Please enter your full name.";
@@ -394,18 +525,31 @@
       form.elements.customerAddress.focus();
       return;
     }
-    const reference = `DIA-${Date.now().toString().slice(-6)}`;
-    const total = cartSubtotal() + (cartSubtotal() >= 2500 ? 0 : 120);
-    checkoutContent.innerHTML = `
-      <div class="success-mark">${icon("check")}</div><p class="checkout-intro">Order received</p><h2 class="checkout-title" id="checkoutTitle">Thanks, ${escapeHtml(name.split(" ")[0])}.</h2><p class="checkout-description">Your demo order has been recorded in this session. This sample site has no payment or delivery backend.</p>
-      <div class="order-reference"><strong>${reference}</strong><br />${cartCount()} ${cartCount() === 1 ? "piece" : "pieces"} · ${formatPrice(total)}<br />Confirmation preview for ${escapeHtml(email)}.</div>
-      <button class="primary-button full-width" data-action="finish-order">Back to the store ${icon("arrow")}</button>`;
-    cart = [];
-    saveStorage();
-    updateCartBadges();
+    if (!checkoutAttemptId) openCheckout();
+    button.disabled = true;
+    error.textContent = '';
+    try {
+      const data = await storeApi('/api/orders', {
+        method: 'POST',
+        body: JSON.stringify({ customerName: name, customerEmail: email, customerAddress: address, idempotencyKey: checkoutAttemptId })
+      });
+      const order = data.order;
+      const count = (data.items || []).reduce((sum, item) => sum + item.quantity, 0);
+      checkoutContent.innerHTML = `
+        <div class="success-mark">${icon("check")}</div><p class="checkout-intro">Order recorded</p><h2 class="checkout-title" id="checkoutTitle">Thanks, ${escapeHtml(name.split(" ")[0])}.</h2><p class="checkout-description">${escapeHtml(data.notice || 'This is a demonstration order. No payment was collected.')}</p>
+        <div class="order-reference"><strong>${escapeHtml(order.orderNumber)}</strong><br />${count} ${count === 1 ? "piece" : "pieces"} · ${formatPrice(order.total)}<br />Status: ${escapeHtml(order.status)} · Payment: ${escapeHtml(order.paymentStatus)}<br />Confirmation for ${escapeHtml(email)}.</div>
+        <button class="primary-button full-width" data-action="view-orders">View order history ${icon("arrow")}</button>
+        <button class="secondary-button full-width" data-action="finish-order">Back to the store</button>`;
+      cart = [];
+      updateCartBadges();
+      await loadOrders();
+    } catch (requestError) {
+      error.textContent = requestError.message || 'The order could not be created. Your bag has not been cleared.';
+      if (button) button.disabled = false;
+    }
   }
 
-  function escapeHtml(value) {
+    function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (character) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
     }[character]));
@@ -482,6 +626,16 @@
         navigate("shop");
         showToast("Thanks for shopping Dia+");
         break;
+      case "view-orders":
+        checkoutModal.hidden = true;
+        navigate("orders");
+        break;
+      case "retry-products":
+        loadProducts().catch((error) => showToast(error.message));
+        break;
+      case "retry-orders":
+        loadOrders();
+        break;
     }
   }
 
@@ -512,6 +666,12 @@
       try { replacement.setSelectionRange(cursorPosition, cursorPosition); } catch (_) { /* search input may not support selection */ }
     }
   });
+  pageContent.addEventListener("change", (event) => {
+    if (event.target.id === 'productSort') sortMode = event.target.value;
+    else if (event.target.id === 'priceRange') priceRange = event.target.value;
+    else return;
+    renderPage();
+  });
 
   checkoutContent.addEventListener("submit", (event) => {
     if (event.target.id !== "checkoutForm") return;
@@ -536,4 +696,7 @@
   document.getElementById("heroExplore").addEventListener("click", () => navigate("shop"));
 
   updateCartBadges();
+  loadProducts().catch((error) => {
+    console.warn('Could not load public catalog.', error);
+  });
 })();
