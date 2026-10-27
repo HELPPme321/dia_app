@@ -93,7 +93,8 @@ function createApp(options = {}) {
       const csrfToken=startSession(req,res,id,DAY,'password');
       return res.status(201).json({authenticated:true,user:safeUser(user),csrfToken});
     }catch(e){
-      if(e&&e.code&&String(e.code).startsWith('SQLITE_CONSTRAINT'))return error(res,409,'EMAIL_ALREADY_REGISTERED','An account already uses this email. Sign in or use a different address.');
+      if(e&&e.code==='SQLITE_CONSTRAINT_UNIQUE'&&/users\\.email/i.test(e.message||''))return error(res,409,'EMAIL_ALREADY_REGISTERED','An account already uses this email. Sign in or use a different address.');
+      console.error('Registration persistence failed:',e?.code||'UNKNOWN_ERROR');
       return error(res,500,'REGISTRATION_FAILED','We could not create your account. Please try again.');
     }
   });

@@ -36,7 +36,7 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || DEFAULT_DATA
     "token_hash TEXT PRIMARY KEY," +
     "user_id TEXT REFERENCES users(id) ON DELETE CASCADE," +
     "csrf_token TEXT NOT NULL," +
-    "auth_method TEXT NOT NULL DEFAULT 'anonymous' CHECK (auth_method IN ('anonymous', 'google', 'admin'))," +
+    "auth_method TEXT NOT NULL DEFAULT 'anonymous' CHECK (auth_method IN ('anonymous', 'google', 'admin', 'password'))," +
     "created_at INTEGER NOT NULL," +
     "last_seen_at INTEGER NOT NULL," +
     "expires_at INTEGER NOT NULL" +
@@ -49,6 +49,34 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || DEFAULT_DATA
   if (!columns.includes('auth_method')) {
     db.exec("ALTER TABLE sessions ADD COLUMN auth_method TEXT NOT NULL DEFAULT 'anonymous'");
   }
+
+  // Existing databases created before password sign-in only allow anonymous/google/admin.
+  // Rebuild the session table to extend its CHECK constraint while preserving active sessions.
+  const sessionSchema = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='sessions'").get()?.sql || '';
+  if (!sessionSchema.includes("'password'")) {
+    db.pragma('foreign_keys = OFF');
+    try {
+      db.transaction(() => {
+        db.exec("ALTER TABLE sessions RENAME TO sessions_legacy");
+        db.exec(
+          "CREATE TABLE sessions (" +
+          "token_hash TEXT PRIMARY KEY," +
+          "user_id TEXT REFERENCES users(id) ON DELETE CASCADE," +
+          "csrf_token TEXT NOT NULL," +
+          "auth_method TEXT NOT NULL DEFAULT 'anonymous' CHECK (auth_method IN ('anonymous', 'google', 'admin', 'password'))," +
+          "created_at INTEGER NOT NULL," +
+          "last_seen_at INTEGER NOT NULL," +
+          "expires_at INTEGER NOT NULL" +
+          ")"
+        );
+        db.exec("INSERT INTO sessions(token_hash,user_id,csrf_token,auth_method,created_at,last_seen_at,expires_at) SELECT token_hash,user_id,csrf_token,auth_method,created_at,last_seen_at,expires_at FROM sessions_legacy");
+        db.exec("DROP TABLE sessions_legacy");
+      })();
+    } finally {
+      db.pragma('foreign_keys = ON');
+    }
+  }
+  db.exec("CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id); CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);");
   return db;
 }
 
