@@ -88,12 +88,18 @@ function createApp(options = {}) {
     const now=new Date().toISOString(),id=crypto.randomUUID();
     try{
       const passwordHash=await bcrypt.hash(password,12);
-      db.prepare("INSERT INTO users(id,email,password_hash,name,role,status,created_at,updated_at,last_login_at) VALUES(?,?,?,?,'user','active',?,?,?)").run(id,email,passwordHash,name,now,now,now);
-      const user=db.prepare('SELECT * FROM users WHERE id=?').get(id);
-      const csrfToken=startSession(req,res,id,DAY,'password');
-      return res.status(201).json({authenticated:true,user:safeUser(user),csrfToken});
+      // The user row and authenticated session are one SQLite transaction. A failed
+      // registration cannot leave behind an account that the UI reports as failed.
+      const created=db.transaction(()=>{
+        db.prepare("INSERT INTO users(id,email,password_hash,name,role,status,created_at,updated_at,last_login_at) VALUES(?,?,?,?,'user','active',?,?,?)").run(id,email,passwordHash,name,now,now,now);
+        const user=db.prepare('SELECT * FROM users WHERE id=?').get(id);
+        const csrfToken=startSession(req,res,id,DAY,'password');
+        return {user,csrfToken};
+      })();
+      return res.status(201).json({authenticated:true,user:safeUser(created.user),csrfToken:created.csrfToken});
     }catch(e){
-      if(e&&e.code==='SQLITE_CONSTRAINT_UNIQUE'&&/users\\.email/i.test(e.message||''))return error(res,409,'EMAIL_ALREADY_REGISTERED','An account already uses this email. Sign in or use a different address.');
+      res.clearCookie(cookieName,{httpOnly:true,secure:prod,sameSite:'lax',path:'/'});
+      if(e&&e.code==='SQLITE_CONSTRAINT_UNIQUE'&&/users\.email/i.test(e.message||''))return error(res,409,'EMAIL_ALREADY_REGISTERED','An account already uses this email. Sign in or use a different address.');
       console.error('Registration persistence failed:',e?.code||'UNKNOWN_ERROR');
       return error(res,500,'REGISTRATION_FAILED','We could not create your account. Please try again.');
     }
