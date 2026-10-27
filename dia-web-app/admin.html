@@ -80,7 +80,7 @@
       <article><span>Gross profit</span><strong id="statProfit">—</strong></article>
     </div>
 
-    <section class="admin-users admin-panel">
+    <section class="admin-users admin-panel" id="admin-analytics">
       <div class="admin-users-head"><div><p class="admin-kicker">SALES ANALYTICS</p><h2>Order performance.</h2></div><label class="admin-inline-filter" for="analyticsDays">Period <select id="analyticsDays"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">12 months</option></select></label></div>
       <p class="admin-data-note">Chart uses actual completed-order totals, not proof of payment or collected revenue.</p>
       <div id="salesChart" class="sales-chart"><p>No completed orders in this period.</p></div>
@@ -90,7 +90,7 @@
       </div>
     </section>
 
-    <section class="admin-users admin-panel">
+    <section class="admin-users admin-panel" id="admin-products">
       <div class="admin-users-head"><div><p class="admin-kicker">PRODUCT CATALOG</p><h2>Manage clothing.</h2></div><div class="admin-panel-actions"><select id="productStatusFilter" aria-label="Product status"><option value="">All statuses</option><option value="active">Active</option><option value="archived">Archived</option></select><button id="refreshProducts" class="admin-secondary" type="button">Refresh ↻</button></div></div>
       <p class="admin-data-note">Sample products are marked in the database. Cost price is private to administrators and is never returned by the public catalog API.</p>
       <form id="productForm" class="admin-product-form">
@@ -117,13 +117,13 @@
       <div class="admin-table-scroll"><table><thead><tr><th>PRODUCT</th><th>PRICE</th><th>COST</th><th>STOCK</th><th>STATUS</th><th>ACTIONS</th></tr></thead><tbody id="productRows"><tr><td colspan="6">Loading products…</td></tr></tbody></table></div>
     </section>
 
-    <section class="admin-users admin-panel">
+    <section class="admin-users admin-panel" id="admin-orders">
       <div class="admin-users-head"><div><p class="admin-kicker">ORDER MANAGEMENT</p><h2>Customer orders.</h2></div><button id="refreshOrders" class="admin-secondary" type="button">Refresh ↻</button></div>
       <div class="admin-filters"><input id="orderSearch" type="search" placeholder="Search order, name, or email" aria-label="Search orders"><select id="orderStatusFilter" aria-label="Filter by order status"><option value="">All statuses</option><option>pending</option><option>confirmed</option><option>processing</option><option>shipped</option><option>completed</option><option>cancelled</option><option>refunded</option></select></div>
       <div class="admin-table-scroll"><table><thead><tr><th>ORDER</th><th>CUSTOMER</th><th>ITEMS</th><th>TOTAL</th><th>STATUS</th><th>UPDATE STATUS</th></tr></thead><tbody id="orderRows"><tr><td colspan="6">Loading orders…</td></tr></tbody></table></div>
     </section>
 
-    <section class="admin-users admin-panel">
+    <section class="admin-users admin-panel" id="admin-users">
       <div class="admin-users-head"><div><p class="admin-kicker">ACCOUNT DIRECTORY</p><h2>People in Dia+.</h2></div><button id="refreshUsers" class="admin-secondary" type="button">Refresh ↻</button></div>
       <div class="admin-filters"><input id="userSearch" type="search" placeholder="Search name or email" aria-label="Search users"><select id="roleFilter" aria-label="Filter by role"><option value="">All roles</option><option value="user">Customer</option><option value="admin">Admin</option></select><select id="statusFilter" aria-label="Filter by status"><option value="">All statuses</option><option value="active">Active</option><option value="disabled">Disabled</option></select></div>
       <div class="admin-table-scroll"><table><thead><tr><th>ACCOUNT</th><th>ROLE</th><th>STATUS</th><th>JOINED</th><th>ACTIONS</th></tr></thead><tbody id="userRows"><tr><td colspan="5">Sign in to load accounts.</td></tr></tbody></table></div>
