@@ -228,12 +228,12 @@ function createApp(options = {}) {
   });
   registerStoreRoutes(app,{db,auth,admin,csrf});
 
-  function serveAdminPage(req,res) {
-    // Keep the sign-in form available anonymously, but never render it to a signed-in
-    // customer or to an admin session created through the wrong authentication method.
-    if (req.user && (req.user.role !== 'admin' || req.session?.auth_method !== 'admin')) {
-      return res.status(403).type('text/plain').send('Administrator password sign-in is required.');
-    }
+  function serveAdminPage(_req,res) {
+    // The admin HTML is a public sign-in shell. It contains no private records; its
+    // dashboard starts hidden and admin.js reveals it only after checking /api/auth/me.
+    // This must remain reachable when a customer session exists so the same browser can
+    // switch to an administrator account. Every /api/admin/* handler still enforces role,
+    // active status, and auth_method === 'admin' on the server.
     return res.sendFile(path.join(ROOT,'admin.html'));
   }
   app.get('/admin',serveAdminPage);
