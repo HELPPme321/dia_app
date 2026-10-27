@@ -19,6 +19,7 @@ const hash = (s) => crypto.createHash('sha256').update(s).digest('hex');
 const token = () => crypto.randomBytes(32).toString('base64url');
 const emailNorm = (v) => typeof v === 'string' ? v.trim().toLowerCase() : '';
 const validEmail = (v) => v.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+const validPassword = (v) => typeof v === 'string' && v.length >= PASSWORD_MIN_LENGTH && v.length <= 1024 && /[A-Za-z]/.test(v) && /[0-9]/.test(v);
 const safeUser = (u) => u && ({ id:u.id,email:u.email,name:u.name,picture:u.picture_url||null,role:u.role,status:u.status,createdAt:u.created_at,lastLoginAt:u.last_login_at||null });
 function error(res,status,code,message){ return res.status(status).json({error:{code,message}}); }
 function readCookie(req,name){const c=req.headers.cookie||'';for(const p of c.split(';')){const i=p.indexOf('=');if(i>0&&p.slice(0,i).trim()===name)return p.slice(i+1).trim();}return null;}
@@ -67,12 +68,43 @@ function createApp(options = {}) {
   function auth(req,res,next){if(!req.user)return error(res,401,'AUTHENTICATION_REQUIRED','Please sign in to continue.');if(req.user.status!=='active')return error(res,403,'ACCOUNT_DISABLED','This account is disabled.');next();}
   function admin(req,res,next){if(!req.user)return error(res,401,'AUTHENTICATION_REQUIRED','Administrator sign-in is required.');if(req.user.role!=='admin'||req.user.status!=='active'||req.session?.auth_method!=='admin')return error(res,403,'ADMIN_ACCESS_REQUIRED','Administrator password sign-in is required.');next();}
   const limiter=rateLimit({windowMs:15*60*1000,limit:12,standardHeaders:'draft-8',legacyHeaders:false,message:{error:{code:'TOO_MANY_ATTEMPTS',message:'Too many sign-in attempts. Please wait before trying again.'}}});
+  const registrationLimiter=rateLimit({windowMs:60*60*1000,limit:8,standardHeaders:'draft-8',legacyHeaders:false,message:{error:{code:'REGISTRATION_RATE_LIMITED',message:'Too many registration attempts. Please wait and try again.'}}});
   app.get('/api/health',(_req,res)=>res.json({status:'ok'}));
   app.get('/api/config',(_req,res)=>res.json({googleClientId:env.GOOGLE_CLIENT_ID||''}));
   app.get('/api/auth/csrf',(req,res)=>{db.prepare('DELETE FROM sessions WHERE expires_at<=?').run(Date.now());if(req.session)return res.json({csrfToken:req.session.csrf_token});return res.json({csrfToken:startSession(req,res,null,TTL,'anonymous')});});
   app.get('/api/auth/me',(req,res)=>req.user?res.json({authenticated:true,user:safeUser(req.user),authMethod:req.session.auth_method}):res.status(401).json({authenticated:false,user:null,authMethod:null}));
   app.get('/api/products',(_req,res)=>res.json({products:PRODUCTS}));
   app.get('/api/profile',auth,(req,res)=>res.json({user:safeUser(req.user)}));
+  app.post('/api/auth/register',registrationLimiter,csrf,async(req,res)=>{
+    const name=typeof req.body?.name==='string'?req.body.name.trim().replace(/\s+/g,' '):'';
+    const email=emailNorm(req.body?.email),password=req.body?.password,confirmPassword=req.body?.confirmPassword;
+    if(name.length<2||name.length>120||/[\u0000-\u001f\u007f]/.test(name))return error(res,400,'INVALID_NAME','Enter your full name.');
+    if(!validEmail(email))return error(res,400,'INVALID_EMAIL','Enter a valid email address.');
+    if(!validPassword(password))return error(res,400,'WEAK_PASSWORD','Use at least 12 characters, including a letter and a number.');
+    if(password!==confirmPassword)return error(res,400,'PASSWORD_MISMATCH','The passwords do not match.');
+    if(db.prepare('SELECT id FROM users WHERE email=?').get(email))return error(res,409,'EMAIL_ALREADY_REGISTERED','An account already uses this email. Sign in or use a different address.');
+    const now=new Date().toISOString(),id=crypto.randomUUID();
+    try{
+      const passwordHash=await bcrypt.hash(password,12);
+      db.prepare("INSERT INTO users(id,email,password_hash,name,role,status,created_at,updated_at,last_login_at) VALUES(?,?,?,?,'user','active',?,?,?)").run(id,email,passwordHash,name,now,now,now);
+      const user=db.prepare('SELECT * FROM users WHERE id=?').get(id);
+      const csrfToken=startSession(req,res,id,DAY,'password');
+      return res.status(201).json({authenticated:true,user:safeUser(user),csrfToken});
+    }catch(e){
+      if(e&&e.code&&String(e.code).startsWith('SQLITE_CONSTRAINT'))return error(res,409,'EMAIL_ALREADY_REGISTERED','An account already uses this email. Sign in or use a different address.');
+      return error(res,500,'REGISTRATION_FAILED','We could not create your account. Please try again.');
+    }
+  });
+  app.post('/api/auth/login',limiter,csrf,async(req,res)=>{
+    const email=emailNorm(req.body?.email),password=req.body?.password;
+    if(!validEmail(email)||typeof password!=='string'||password.length>1024)return error(res,400,'INVALID_INPUT','Enter your email address and password.');
+    const u=db.prepare('SELECT * FROM users WHERE email=?').get(email);
+    let ok=false;try{ok=await bcrypt.compare(password,u?.password_hash||DUMMY_HASH);}catch{}
+    if(!u||u.role!=='user'||u.status!=='active'||!u.password_hash||!ok)return error(res,401,'INVALID_CREDENTIALS','Email or password is incorrect.');
+    const now=new Date().toISOString();db.prepare('UPDATE users SET last_login_at=?,updated_at=? WHERE id=?').run(now,now,u.id);
+    const remember=req.body?.rememberMe===true,csrfToken=startSession(req,res,u.id,remember?30*DAY:DAY,'password');
+    return res.json({authenticated:true,user:safeUser(db.prepare('SELECT * FROM users WHERE id=?').get(u.id)),csrfToken});
+  });
   app.post('/api/auth/google',limiter,csrf,async(req,res)=>{
     try{
       const credential=req.body?.credential;
@@ -143,9 +175,13 @@ function createApp(options = {}) {
     res.json({user:safeUser(db.prepare('SELECT id,email,name,picture_url,role,status,created_at,last_login_at FROM users WHERE id=?').get(id))});
   });
   app.get('/admin',(_req,res)=>res.sendFile(path.join(ROOT,'admin.html')));
-  app.use(express.static(ROOT,{extensions:['html'],dotfiles:'ignore'}));
+  app.get('/',(_req,res)=>res.sendFile(path.join(ROOT,'index.html')));
+  for(const file of ['index.html','style.css','script.js','auth.js','admin.html','admin.css','admin.js']){
+    app.get('/'+file,(_req,res)=>res.sendFile(path.join(ROOT,file)));
+  }
+  app.use('/assets',express.static(path.join(ROOT,'assets'),{dotfiles:'deny',index:false}));
   app.use('/api',(_req,res)=>error(res,404,'ENDPOINT_NOT_FOUND','The requested API endpoint was not found.'));
-  app.use((_req,res)=>res.status(404).sendFile(path.join(ROOT,'404.html')));
+  app.use((_req,res)=>res.status(404).type('text/plain').send('Not found'));
   app.use((err,_req,res,_next)=>{if(res.headersSent)return;res.status(500).json({error:{code:'INTERNAL_ERROR',message:'Something went wrong. Please try again.'}});});
   return {app,db};
 }
