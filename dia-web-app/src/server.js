@@ -178,9 +178,17 @@ function createApp(options = {}) {
     db.prepare('UPDATE users SET '+sets.join(',')+' WHERE id=?').run(...values);
     res.json({user:safeUser(db.prepare('SELECT id,email,name,picture_url,role,status,created_at,last_login_at FROM users WHERE id=?').get(id))});
   });
-  app.get('/admin',(_req,res)=>res.sendFile(path.join(ROOT,'admin.html')));
-  app.get('/',(_req,res)=>res.sendFile(path.join(ROOT,'index.html')));
-  for(const file of ['index.html','style.css','script.js','auth.js','admin.html','admin.css','admin.js']){
+  function serveAdminPage(req,res) {
+    // Keep the sign-in form available anonymously, but never render it to a signed-in
+    // customer or to an admin session created through the wrong authentication method.
+    if (req.user && (req.user.role !== 'admin' || req.session?.auth_method !== 'admin')) {
+      return res.status(403).type('text/plain').send('Administrator password sign-in is required.');
+    }
+    return res.sendFile(path.join(ROOT,'admin.html'));
+  }
+  app.get('/admin',serveAdminPage);
+  app.get('/admin.html',serveAdminPage);
+  for(const file of ['index.html','style.css','script.js','auth.js','admin.css','admin.js']){
     app.get('/'+file,(_req,res)=>res.sendFile(path.join(ROOT,file)));
   }
   app.use('/assets',express.static(path.join(ROOT,'assets'),{dotfiles:'deny',index:false}));
