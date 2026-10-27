@@ -188,7 +188,7 @@ function registerStoreRoutes(app, { db, auth, admin, csrf }) {
       name: 'name COLLATE NOCASE ASC'
     })[req.query.sort] || 'tag ASC,name ASC';
     const rows = db.prepare('SELECT * FROM products WHERE ' + clauses.join(' AND ') + ' ORDER BY ' + orderBy).all(...params);
-    res.json({ products: rows.map(publicProduct) });
+    res.json({ products: rows.map((row) => publicProduct(row)) });
   });
 
   app.get('/api/products/:id', (req, res) => {
