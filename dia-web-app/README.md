@@ -10,7 +10,7 @@ From this `dia-web-app` directory, run `npm.cmd install`, `npm.cmd run check`, `
 
 ## Deploy online
 
-The repository includes a Render Blueprint. See [../DEPLOY_RENDER.md](../DEPLOY_RENDER.md) for production setup, persistent SQLite storage, initial administrator provisioning, optional Google OAuth, hosting costs, and updates. Render must run this Express server; static hosting and Live Server cannot provide the API. A free service with an ephemeral filesystem is not safe for real account data.
+The repository includes a Render Blueprint. See [../DEPLOY_RENDER.md](../DEPLOY_RENDER.md) for production setup, persistent SQLite storage, initial administrator provisioning, optional Google OAuth, hosting costs, and updates. Render must run this Express server; static hosting and Live Server cannot provide the API. A free service with an ephemeral filesystem is not safe for persistent account data.
 
 ## Run locally
 
@@ -33,6 +33,33 @@ Open http://localhost:3000. If .env already exists, do not overwrite your privat
 - Existing customers sign in on the **Log in** tab. The Remember me option uses a longer server-side session expiration.
 - Login and registration responses do not expose password hashes. Email addresses are normalized to lowercase and duplicate accounts are rejected.
 - **Forgot password** currently displays a notice because no email delivery provider or password-reset email flow is configured. Do not rely on this link for recovery until a mail service and expiring reset-token workflow are implemented.
+
+## Demonstration accounts (opt-in only)
+
+The seed script creates these database-backed accounts only when you explicitly enable it and run the command. They are intended for demonstrations, not production authentication:
+
+| Role | Email | Initial password | Sign-in form |
+|---|---|---|---|
+| Normal user | `demo@example.com` | `DemoUser2026!` | Regular **Log in** form on the storefront |
+| Administrator | `admin@example.com` | `AdminDemo2026!` | Separate administrator form at `/admin` |
+
+Run from `dia-web-app`. For Windows PowerShell, set the opt-in flag for the command, then remove it from the shell:
+
+    $env:ENABLE_DEMO_ACCOUNTS = "true"
+    npm.cmd run demo:seed
+    Remove-Item Env:ENABLE_DEMO_ACCOUNTS
+
+For macOS/Linux:
+
+    ENABLE_DEMO_ACCOUNTS=true npm run demo:seed
+
+By default, the script does nothing. It hashes passwords with bcrypt and creates accounts only if the email addresses are unused. It does **not** overwrite an existing account's password, role, or status. If either email already belongs to another account, the script reports a conflict and leaves that account unchanged. Re-running it is safe for accounts it originally seeded. Demo accounts are marked in the database so they can be disabled without affecting ordinary accounts.
+
+After the demonstration, run:
+
+    npm.cmd run demo:disable
+
+This disables only accounts created by the demo seed script and revokes their sessions; it does not delete records or reset passwords. Make sure you have a separate active administrator before disabling the demo admin. Do not leave the demo admin credentials enabled on a public production site. If a conflicting pre-existing account uses either demo email, resolve ownership and inspect that row manually rather than resetting its credentials through the seed script.
 
 ## Optional Google sign-in
 
@@ -64,10 +91,10 @@ Open http://localhost:3000/admin. Unset ADMIN_PASSWORD after provisioning. Do no
 - SQLite database by default at data/dia.sqlite; data and environment files are ignored by Git.
 - Random session IDs in HttpOnly cookies, only SHA-256 token digests in SQLite, server-side expiry, CSRF tokens for changing requests, rate limiting, Helmet headers, and same-origin request checks.
 - Password hashing with bcrypt, generic invalid-login responses, server-side role checks, self-lockout and last-active-admin safeguards.
-- Web serving is restricted to known frontend files and the assets directory; backend source and package metadata are not served as static files.
+- Web serving is restricted to known frontend files and the assets directory; backend source and package metadata are not served as static files. A logged-in customer is also denied the administrator HTML route, not only its APIs.
 - Sessions persist across refreshes. Use the storefront sign-out control to invalidate the session.
 - The product catalog, saved pieces, cart, and checkout remain a browser-side demo. Checkout does not take payments or create real orders.
 
 ## Tests and build verification
 
-Run npm.cmd run check and npm.cmd test. Tests use an in-memory SQLite database and a mocked Google token verifier. Real Google sign-in still needs your client ID and browser testing. Email password recovery needs an email delivery provider before it can be enabled.
+Run npm.cmd run check and npm.cmd test. Tests use SQLite, mock Google token verification, and exercise seeded demo-account login, server-side role separation, logout, and persistence through a database close/reopen. Real Google sign-in still needs your client ID and browser testing. Email password recovery needs an email delivery provider before it can be enabled.
