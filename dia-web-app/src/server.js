@@ -188,6 +188,7 @@ function createApp(options = {}) {
   }
   app.get('/admin',serveAdminPage);
   app.get('/admin.html',serveAdminPage);
+  app.get('/',(_req,res)=>res.sendFile(path.join(ROOT,'index.html')));
   for(const file of ['index.html','style.css','script.js','auth.js','admin.css','admin.js']){
     app.get('/'+file,(_req,res)=>res.sendFile(path.join(ROOT,file)));
   }
