@@ -29,7 +29,7 @@ const routeContract = [
 ];
 
 test('frontend API calls use methods and paths registered by Express', () => {
-  const routePattern = /app\\.(get|post|patch|put|delete)\\(\\s*['"]([^'"]+)['"]/g;
+  const routePattern = /app\.(get|post|patch|put|delete)\(\s*['"]([^'"]+)['"]/g;
   const registered = new Set(
     [...serverSource.matchAll(routePattern)].map((match) => `${match[1].toUpperCase()} ${match[2]}`)
   );
