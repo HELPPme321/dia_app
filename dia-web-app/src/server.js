@@ -120,7 +120,7 @@ function createApp(options = {}) {
     const page=Math.max(1,Number.parseInt(req.query.page,10)||1),limit=Math.max(1,Math.min(50,Number.parseInt(req.query.limit,10)||10));
     const search=typeof req.query.search==='string'?req.query.search.trim().slice(0,80):'';
     const role=['user','admin'].includes(req.query.role)?req.query.role:'',status=['active','disabled'].includes(req.query.status)?req.query.status:'';
-    const clauses=[],params=[];if(search){clauses.push("(email LIKE ? ESCAPE '\\\\' OR name LIKE ? ESCAPE '\\\\')");const q=search.replace(/[\\\\%_]/g,'\\\\$&');params.push('%'+q+'%','%'+q+'%');}
+    const clauses=[],params=[];if(search){clauses.push("(email LIKE ? OR name LIKE ?)");params.push('%'+search+'%','%'+search+'%');}
     if(role){clauses.push('role=?');params.push(role);}if(status){clauses.push('status=?');params.push(status);}
     const where=clauses.length?' WHERE '+clauses.join(' AND '):'';
     const total=db.prepare('SELECT COUNT(*) count FROM users'+where).get(...params).count;
