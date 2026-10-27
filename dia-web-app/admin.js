@@ -1,22 +1,548 @@
 'use strict';
 (() => {
-const $=s=>document.querySelector(s);let csrf='',page=1,pages=1,searchTimer=null,pending=null;
-const notice=(el,msg,ok=false)=>{el.textContent=msg;el.classList.toggle('success',ok);el.hidden=!msg;};
-async function getCsrf(){const r=await fetch('/api/auth/csrf',{credentials:'same-origin'}),d=await r.json();if(!r.ok)throw Error('Secure session could not be started.');csrf=d.csrfToken;return csrf;}
-async function api(url,o={}){const m=(o.method||'GET').toUpperCase(),h={Accept:'application/json',...(o.headers||{})};if(o.body)h['Content-Type']='application/json';if(!['GET','HEAD','OPTIONS'].includes(m)){if(!csrf)await getCsrf();h['X-CSRF-Token']=csrf;}const r=await fetch(url,{...o,method:m,headers:h,credentials:'same-origin'}),d=await r.json().catch(()=>({}));if(!r.ok){const e=Error(d?.error?.message||'Request failed.');e.status=r.status;throw e;}if(d.csrfToken)csrf=d.csrfToken;return d;}
-function login(msg=''){ $('#adminLogin').hidden=false;$('#adminDashboard').hidden=true;if(msg)notice($('#adminNotice'),msg);}
-function dashboard(user){$('#adminLogin').hidden=true;$('#adminDashboard').hidden=false;$('#adminIdentity').textContent=user.name+' · '+user.email;load();}
-async function loadStats(){const d=await api('/api/admin/stats');$('#statUsers').textContent=d.stats.totalUsers;$('#statActive').textContent=d.stats.activeUsers;$('#statAdmins').textContent=d.stats.administrators;$('#statNew').textContent=d.stats.newUsersThisWeek;}
-async function loadUsers(){const q=new URLSearchParams({page,limit:10,search:$('#userSearch').value,role:$('#roleFilter').value,status:$('#statusFilter').value});const d=await api('/api/admin/users?'+q);pages=Math.max(1,d.pagination.pages);$('#pageLabel').textContent='Page '+d.pagination.page+' of '+pages+' · '+d.pagination.total+' accounts';$('#prevPage').disabled=page<=1;$('#nextPage').disabled=page>=pages;const tbody=$('#userRows');tbody.replaceChildren();if(!d.users.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;td.textContent='No accounts match these filters.';tr.append(td);tbody.append(tr);return;}d.users.forEach(u=>{const tr=document.createElement('tr'),account=document.createElement('td'),name=document.createElement('strong'),email=document.createElement('small'),role=document.createElement('td'),status=document.createElement('td'),joined=document.createElement('td'),actions=document.createElement('td'),roleBadge=document.createElement('span'),statusBadge=document.createElement('span'),select=document.createElement('select');name.textContent=u.name;email.textContent=u.email;account.append(name,email);roleBadge.className='admin-role';roleBadge.textContent=u.role==='admin'?'Administrator':'Customer';role.append(roleBadge);statusBadge.className='admin-status '+(u.status==='disabled'?'disabled':'');statusBadge.textContent=u.status;status.append(statusBadge);joined.textContent=u.createdAt?new Date(u.createdAt).toLocaleDateString():'—';select.className='admin-action';select.setAttribute('aria-label','Actions for '+u.email);[['','Actions'],['status:disabled','Disable'],['status:active','Enable'],['role:admin','Grant admin'],['role:user','Make customer']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;select.append(o)});select.addEventListener('change',()=>{if(!select.value)return;const [field,value]=select.value.split(':');select.value='';openConfirm(u,field,value);});actions.append(select);tr.append(account,role,status,joined,actions);tbody.append(tr);});}
-async function load(){notice($('#dashNotice'),'');try{await Promise.all([loadStats(),loadUsers()]);}catch(e){if(e.status===401||e.status===403){login('Your administrator session expired or no longer has access. Sign in again.');return;}notice($('#dashNotice'),e.message);}}
-function openConfirm(user,field,value){pending={user,field,value};const promotion=field==='role'&&value==='admin';$('#confirmTitle').textContent=promotion?'Grant administrator access?':'Confirm account change';$('#confirmText').textContent='You are about to '+(field==='role'?(value==='admin'?'make this account an administrator':'change this account to a customer'):value+' this account')+' for '+user.name+' ('+user.email+'). The server will verify this action.';$('#promoteLabel').hidden=!promotion;$('#promotePassword').hidden=!promotion;$('#promotePassword').required=promotion;$('#promotePassword').value='';$('#adminConfirm').showModal();}
-async function applyChange(){if(!pending)return;const {user,field,value}=pending,promotion=field==='role'&&value==='admin',password=$('#promotePassword').value;if(promotion&&password.length<14){notice($('#dashNotice'),'Administrator passwords must be at least 14 characters.');return;}const b=$('#applyConfirm');b.disabled=true;try{const body={[field]:value};if(promotion)body.adminPassword=password;await api('/api/admin/users/'+encodeURIComponent(user.id),{method:'PATCH',body:JSON.stringify(body)});$('#adminConfirm').close();pending=null;notice($('#dashNotice'),'Account updated.',true);await load();}catch(e){notice($('#dashNotice'),e.message);}finally{b.disabled=false;}}
-$('#adminLoginForm').addEventListener('submit',async e=>{e.preventDefault();notice($('#adminNotice'),'');const b=$('#adminSubmit');b.disabled=true;b.textContent='Verifying credentials…';try{const d=await api('/api/auth/admin-login',{method:'POST',body:JSON.stringify({email:$('#adminEmail').value.trim(),password:$('#adminPassword').value})});$('#adminPassword').value='';if(d.user.role!=='admin')throw Error('Administrator access is required.');dashboard(d.user);}catch(err){notice($('#adminNotice'),err.message);}finally{b.disabled=false;b.innerHTML='Sign in securely <span>↗</span>'; }});
-$('#togglePassword').addEventListener('click',()=>{const i=$('#adminPassword'),show=i.type==='password';i.type=show?'text':'password';$('#togglePassword').textContent=show?'Hide':'Show';$('#togglePassword').setAttribute('aria-label',show?'Hide password':'Show password');});
-$('#adminLogout').addEventListener('click',async()=>{try{await api('/api/auth/logout',{method:'POST',body:'{}'});}catch{}csrf='';try{await getCsrf();}catch{}login('You have signed out securely.');});
-$('#refreshUsers').addEventListener('click',load);$('#userSearch').addEventListener('input',()=>{clearTimeout(searchTimer);page=1;searchTimer=setTimeout(()=>loadUsers().catch(e=>notice($('#dashNotice'),e.message)),250);});
-$('#roleFilter').addEventListener('change',()=>{page=1;loadUsers().catch(e=>notice($('#dashNotice'),e.message));});$('#statusFilter').addEventListener('change',()=>{page=1;loadUsers().catch(e=>notice($('#dashNotice'),e.message));});
-$('#prevPage').addEventListener('click',()=>{page=Math.max(1,page-1);loadUsers().catch(e=>notice($('#dashNotice'),e.message));});$('#nextPage').addEventListener('click',()=>{page=Math.min(pages,page+1);loadUsers().catch(e=>notice($('#dashNotice'),e.message));});
-$('#applyConfirm').addEventListener('click',e=>{e.preventDefault();applyChange();});$('#cancelConfirm').addEventListener('click',e=>{e.preventDefault();$('#adminConfirm').close();pending=null;});
-(async()=>{try{await getCsrf();const r=await fetch('/api/auth/me',{credentials:'same-origin'});if(r.ok){const d=await r.json();if(d.user?.role==='admin'&&d.authMethod==='admin'){dashboard(d.user);return;}login('Administrator password sign-in is required.');}else login();}catch(e){login('Authentication service unavailable. Start the Dia+ server and refresh.');}})();
+  const $ = (selector) => document.querySelector(selector);
+  let csrf = '';
+  let page = 1;
+  let pages = 1;
+  let searchTimer = null;
+  let pendingUserChange = null;
+  let productRows = [];
+  let orderRows = [];
+  let productSearchTimer = null;
+  let orderSearchTimer = null;
+
+  const notice = (element, message, success = false) => {
+    if (!element) return;
+    element.textContent = message || '';
+    element.classList.toggle('success', success);
+    element.hidden = !message;
+  };
+  const formatPrice = (value) => new Intl.NumberFormat('en-PH', {
+    style: 'currency', currency: 'PHP', maximumFractionDigits: 0
+  }).format(Number(value) || 0);
+  const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[character]));
+
+  async function getCsrf() {
+    const response = await fetch('/api/auth/csrf', { credentials: 'same-origin' });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.csrfToken) throw new Error('Secure session could not be started. Refresh and try again.');
+    csrf = data.csrfToken;
+    return csrf;
+  }
+  async function api(url, options = {}) {
+    const method = (options.method || 'GET').toUpperCase();
+    const headers = { Accept: 'application/json', ...(options.headers || {}) };
+    if (options.body) headers['Content-Type'] = 'application/json';
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+      if (!csrf) await getCsrf();
+      headers['X-CSRF-Token'] = csrf;
+    }
+    const response = await fetch(url, { ...options, method, headers, credentials: 'same-origin' });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const error = new Error(data?.error?.message || 'Request failed. Please try again.');
+      error.status = response.status;
+      error.code = data?.error?.code;
+      if (error.code === 'ENDPOINT_NOT_FOUND') error.message += ' [' + method + ' ' + (data?.error?.path || url) + ']';
+      throw error;
+    }
+    if (data.csrfToken) csrf = data.csrfToken;
+    return data;
+  }
+
+  function showLogin(message = '') {
+    $('#adminLogin').hidden = false;
+    $('#adminDashboard').hidden = true;
+    notice($('#adminNotice'), message);
+  }
+  function showDashboard(user) {
+    $('#adminLogin').hidden = true;
+    $('#adminDashboard').hidden = false;
+    $('#adminIdentity').textContent = user.name + ' · ' + user.email;
+    loadAll();
+  }
+
+  async function loadStats() {
+    const { stats, financialNotice } = await api('/api/admin/stats');
+    const values = {
+      '#statUsers': stats.totalUsers,
+      '#statActive': stats.activeUsers,
+      '#statAdmins': stats.administrators,
+      '#statNew': stats.newUsersThisWeek,
+      '#statProducts': stats.totalProducts,
+      '#statStock': stats.productsInStock,
+      '#statLowStock': stats.lowStockProducts,
+      '#statOutStock': stats.outOfStockProducts,
+      '#statOrders': stats.totalOrders,
+      '#statPending': stats.pendingOrders,
+      '#statCompletedValue': formatPrice(stats.completedOrderValue),
+      '#statRevenue': formatPrice(stats.collectedRevenue),
+      '#statProfit': stats.profitAvailable && stats.grossProfit !== null ? formatPrice(stats.grossProfit) : 'Not available'
+    };
+    for (const [selector, value] of Object.entries(values)) $(selector).textContent = value ?? '0';
+    if (financialNotice) notice($('#dashNotice'), financialNotice);
+  }
+
+  async function loadUsers() {
+    const query = new URLSearchParams({
+      page: String(page),
+      limit: '10',
+      search: $('#userSearch').value.trim(),
+      role: $('#roleFilter').value,
+      status: $('#statusFilter').value
+    });
+    const data = await api('/api/admin/users?' + query.toString());
+    pages = Math.max(1, data.pagination.pages);
+    $('#pageLabel').textContent = 'Page ' + data.pagination.page + ' of ' + pages + ' · ' + data.pagination.total + ' accounts';
+    $('#prevPage').disabled = page <= 1;
+    $('#nextPage').disabled = page >= pages;
+    const body = $('#userRows');
+    body.replaceChildren();
+    if (!data.users.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 5;
+      td.textContent = 'No accounts match these filters.';
+      tr.append(td);
+      body.append(tr);
+      return;
+    }
+    data.users.forEach((user) => {
+      const tr = document.createElement('tr');
+      const account = document.createElement('td');
+      const name = document.createElement('strong');
+      const email = document.createElement('small');
+      const role = document.createElement('td');
+      const status = document.createElement('td');
+      const joined = document.createElement('td');
+      const actions = document.createElement('td');
+      const roleBadge = document.createElement('span');
+      const statusBadge = document.createElement('span');
+      const select = document.createElement('select');
+      name.textContent = user.name;
+      email.textContent = user.email;
+      account.append(name, email);
+      roleBadge.className = 'admin-role';
+      roleBadge.textContent = user.role === 'admin' ? 'Administrator' : 'Customer';
+      role.append(roleBadge);
+      statusBadge.className = 'admin-status ' + (user.status === 'disabled' ? 'disabled' : '');
+      statusBadge.textContent = user.status;
+      status.append(statusBadge);
+      joined.textContent = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—';
+      select.className = 'admin-action';
+      select.setAttribute('aria-label', 'Actions for ' + user.email);
+      [['', 'Actions'], ['status:disabled', 'Disable'], ['status:active', 'Enable'], ['role:admin', 'Grant admin'], ['role:user', 'Make customer']].forEach(([value, label]) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        select.append(option);
+      });
+      select.addEventListener('change', () => {
+        if (!select.value) return;
+        const [field, value] = select.value.split(':');
+        select.value = '';
+        openUserConfirm(user, field, value);
+      });
+      actions.append(select);
+      tr.append(account, role, status, joined, actions);
+      body.append(tr);
+    });
+  }
+
+  function openUserConfirm(user, field, value) {
+    pendingUserChange = { user, field, value };
+    const promotion = field === 'role' && value === 'admin';
+    $('#confirmTitle').textContent = promotion ? 'Grant administrator access?' : 'Confirm account change';
+    $('#confirmText').textContent = 'You are about to ' +
+      (field === 'role' ? (value === 'admin' ? 'make this account an administrator' : 'change this account to a customer') : value + ' this account') +
+      ' for ' + user.name + ' (' + user.email + '). The server will verify this action.';
+    $('#promoteLabel').hidden = !promotion;
+    $('#promotePassword').hidden = !promotion;
+    $('#promotePassword').required = promotion;
+    $('#promotePassword').value = '';
+    $('#adminConfirm').showModal();
+  }
+
+  async function applyUserChange() {
+    if (!pendingUserChange) return;
+    const { user, field, value } = pendingUserChange;
+    const promotion = field === 'role' && value === 'admin';
+    const password = $('#promotePassword').value;
+    if (promotion && password.length < 14) {
+      notice($('#dashNotice'), 'Administrator passwords must be at least 14 characters.');
+      return;
+    }
+    const button = $('#applyConfirm');
+    button.disabled = true;
+    try {
+      const body = { [field]: value };
+      if (promotion) body.adminPassword = password;
+      await api('/api/admin/users/' + encodeURIComponent(user.id), { method: 'PATCH', body: JSON.stringify(body) });
+      $('#adminConfirm').close();
+      pendingUserChange = null;
+      notice($('#dashNotice'), 'Account updated.', true);
+      await loadUsers();
+      await loadStats();
+    } catch (error) {
+      notice($('#dashNotice'), error.message);
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function loadProducts() {
+    const query = new URLSearchParams({
+      search: $('#productSearch').value.trim(),
+      status: $('#productStatusFilter').value
+    });
+    const data = await api('/api/admin/products?' + query.toString());
+    productRows = data.products || [];
+    renderProducts();
+  }
+  function renderProducts() {
+    const body = $('#productRows');
+    body.replaceChildren();
+    if (!productRows.length) {
+      const row = document.createElement('tr');
+      const cell = document.createElement('td');
+      cell.colSpan = 6;
+      cell.textContent = 'No products found. Add a product above or run the documented sample-catalog seed.';
+      row.append(cell);
+      body.append(row);
+      return;
+    }
+    productRows.forEach((product) => {
+      const row = document.createElement('tr');
+      const name = document.createElement('td');
+      const price = document.createElement('td');
+      const cost = document.createElement('td');
+      const stock = document.createElement('td');
+      const status = document.createElement('td');
+      const actions = document.createElement('td');
+      const title = document.createElement('strong');
+      const meta = document.createElement('small');
+      const edit = document.createElement('button');
+      const archive = document.createElement('button');
+      title.textContent = product.name;
+      meta.textContent = product.category + (product.isSample ? ' · sample inventory' : '');
+      name.append(title, meta);
+      price.textContent = formatPrice(product.price);
+      cost.textContent = product.costPrice === null || product.costPrice === undefined ? 'Unknown' : formatPrice(product.costPrice);
+      stock.textContent = String(product.stock);
+      status.innerHTML = '<span class="admin-status ' + (product.status === 'archived' ? 'disabled' : '') + '">' + escapeHtml(product.status) + '</span>';
+      edit.type = 'button';
+      edit.className = 'admin-secondary admin-small-button';
+      edit.textContent = 'Edit';
+      edit.addEventListener('click', () => fillProductForm(product));
+      archive.type = 'button';
+      archive.className = 'admin-secondary admin-small-button';
+      archive.textContent = product.status === 'active' ? 'Archive' : 'Restore';
+      archive.addEventListener('click', () => changeProductStatus(product, product.status === 'active' ? 'archived' : 'active'));
+      actions.append(edit, archive);
+      row.append(name, price, cost, stock, status, actions);
+      body.append(row);
+    });
+  }
+
+  function fillProductForm(product) {
+    $('#productId').value = product.id;
+    $('#productName').value = product.name;
+    $('#productCategory').value = product.category;
+    $('#productDescription').value = product.description || '';
+    $('#productPrice').value = product.price;
+    $('#productCostPrice').value = product.costPrice ?? '';
+    $('#productStock').value = product.stock;
+    $('#productColor').value = product.color;
+    $('#productSizes').value = (product.sizes || []).join(', ');
+    $('#productTag').value = product.tag || 'New arrival';
+    $('#productImage').value = product.image || '/assets/dia-editorial.webp';
+    $('#productImagePosition').value = product.position || 'center center';
+    $('#productSubmit').textContent = product.status === 'archived' ? 'Save archived product' : 'Save product changes';
+    notice($('#productNotice'), 'Editing ' + product.name + '.');
+    $('#productForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function clearProductForm() {
+    $('#productForm').reset();
+    $('#productId').value = '';
+    $('#productImage').value = '/assets/dia-editorial.webp';
+    $('#productImagePosition').value = 'center center';
+    $('#productTag').value = 'New arrival';
+    $('#productSubmit').textContent = 'Add product';
+    notice($('#productNotice'), '');
+  }
+
+  async function submitProduct(event) {
+    event.preventDefault();
+    const id = $('#productId').value;
+    const costText = $('#productCostPrice').value.trim();
+    const body = {
+      name: $('#productName').value.trim(),
+      category: $('#productCategory').value.trim(),
+      description: $('#productDescription').value.trim(),
+      price: Number($('#productPrice').value),
+      costPrice: costText === '' ? null : Number(costText),
+      stock: Number($('#productStock').value),
+      color: $('#productColor').value.trim(),
+      sizes: $('#productSizes').value.split(',').map((size) => size.trim()).filter(Boolean),
+      tag: $('#productTag').value.trim(),
+      image: $('#productImage').value.trim(),
+      imagePosition: $('#productImagePosition').value.trim()
+    };
+    const button = $('#productSubmit');
+    button.disabled = true;
+    try {
+      const result = await api(id ? '/api/admin/products/' + encodeURIComponent(id) : '/api/admin/products', {
+        method: id ? 'PATCH' : 'POST',
+        body: JSON.stringify(body)
+      });
+      notice($('#productNotice'), (id ? 'Updated ' : 'Created ') + result.product.name + '.', true);
+      clearProductForm();
+      await loadProducts();
+      await loadStats();
+    } catch (error) {
+      notice($('#productNotice'), error.message);
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function changeProductStatus(product, status) {
+    const action = status === 'archived' ? 'archive' : 'restore';
+    if (!window.confirm('Are you sure you want to ' + action + ' ' + product.name + '?')) return;
+    try {
+      await api('/api/admin/products/' + encodeURIComponent(product.id), { method: 'PATCH', body: JSON.stringify({ status }) });
+      notice($('#productNotice'), product.name + ' ' + (status === 'archived' ? 'archived.' : 'restored.'), true);
+      await loadProducts();
+      await loadStats();
+    } catch (error) {
+      notice($('#productNotice'), error.message);
+    }
+  }
+
+  const allowedOrderTransitions = {
+    pending: ['confirmed', 'cancelled'],
+    confirmed: ['processing', 'cancelled'],
+    processing: ['shipped', 'cancelled'],
+    shipped: ['completed', 'refunded'],
+    completed: ['refunded'],
+    cancelled: [],
+    refunded: []
+  };
+  async function loadOrders() {
+    const query = new URLSearchParams({
+      search: $('#orderSearch').value.trim(),
+      status: $('#orderStatusFilter').value
+    });
+    const data = await api('/api/admin/orders?' + query.toString());
+    orderRows = data.orders || [];
+    renderOrders();
+  }
+  function renderOrders() {
+    const body = $('#orderRows');
+    body.replaceChildren();
+    if (!orderRows.length) {
+      const row = document.createElement('tr');
+      const cell = document.createElement('td');
+      cell.colSpan = 6;
+      cell.textContent = 'No order records found.';
+      row.append(cell);
+      body.append(row);
+      return;
+    }
+    orderRows.forEach((order) => {
+      const row = document.createElement('tr');
+      const ref = document.createElement('td');
+      const customer = document.createElement('td');
+      const itemCell = document.createElement('td');
+      const total = document.createElement('td');
+      const status = document.createElement('td');
+      const action = document.createElement('td');
+      const number = document.createElement('strong');
+      const date = document.createElement('small');
+      const email = document.createElement('small');
+      number.textContent = order.orderNumber;
+      date.textContent = new Date(order.createdAt).toLocaleString();
+      ref.append(number, date);
+      customer.append(document.createTextNode(order.customerName));
+      email.textContent = order.customerEmail;
+      customer.append(email);
+      itemCell.textContent = (order.items || []).map((item) => item.name + ' · ' + item.size + ' × ' + item.quantity).join('; ');
+      total.textContent = formatPrice(order.total);
+      status.innerHTML = '<span class="admin-status">' + escapeHtml(order.status) + '</span><small>' + escapeHtml(order.paymentStatus) + '</small>';
+      const select = document.createElement('select');
+      select.className = 'admin-action';
+      select.setAttribute('aria-label', 'Update status for ' + order.orderNumber);
+      const choices = [['', 'Choose status'], [order.status, order.status], ...(allowedOrderTransitions[order.status] || []).map((next) => [next, next])];
+      choices.forEach(([value, label]) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        select.append(option);
+      });
+      select.addEventListener('change', async () => {
+        const next = select.value;
+        select.value = '';
+        if (!next || next === order.status) return;
+        if (!window.confirm('Change ' + order.orderNumber + ' from ' + order.status + ' to ' + next + '?')) return;
+        try {
+          await api('/api/admin/orders/' + encodeURIComponent(order.id), { method: 'PATCH', body: JSON.stringify({ status: next }) });
+          notice($('#dashNotice'), 'Order ' + order.orderNumber + ' updated.', true);
+          await Promise.all([loadOrders(), loadStats(), loadAnalytics()]);
+        } catch (error) {
+          notice($('#dashNotice'), error.message);
+        }
+      });
+      action.append(select);
+      row.append(ref, customer, itemCell, total, status, action);
+      body.append(row);
+    });
+  }
+
+  async function loadAnalytics() {
+    const days = $('#analyticsDays').value;
+    const data = await api('/api/admin/analytics?days=' + encodeURIComponent(days));
+    const chart = $('#salesChart');
+    const daily = data.daily || [];
+    if (!daily.length) {
+      chart.innerHTML = '<p>No completed orders in this period. Values appear here when order records reach completed status.</p>';
+    } else {
+      const maxValue = Math.max(1, ...daily.map((row) => Number(row.completedOrderValue) || 0));
+      chart.innerHTML = daily.map((row) => {
+        const value = Number(row.completedOrderValue) || 0;
+        const height = Math.max(value > 0 ? 4 : 0, Math.round(value / maxValue * 100));
+        return '<div class="sales-bar-column" title="' + escapeHtml(row.day) + ': ' + escapeHtml(formatPrice(value)) + '"><div class="sales-bar-value">' + escapeHtml(formatPrice(value)) + '</div><div class="sales-bar-track"><span class="sales-bar-fill" style="height:' + height + '%"></span></div><small>' + escapeHtml(row.day.slice(5)) + '</small></div>';
+      }).join('');
+    }
+    const top = $('#topProductRows');
+    top.replaceChildren();
+    if (!(data.topProducts || []).length) {
+      const row = document.createElement('tr'); const cell = document.createElement('td');
+      cell.colSpan = 3; cell.textContent = 'No completed item sales in this period.'; row.append(cell); top.append(row);
+    } else {
+      data.topProducts.forEach((item) => {
+        const row = document.createElement('tr');
+        [item.name, String(item.units), formatPrice(item.completedOrderValue)].forEach((value) => {
+          const cell = document.createElement('td'); cell.textContent = value; row.append(cell);
+        });
+        top.append(row);
+      });
+    }
+    const categories = $('#categoryRows');
+    categories.replaceChildren();
+    if (!(data.byCategory || []).length) {
+      const row = document.createElement('tr'); const cell = document.createElement('td');
+      cell.colSpan = 3; cell.textContent = 'No completed item sales in this period.'; row.append(cell); categories.append(row);
+    } else {
+      data.byCategory.forEach((item) => {
+        const row = document.createElement('tr');
+        [item.category, String(item.units), formatPrice(item.completedOrderValue)].forEach((value) => {
+          const cell = document.createElement('td'); cell.textContent = value; row.append(cell);
+        });
+        categories.append(row);
+      });
+    }
+  }
+
+  async function loadAll() {
+    notice($('#dashNotice'), '');
+    const tasks = await Promise.allSettled([loadStats(), loadUsers(), loadProducts(), loadOrders(), loadAnalytics()]);
+    const failed = tasks.find((task) => task.status === 'rejected');
+    if (failed) {
+      const error = failed.reason;
+      if (error?.status === 401 || error?.status === 403) {
+        showLogin('Your administrator session expired or no longer has access. Please sign in again.');
+        return;
+      }
+      notice($('#dashNotice'), error?.message || 'Some dashboard data could not be loaded. Use Refresh to retry.');
+    }
+  }
+
+  $('#adminLoginForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    notice($('#adminNotice'), '');
+    const button = $('#adminSubmit');
+    button.disabled = true;
+    button.textContent = 'Verifying credentials…';
+    try {
+      const data = await api('/api/auth/admin-login', {
+        method: 'POST',
+        body: JSON.stringify({ email: $('#adminEmail').value.trim(), password: $('#adminPassword').value })
+      });
+      $('#adminPassword').value = '';
+      if (data.user?.role !== 'admin') throw new Error('Administrator access is required.');
+      showDashboard(data.user);
+    } catch (error) {
+      notice($('#adminNotice'), error.message);
+    } finally {
+      button.disabled = false;
+      button.innerHTML = 'Sign in securely <span>↗</span>';
+    }
+  });
+  $('#togglePassword').addEventListener('click', () => {
+    const input = $('#adminPassword');
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    $('#togglePassword').textContent = show ? 'Hide' : 'Show';
+    $('#togglePassword').setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  });
+  $('#adminLogout').addEventListener('click', async () => {
+    const button = $('#adminLogout');
+    button.disabled = true;
+    try {
+      await api('/api/auth/logout', { method: 'POST', body: '{}' });
+      csrf = '';
+      showLogin('You have signed out securely.');
+    } catch (error) {
+      notice($('#dashNotice'), 'Sign out failed: ' + error.message);
+    } finally {
+      button.disabled = false;
+    }
+  });
+  $('#refreshUsers').addEventListener('click', loadUsers);
+  $('#userSearch').addEventListener('input', () => {
+    clearTimeout(searchTimer); page = 1;
+    searchTimer = setTimeout(() => loadUsers().catch((error) => notice($('#dashNotice'), error.message)), 250);
+  });
+  $('#roleFilter').addEventListener('change', () => { page = 1; loadUsers().catch((error) => notice($('#dashNotice'), error.message)); });
+  $('#statusFilter').addEventListener('change', () => { page = 1; loadUsers().catch((error) => notice($('#dashNotice'), error.message)); });
+  $('#prevPage').addEventListener('click', () => { page = Math.max(1, page - 1); loadUsers().catch((error) => notice($('#dashNotice'), error.message)); });
+  $('#nextPage').addEventListener('click', () => { page = Math.min(pages, page + 1); loadUsers().catch((error) => notice($('#dashNotice'), error.message)); });
+  $('#applyConfirm').addEventListener('click', (event) => { event.preventDefault(); applyUserChange(); });
+  $('#cancelConfirm').addEventListener('click', (event) => { event.preventDefault(); $('#adminConfirm').close(); pendingUserChange = null; });
+
+  $('#productForm').addEventListener('submit', submitProduct);
+  $('#productReset').addEventListener('click', clearProductForm);
+  $('#refreshProducts').addEventListener('click', () => loadProducts().catch((error) => notice($('#productNotice'), error.message)));
+  $('#productStatusFilter').addEventListener('change', () => loadProducts().catch((error) => notice($('#productNotice'), error.message)));
+  $('#productSearch').addEventListener('input', () => {
+    clearTimeout(productSearchTimer);
+    productSearchTimer = setTimeout(() => loadProducts().catch((error) => notice($('#productNotice'), error.message)), 250);
+  });
+  $('#refreshOrders').addEventListener('click', () => loadOrders().catch((error) => notice($('#dashNotice'), error.message)));
+  $('#orderStatusFilter').addEventListener('change', () => loadOrders().catch((error) => notice($('#dashNotice'), error.message)));
+  $('#orderSearch').addEventListener('input', () => {
+    clearTimeout(orderSearchTimer);
+    orderSearchTimer = setTimeout(() => loadOrders().catch((error) => notice($('#dashNotice'), error.message)), 250);
+  });
+  $('#analyticsDays').addEventListener('change', () => loadAnalytics().catch((error) => notice($('#dashNotice'), error.message)));
+
+  (async () => {
+    try {
+      await getCsrf();
+      const response = await fetch('/api/auth/me', { credentials: 'same-origin' });
+      const data = await response.json().catch(() => ({}));
+      if (response.ok && data.user?.role === 'admin' && data.authMethod === 'admin') {
+        showDashboard(data.user);
+      } else if (response.ok && data.user) {
+        showLogin('This session does not have administrator access. Use administrator password sign-in.');
+      } else {
+        showLogin();
+      }
+    } catch (error) {
+      showLogin('Authentication service unavailable. Check that the Dia+ server is running. ' + error.message);
+    }
+  })();
 })();
