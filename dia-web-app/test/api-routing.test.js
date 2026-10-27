@@ -84,6 +84,12 @@ test('frontend API calls use methods and paths registered by Express', () => {
     const source = fs.readFileSync(path.join(root, file), 'utf8');
     assert.ok(source.includes(expression), `Expected API call not found in ${file}: ${expression}`);
   }
+  for (const file of ['auth.js', 'script.js', 'admin.js']) {
+    const source = fs.readFileSync(path.join(root, file), 'utf8');
+    assert.ok(source.includes('function apiFailureMessage('), `${file} must identify failed API requests`);
+    assert.ok(source.includes('returned HTTP 404'), `${file} must explain a non-API 404 response`);
+    assert.ok(source.includes('requestPath'), `${file} must display the request path`);
+  }
 });
 
 test('health, config, products, and protected endpoints return their expected behavior', async () => {
@@ -92,14 +98,14 @@ test('health, config, products, and protected endpoints return their expected be
     seedSampleProducts({ db, logger: { log() {} } });
     const { app } = createApp({
       db,
-      env: { NODE_ENV: 'test', APP_ORIGIN: 'http://localhost:3000' }
+      env: { NODE_ENV: 'test', APP_ORIGIN: 'http://localhost:3000', RENDER_GIT_COMMIT: 'test-commit-abcdef123456' }
     });
 
     const health = await request(app).get('/api/health').expect(200);
     assert.equal(health.body.status, 'ok');
     assert.equal(health.body.service, 'dia-plus-api');
     assert.equal(health.body.version, require('../package.json').version);
-    assert.equal(health.body.buildCommit, null);
+    assert.equal(health.body.buildCommit, 'test-commit-abcdef123456');
 
     const config = await request(app).get('/api/config').expect(200);
     assert.deepEqual(config.body, { googleClientId: '' });
