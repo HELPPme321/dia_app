@@ -6,12 +6,12 @@ This project is a Node.js 20+ / Express app with a vanilla HTML/CSS/JavaScript s
 
 The repository contains a Render Blueprint at `render.yaml`. It defines one public web service using the Singapore region, a health check at `/api/health`, CI/test commands before startup, and a 1 GB persistent disk mounted at `/var/data`. The SQLite database is configured as `/var/data/dia.sqlite`, so account records survive ordinary deploys and restarts.
 
-The Blueprint is pinned to `feature/render-deployment` so this branch can be reviewed/deployed before merging to `main`. Once the deployment is established and the PR is approved/merged, change the Render service's linked branch to `main` to make approved production-branch pushes the deployment trigger. Automatic deployments are configured to wait for CI checks to pass; the build command also runs syntax checks and tests.
+The Blueprint is configured to track `main` so reviewed and merged changes can be deployed from the current production branch. If an existing Render service was created while the Blueprint tracked `feature/render-deployment`, open its settings and change the linked branch to `main`, then deploy the latest commit. Automatic deployments are configured to wait for CI checks to pass; the build command also runs syntax checks and tests.
 
 ## Create the online service
 
 1. Sign in to Render and open its Blueprint setup page: https://dashboard.render.com/blueprints/new
-2. Connect/authorize GitHub access if asked, then choose `HELPPme321/dia_app` and branch `feature/render-deployment`.
+2. Connect/authorize GitHub access if asked, then choose `HELPPme321/dia_app` and branch `main`.
 3. Review the resource summary. The SQLite disk requires a paid web-service plan. Do not select a free plan for this Blueprint because free Render web services have ephemeral filesystems.
 4. During setup, provide an administrator email and a unique password at least 14 characters long when prompted for `ADMIN_EMAIL` and `ADMIN_PASSWORD`. Do not put these values into GitHub.
 5. Approve creation and wait for the first deployment and the one-time `npm run admin:provision` hook to complete.
@@ -30,7 +30,7 @@ Render provides `RENDER_EXTERNAL_URL`, used automatically by the application for
 
 Google sign-in is optional. To enable it, create a Web OAuth client ID in Google Cloud Console, set the public `GOOGLE_CLIENT_ID` environment variable in Render, and add the exact HTTPS site origin to Google OAuth's **Authorized JavaScript origins**. The current implementation uses Google Identity Services ID-token verification, so configure the JavaScript origin; no separate redirect URI is used by this frontend callback flow. Email/password login works without Google.
 
-There is no email delivery provider configured, so password-reset emails are not available. Do not rely on the “Forgot password?” notice for automatic recovery. Checkout remains a demo and does not take payment or save orders.
+There is no email delivery provider configured, so password-reset emails are not available. Do not rely on the “Forgot password?” notice for automatic recovery. Product catalog, cart and demo-order APIs use SQLite; checkout writes an order but does not collect payment, ship items, or send email. Run `npm run products:seed` once to import the existing sample catalog. Run the demo account seed only when you deliberately want the public demo credentials enabled.
 
 ## Costs and free-tier trade-offs
 
@@ -51,4 +51,4 @@ The Render build command runs `npm install`, `npm run check`, and `npm test` bef
 
 ## Updating the app
 
-After the PR is reviewed and merged, switch the Render service's linked branch to `main`. Render can then automatically deploy pushes after GitHub CI checks pass. Until branch switching is done, this Blueprint intentionally follows `feature/render-deployment`. Do not merge the PR without reviewing and approving the changes yourself.
+After the PR is reviewed and merged, switch the Render service's linked branch to `main`. Render can then automatically deploy pushes after GitHub CI checks pass. The Blueprint source is now set to `main`. Do not leave it tracking the old feature branch. Do not deploy before reviewing and approving the changes yourself.
