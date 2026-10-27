@@ -13,6 +13,8 @@ const { PRODUCTS } = require('./products');
 const ROOT = path.join(__dirname, '..');
 const TTL = 7 * 24 * 60 * 60 * 1000;
 const ADMIN_TTL = 4 * 60 * 60 * 1000;
+const DAY = 24 * 60 * 60 * 1000;
+const PASSWORD_MIN_LENGTH = 12;
 const SAFE = new Set(['GET', 'HEAD', 'OPTIONS']);
 const DUMMY_HASH = bcrypt.hashSync('timing-only-not-a-real-password', 10);
 const hash = (s) => crypto.createHash('sha256').update(s).digest('hex');
