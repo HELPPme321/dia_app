@@ -69,9 +69,9 @@ test('customer signup, DB cart, stock-safe demo order, order history, and admin 
     assert.equal(registered.body.user.role, 'user');
     assert.equal(db.prepare('SELECT role FROM users WHERE email=?').get('shopper@example.net').role, 'user');
 
-    const catalog = await customer.get('/api/products?q=hoodie').expect(200);
+    const catalog = await customer.get('/api/products?q=core%20cap').expect(200);
     assert.equal(catalog.body.products.length, 1);
-    assert.equal(catalog.body.products[0].id, 'essential-hoodie');
+    assert.equal(catalog.body.products[0].id, 'core-cap');
     assert.equal(Object.hasOwn(catalog.body.products[0], 'costPrice'), false);
     const categories = await customer.get('/api/categories').expect(200);
     assert.ok(categories.body.categories.some((category) => category.name === 'Tops'));
