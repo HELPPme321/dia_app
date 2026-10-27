@@ -8,7 +8,7 @@
   let busy = false;
   function message(text, success = false) { notice.textContent=text; notice.classList.toggle('success',success); notice.hidden=!text; }
   function showAuth(text) { auth.hidden=false; app.style.display='none'; if(text)message(text); }
-  function showApp(successMessage='') { auth.hidden=true; app.style.display=''; if(successMessage){const toast=$('#toast');toast.textContent=successMessage;toast.classList.add('is-visible');window.setTimeout(()=>toast.classList.remove('is-visible'),2800);} }
+  function showApp(successMessage='') { auth.hidden=true; app.style.display=''; document.dispatchEvent(new CustomEvent('dia:auth-success')); if(successMessage){const toast=$('#toast');toast.textContent=successMessage;toast.classList.add('is-visible');window.setTimeout(()=>toast.classList.remove('is-visible'),2800);} }
   function setMode(mode) {
     const signup=mode==='signup';
     $('#loginPanel').hidden=signup;$('#signupPanel').hidden=!signup;
