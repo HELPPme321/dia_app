@@ -24,10 +24,31 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[character]));
 
+  function apiFailureMessage(response, data, method, url, fallback) {
+    const requestPath = (() => {
+      try { return new URL(url, window.location.href).pathname; }
+      catch { return String(url).split('?')[0]; }
+    })();
+    const contentType = response.headers.get('content-type') || 'unknown content type';
+    if (response.status === 404) {
+      const apiError = data?.error;
+      if (apiError?.code === 'ENDPOINT_NOT_FOUND') {
+        const build = apiError.version
+          ? `; ${apiError.service || 'Dia+'} v${apiError.version}${apiError.buildCommit ? ' (' + String(apiError.buildCommit).slice(0, 7) + ')' : ''}`
+          : '; server build unknown';
+        return `${apiError.message || 'API endpoint not found.'} [${apiError.method || method} ${apiError.path || requestPath}${build}]`;
+      }
+      const serverMessage = apiError?.message || data?.message;
+      if (serverMessage) return `${serverMessage} [${method} ${requestPath}; HTTP 404; ${contentType}]`;
+      return `API endpoint request failed: ${method} ${requestPath} returned HTTP 404 (${contentType}). Verify this page is served by the current Dia+ Express app, not a static host or stale deployment.`;
+    }
+    return data?.error?.message || data?.message || fallback;
+  }
+
   async function getCsrf() {
     const response = await fetch('/api/auth/csrf', { credentials: 'same-origin' });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || !data.csrfToken) throw new Error('Secure session could not be started. Refresh and try again.');
+    if (!response.ok || !data.csrfToken) throw new Error(apiFailureMessage(response, data, 'GET', '/api/auth/csrf', 'Secure session could not be started. Refresh and try again.'));
     csrf = data.csrfToken;
     return csrf;
   }
@@ -42,10 +63,9 @@
     const response = await fetch(url, { ...options, method, headers, credentials: 'same-origin' });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      const error = new Error(data?.error?.message || 'Request failed. Please try again.');
+      const error = new Error(apiFailureMessage(response, data, method, url, 'Request failed. Please try again.'));
       error.status = response.status;
       error.code = data?.error?.code;
-      if (error.code === 'ENDPOINT_NOT_FOUND') error.message += ' [' + method + ' ' + (data?.error?.path || url) + ']';
       throw error;
     }
     if (data.csrfToken) csrf = data.csrfToken;
@@ -534,6 +554,7 @@
       await getCsrf();
       const response = await fetch('/api/auth/me', { credentials: 'same-origin' });
       const data = await response.json().catch(() => ({}));
+      if (response.status === 404) throw new Error(apiFailureMessage(response, data, 'GET', '/api/auth/me', 'Could not verify the administrator session.'));
       if (response.ok && data.user?.role === 'admin' && data.authMethod === 'admin') {
         showDashboard(data.user);
       } else if (response.ok && data.user) {

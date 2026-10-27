@@ -2,7 +2,7 @@
 
 ## Request flow and root-cause diagnosis
 
-Dia+ uses vanilla HTML/CSS/JavaScript served by Express (src/server.js) and SQLite (src/db.js). The browser sends same-origin relative requests such as POST /api/auth/register; the frontend does not have a separate API base URL. Express registers authentication routes in src/server.js and product/cart/order/admin routes in src/store-routes.js. The final /api handler intentionally returns 404 ENDPOINT_NOT_FOUND for an unmatched method/path instead of pretending the request succeeded.
+Dia+ uses vanilla HTML/CSS/JavaScript served by Express (src/server.js) and SQLite (src/db.js). The browser sends same-origin relative requests such as POST /api/auth/register; the frontend does not have a separate API base URL. Express registers authentication routes in src/server.js and product/cart/order/admin routes in src/store-routes.js. The final /api handler intentionally returns 404 ENDPOINT_NOT_FOUND for an unmatched method/path instead of pretending the request succeeded. The health response and API 404s also include service/version/build metadata so a deployed stale process can be distinguished from current source.
 
 The recurring message **“The requested API endpoint was not found” is not a registration error produced by the current registration handler**. Current source registers POST /api/auth/register. That message means the server handling a request did not match the requested method/path. Common causes are: opening the app through Live Server/static hosting instead of Express; an older process/build still running; a deployed Render service still linked to an older branch; or the client requesting another method/path. Check the HTTP method and path in the ENDPOINT_NOT_FOUND JSON and the matching [api-route-not-found] server-log line. Do not add a fake success route to suppress this diagnostic.
 
@@ -21,7 +21,7 @@ Open http://localhost:3000. Do not open index.html directly or use VS Code Live 
 
 | Method | Path | Purpose | Access / success |
 |---|---|---|---|
-| GET | /api/health | Health check | Public, 200 {status:"ok"} |
+| GET | /api/health | Health check and running build fingerprint | Public, 200 with status, service, version and buildCommit |
 | GET | /api/config | Optional public Google client ID | Public |
 | GET | /api/auth/csrf | Start/reuse session and issue CSRF token | Public, sets HttpOnly session cookie |
 | GET | /api/auth/me | Inspect current session | Public introspection; 401 when signed out |
