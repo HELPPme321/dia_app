@@ -26,6 +26,7 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || DEFAULT_DATA
     "picture_url TEXT," +
     "role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin'))," +
     "status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'disabled'))," +
+    "is_demo INTEGER NOT NULL DEFAULT 0 CHECK (is_demo IN (0, 1))," +
     "created_at TEXT NOT NULL," +
     "updated_at TEXT NOT NULL," +
     "last_login_at TEXT" +
@@ -44,6 +45,12 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || DEFAULT_DATA
     "CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);" +
     "CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);"
   );
+
+  // Safe additive migration for existing databases: ordinary accounts are not demo accounts.
+  const userColumns = db.prepare('PRAGMA table_info(users)').all().map((column) => column.name);
+  if (!userColumns.includes('is_demo')) {
+    db.exec("ALTER TABLE users ADD COLUMN is_demo INTEGER NOT NULL DEFAULT 0 CHECK (is_demo IN (0, 1))");
+  }
 
   const columns = db.prepare('PRAGMA table_info(sessions)').all().map((column) => column.name);
   if (!columns.includes('auth_method')) {
