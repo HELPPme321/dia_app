@@ -13,6 +13,7 @@ PowerShell:
     npm.cmd install
     npm.cmd run check
     npm.cmd test
+    npm.cmd run products:seed
     npm.cmd start
 
 Open http://localhost:3000. Run these commands from `dia-web-app`, not the repository root. Do not use `index.html` directly or Live Server for the authentication version; those static-server options cannot serve the `/api/*` backend.
