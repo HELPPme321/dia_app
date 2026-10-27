@@ -114,8 +114,13 @@ test('seeded accounts complete login, role protection, dashboard access, logout,
     assert.equal(profile.body.user.email, credentials.user.email);
     await userAgent.get('/api/admin/stats').expect(403);
     await userAgent.get('/api/admin/users').expect(403);
-    await userAgent.get('/admin').expect(403);
-    await userAgent.get('/admin.html').expect(403);
+    // A customer can open the public admin sign-in shell to switch accounts, but
+    // this must never grant access to administrator APIs or private dashboard data.
+    const adminShell = await userAgent.get('/admin').expect(200);
+    assert.match(adminShell.text, /adminLogin/);
+    assert.match(adminShell.text, /adminDashboard/);
+    await userAgent.get('/admin.html').expect(200);
+    await userAgent.get('/api/admin/stats').expect(403);
 
     await userAgent.post('/api/auth/logout')
       .set('x-csrf-token', userLogin.body.csrfToken)
