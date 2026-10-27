@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#354435" />
+  <meta name="description" content="Dia+ — wear your story. Considered everyday essentials in deep olive and warm neutral tones." />
+  <title>Dia+ — Wear Your Story</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="app-stage">
+    <div class="ambient ambient-left" aria-hidden="true"></div>
+    <div class="ambient ambient-right" aria-hidden="true"></div>
+
+    <!-- Physical-device frame, inspired by the supplied mobile UI reference. -->
+    <div class="phone-frame">
+      <span class="side-button side-button-left side-button-one" aria-hidden="true"></span>
+      <span class="side-button side-button-left side-button-two" aria-hidden="true"></span>
+      <span class="side-button side-button-right" aria-hidden="true"></span>
+
+      <div class="phone-screen" id="appScreen">
+        <div class="camera-island" aria-hidden="true"><span class="camera-lens"></span></div>
+
+        <!-- Welcome / splash screen -->
+        <section class="screen-view home-view is-active" id="homeView" aria-label="Dia+ welcome screen">
+          <div class="hero-photo" role="img" aria-label="Forest green hoodie, ivory T-shirt, and black cap on a clothing rack"></div>
+          <div class="hero-shade" aria-hidden="true"></div>
+          <div class="hero-topline" aria-hidden="true">
+            <span>CONSIDERED ESSENTIALS</span>
+            <span>DROP Nº 01</span>
+          </div>
+          <button class="hero-brand" id="heroExplore" aria-label="Explore the Dia+ collection">
+            <span class="hero-word">Dia</span><span class="hero-sparkle" aria-hidden="true">✦</span><span class="hero-diamond" aria-hidden="true"></span>
+          </button>
+          <p class="hero-tagline">WEAR YOUR STORY</p>
+          <p class="hero-edition">A quieter kind of statement.</p>
+          <button class="enter-button" id="enterButton" aria-label="Enter the Dia+ store" title="Explore collection">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
+          </button>
+          <p class="hero-scroll-label" aria-hidden="true">DISCOVER THE COLLECTION</p>
+        </section>
+
+        <!-- Store pages are rendered into this view by vanilla JavaScript. -->
+        <section class="screen-view store-view" id="storeView" aria-label="Dia+ store" hidden>
+          <header class="store-header">
+            <button class="mini-brand" data-action="navigate" data-page="home" aria-label="Back to welcome screen">
+              <span>Dia</span><span class="mini-sparkle" aria-hidden="true">✦</span>
+            </button>
+            <p class="header-note">WEAR YOUR STORY</p>
+            <button class="header-bag-button icon-button" data-action="navigate" data-page="bag" aria-label="Open shopping bag">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 12H4L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
+              <span class="bag-count" id="headerBagCount">0</span>
+            </button>
+          </header>
+          <div class="page-content" id="pageContent" tabindex="-1"></div>
+          <nav class="bottom-nav" aria-label="Main navigation">
+            <button class="nav-item" data-action="navigate" data-page="home" aria-label="Home">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H5V10"/><path d="M9 20v-6h6v6"/></svg><span>Home</span>
+            </button>
+            <button class="nav-item is-current" data-action="navigate" data-page="shop" aria-label="Shop">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 12H4L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg><span>Shop</span>
+            </button>
+            <button class="nav-item" data-action="navigate" data-page="saved" aria-label="Saved items">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5-8.8 11-8.8 11s-8.8-6-8.8-11A4.7 4.7 0 0 1 12 6.3a4.7 4.7 0 0 1 8.8 2.5Z"/></svg><span>Saved</span>
+            </button>
+            <button class="nav-item" data-action="navigate" data-page="bag" aria-label="Shopping bag">
+              <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 12H4L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg><span class="nav-count" id="navBagCount">0</span></span><span>Bag</span>
+            </button>
+          </nav>
+        </section>
+
+        <!-- Product details overlay -->
+        <div class="modal-backdrop" id="productModal" hidden>
+          <section class="product-modal modal-panel" role="dialog" aria-modal="true" aria-labelledby="detailName">
+            <button class="modal-close icon-button" data-action="close-product" aria-label="Close product details">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+            </button>
+            <div id="productModalContent"></div>
+          </section>
+        </div>
+
+        <!-- Checkout overlay. This demo validates locally; it does not process payments. -->
+        <div class="modal-backdrop checkout-backdrop" id="checkoutModal" hidden>
+          <section class="checkout-modal modal-panel" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
+            <button class="modal-close icon-button" data-action="close-checkout" aria-label="Close checkout">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+            </button>
+            <div id="checkoutContent"></div>
+          </section>
+        </div>
+
+        <div class="toast" id="toast" role="status" aria-live="polite"></div>
+        <div class="home-indicator" aria-hidden="true"><span></span></div>
+      </div>
+    </div>
+
+    <p class="stage-caption" aria-hidden="true">DIA+ <span>·</span> EVERYDAY, INTENTIONALLY.</p>
+  </main>
+</body>
+</html>
