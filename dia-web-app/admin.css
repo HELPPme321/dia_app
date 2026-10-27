@@ -264,3 +264,7 @@ td small { color:#929b8c; }
   .admin-login,.admin-dashboard-main,.admin-stats article { animation:none!important; }
   *,*::before,*::after { transition-duration:.01ms!important; scroll-behavior:auto!important; }
 }
+
+.admin-setup-hint{margin:18px 0 0;padding:12px 13px;border-left:2px solid #b9c5aa;background:#f0f2e9;color:#778372;font-size:.68rem;line-height:1.7}
+.admin-setup-hint code{color:#34523a;background:#e3e8dc;padding:2px 4px;border-radius:3px;font-size:.65rem}
+@media(max-width:780px){.admin-setup-hint{font-size:.65rem}}
