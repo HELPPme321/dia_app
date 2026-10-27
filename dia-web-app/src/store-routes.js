@@ -188,7 +188,7 @@ function registerStoreRoutes(app, { db, auth, admin, csrf }) {
       name: 'name COLLATE NOCASE ASC'
     })[req.query.sort] || 'tag ASC,name ASC';
     const rows = db.prepare('SELECT * FROM products WHERE ' + clauses.join(' AND ') + ' ORDER BY ' + orderBy).all(...params);
-    res.json({ products: rows.map((row) => publicProduct(row, true)) });
+    res.json({ products: rows.map(publicProduct) });
   });
 
   app.get('/api/products/:id', (req, res) => {
@@ -329,7 +329,7 @@ function registerStoreRoutes(app, { db, auth, admin, csrf }) {
     if (search) { clauses.push('(name LIKE ? OR category LIKE ?)'); params.push('%' + search + '%', '%' + search + '%'); }
     const where = clauses.length ? ' WHERE ' + clauses.join(' AND ') : '';
     const rows = db.prepare('SELECT * FROM products' + where + ' ORDER BY created_at DESC').all(...params);
-    return res.json({ products: rows.map(publicProduct) });
+    return res.json({ products: rows.map((row) => publicProduct(row, true)) });
   });
 
   app.post('/api/admin/products', csrf, auth, admin, (req, res) => {
