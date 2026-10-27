@@ -60,7 +60,7 @@ Cart changes are stored in SQLite, not merely localStorage. Prices, sizes and st
 
 ## Administrator routes
 
-Every admin route requires an active server-side admin role and an administrator-password session (auth method admin). A frontend role flag alone grants no access.
+The `/admin` and `/admin.html` pages are public sign-in shells; their dashboard data is not embedded in HTML. This is intentional so a browser with an active customer session can switch accounts. Every `/api/admin/*` route requires an active server-side admin role and an administrator-password session (`auth_method='admin'`). A frontend role flag alone grants no access.
 
 | Method | Path | Purpose |
 |---|---|---|
