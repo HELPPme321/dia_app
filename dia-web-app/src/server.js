@@ -8,7 +8,7 @@ const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 const { rateLimit } = require('express-rate-limit');
 const { createDatabase } = require('./db');
-const { PRODUCTS } = require('./products');
+const { registerStoreRoutes } = require('./store-routes');
 
 const ROOT = path.join(__dirname, '..');
 const TTL = 7 * 24 * 60 * 60 * 1000;
@@ -76,7 +76,6 @@ function createApp(options = {}) {
   app.get('/api/config',(_req,res)=>res.json({googleClientId:env.GOOGLE_CLIENT_ID||''}));
   app.get('/api/auth/csrf',(req,res)=>{db.prepare('DELETE FROM sessions WHERE expires_at<=?').run(Date.now());if(req.session)return res.json({csrfToken:req.session.csrf_token});return res.json({csrfToken:startSession(req,res,null,TTL,'anonymous')});});
   app.get('/api/auth/me',(req,res)=>req.user?res.json({authenticated:true,user:safeUser(req.user),authMethod:req.session.auth_method}):res.status(401).json({authenticated:false,user:null,authMethod:null}));
-  app.get('/api/products',(_req,res)=>res.json({products:PRODUCTS}));
   app.get('/api/profile',auth,(req,res)=>res.json({user:safeUser(req.user)}));
   app.post('/api/auth/register',registrationLimiter,csrf,async(req,res)=>{
     const name=typeof req.body?.name==='string'?req.body.name.trim().replace(/\s+/g,' '):'';
@@ -89,12 +88,18 @@ function createApp(options = {}) {
     const now=new Date().toISOString(),id=crypto.randomUUID();
     try{
       const passwordHash=await bcrypt.hash(password,12);
-      db.prepare("INSERT INTO users(id,email,password_hash,name,role,status,created_at,updated_at,last_login_at) VALUES(?,?,?,?,'user','active',?,?,?)").run(id,email,passwordHash,name,now,now,now);
-      const user=db.prepare('SELECT * FROM users WHERE id=?').get(id);
-      const csrfToken=startSession(req,res,id,DAY,'password');
-      return res.status(201).json({authenticated:true,user:safeUser(user),csrfToken});
+      // The user row and authenticated session are one SQLite transaction. A failed
+      // registration cannot leave behind an account that the UI reports as failed.
+      const created=db.transaction(()=>{
+        db.prepare("INSERT INTO users(id,email,password_hash,name,role,status,created_at,updated_at,last_login_at) VALUES(?,?,?,?,'user','active',?,?,?)").run(id,email,passwordHash,name,now,now,now);
+        const user=db.prepare('SELECT * FROM users WHERE id=?').get(id);
+        const csrfToken=startSession(req,res,id,DAY,'password');
+        return {user,csrfToken};
+      })();
+      return res.status(201).json({authenticated:true,user:safeUser(created.user),csrfToken:created.csrfToken});
     }catch(e){
-      if(e&&e.code==='SQLITE_CONSTRAINT_UNIQUE'&&/users\\.email/i.test(e.message||''))return error(res,409,'EMAIL_ALREADY_REGISTERED','An account already uses this email. Sign in or use a different address.');
+      res.clearCookie(cookieName,{httpOnly:true,secure:prod,sameSite:'lax',path:'/'});
+      if(e&&e.code==='SQLITE_CONSTRAINT_UNIQUE'&&/users\.email/i.test(e.message||''))return error(res,409,'EMAIL_ALREADY_REGISTERED','An account already uses this email. Sign in or use a different address.');
       console.error('Registration persistence failed:',e?.code||'UNKNOWN_ERROR');
       return error(res,500,'REGISTRATION_FAILED','We could not create your account. Please try again.');
     }
@@ -150,7 +155,44 @@ function createApp(options = {}) {
   app.post('/api/auth/logout',csrf,(req,res)=>{if(req.tokenHash)db.prepare('DELETE FROM sessions WHERE token_hash=?').run(req.tokenHash);res.clearCookie(cookieName,{httpOnly:true,secure:prod,sameSite:'lax',path:'/'});res.json({ok:true});});
   app.get('/api/admin/stats',auth,admin,(_req,res)=>{
     const week=new Date(Date.now()-7*86400000).toISOString(),now=Date.now();
-    res.json({stats:{totalUsers:db.prepare("SELECT COUNT(*) count FROM users WHERE role='user'").get().count,activeUsers:db.prepare("SELECT COUNT(*) count FROM users WHERE role='user' AND status='active'").get().count,administrators:db.prepare("SELECT COUNT(*) count FROM users WHERE role='admin' AND status='active'").get().count,newUsersThisWeek:db.prepare("SELECT COUNT(*) count FROM users WHERE role='user' AND created_at>=?").get(week).count,activeSessions:db.prepare('SELECT COUNT(*) count FROM sessions WHERE user_id IS NOT NULL AND expires_at>?').get(now).count}});
+    const users={
+      total:db.prepare("SELECT COUNT(*) count FROM users WHERE role='user'").get().count,
+      active:db.prepare("SELECT COUNT(*) count FROM users WHERE role='user' AND status='active'").get().count,
+      administrators:db.prepare("SELECT COUNT(*) count FROM users WHERE role='admin' AND status='active'").get().count,
+      newThisWeek:db.prepare("SELECT COUNT(*) count FROM users WHERE role='user' AND created_at>=?").get(week).count
+    };
+    const products={
+      total:db.prepare("SELECT COUNT(*) count FROM products WHERE status='active'").get().count,
+      inStock:db.prepare("SELECT COUNT(*) count FROM products WHERE status='active' AND stock>0").get().count,
+      lowStock:db.prepare("SELECT COUNT(*) count FROM products WHERE status='active' AND stock BETWEEN 1 AND 5").get().count,
+      outOfStock:db.prepare("SELECT COUNT(*) count FROM products WHERE status='active' AND stock=0").get().count
+    };
+    const orders={
+      total:db.prepare("SELECT COUNT(*) count FROM orders").get().count,
+      pending:db.prepare("SELECT COUNT(*) count FROM orders WHERE status='pending'").get().count,
+      completed:db.prepare("SELECT COUNT(*) count FROM orders WHERE status='completed'").get().count,
+      cancelled:db.prepare("SELECT COUNT(*) count FROM orders WHERE status='cancelled'").get().count,
+      refunded:db.prepare("SELECT COUNT(*) count FROM orders WHERE status='refunded'").get().count,
+      completedOrderValue:db.prepare("SELECT COALESCE(SUM(total),0) total FROM orders WHERE status='completed'").get().total,
+      collectedRevenue:db.prepare("SELECT COALESCE(SUM(total),0) total FROM orders WHERE payment_status='paid' AND status NOT IN ('cancelled','refunded')").get().total
+    };
+    const margin=db.prepare(
+      "SELECT COUNT(*) itemCount,SUM(CASE WHEN oi.unit_cost IS NULL THEN 1 ELSE 0 END) missingCosts,"+
+      "COALESCE(SUM(oi.line_total-(oi.unit_cost*oi.quantity)),0) grossProfit "+
+      "FROM order_items oi JOIN orders o ON o.id=oi.order_id WHERE o.status='completed' AND o.payment_status='paid'"
+    ).get();
+    const profitAvailable=margin.itemCount>0&&margin.missingCosts===0;
+    const activeSessions=db.prepare('SELECT COUNT(*) count FROM sessions WHERE user_id IS NOT NULL AND expires_at>?').get(now).count;
+    return res.json({
+      stats:{
+        totalUsers:users.total,activeUsers:users.active,administrators:users.administrators,newUsersThisWeek:users.newThisWeek,
+        totalProducts:products.total,productsInStock:products.inStock,lowStockProducts:products.lowStock,outOfStockProducts:products.outOfStock,
+        totalOrders:orders.total,pendingOrders:orders.pending,completedOrders:orders.completed,cancelledOrders:orders.cancelled,refundedOrders:orders.refunded,
+        completedOrderValue:orders.completedOrderValue,collectedRevenue:orders.collectedRevenue,
+        grossProfit:profitAvailable?margin.grossProfit:null,profitAvailable,activeSessions
+      },
+      financialNotice:'Checkout records demonstration orders without collecting payment. Collected revenue is only orders marked paid by a future verified payment integration. Gross profit is unavailable until all paid completed order items have recorded costs.'
+    });
   });
   app.get('/api/admin/users',auth,admin,(req,res)=>{
     const page=Math.max(1,Number.parseInt(req.query.page,10)||1),limit=Math.max(1,Math.min(50,Number.parseInt(req.query.limit,10)||10));
@@ -178,6 +220,8 @@ function createApp(options = {}) {
     db.prepare('UPDATE users SET '+sets.join(',')+' WHERE id=?').run(...values);
     res.json({user:safeUser(db.prepare('SELECT id,email,name,picture_url,role,status,created_at,last_login_at FROM users WHERE id=?').get(id))});
   });
+  registerStoreRoutes(app,{db,auth,admin,csrf});
+
   function serveAdminPage(req,res) {
     // Keep the sign-in form available anonymously, but never render it to a signed-in
     // customer or to an admin session created through the wrong authentication method.

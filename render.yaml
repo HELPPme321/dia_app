@@ -4,7 +4,7 @@ services:
   - type: web
     name: dia-app-helppme321
     repo: https://github.com/HELPPme321/dia_app
-    branch: feature/render-deployment
+    branch: main
     runtime: node
     plan: starter
     region: singapore
@@ -17,7 +17,7 @@ services:
       name: dia-sqlite-data
       mountPath: /var/data
       sizeGB: 1
-    initialDeployHook: npm run admin:provision
+    initialDeployHook: npm run admin:provision && npm run products:seed
     envVars:
       - key: NODE_ENV
         value: production

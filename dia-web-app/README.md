@@ -6,7 +6,7 @@ The application keeps the existing Dia+ storefront and adds normal email/passwor
 
 This app is not a static-only website. The frontend uses relative same-origin API paths (for example, `/api/auth/login`) which are registered by the Express server in `src/server.js`. Do not open `index.html` directly and do not run this version with VS Code Live Server. Either method serves files without providing the authentication API.
 
-From this `dia-web-app` directory, run `npm.cmd install`, `npm.cmd run check`, `npm.cmd test`, then `npm.cmd start`; open `http://localhost:3000`. For production, deploy this Node.js application to a Node-capable host that runs the Express server and serves the frontend and `/api/*` routes on the same origin. No provider-specific production deployment configuration is present in this repository. See [API_ROUTES.md](API_ROUTES.md) for the endpoint inventory, expected status codes, and production environment requirements.
+From this `dia-web-app` directory, run `npm.cmd install`, `npm.cmd run check`, `npm.cmd test`, then `npm.cmd start`; open `http://localhost:3000`. For production, deploy this Node.js application to a Node-capable host that runs the Express server and serves the frontend and `/api/*` routes on the same origin. See [API_ROUTES.md](API_ROUTES.md) for the full endpoint inventory, the recurrent 404 diagnosis, financial definitions, expected status codes, and deployment requirements. The Render Blueprint is in the repository root.
 
 ## Deploy online
 
@@ -93,8 +93,12 @@ Open http://localhost:3000/admin. Unset ADMIN_PASSWORD after provisioning. Do no
 - Password hashing with bcrypt, generic invalid-login responses, server-side role checks, self-lockout and last-active-admin safeguards.
 - Web serving is restricted to known frontend files and the assets directory; backend source and package metadata are not served as static files. A logged-in customer is also denied the administrator HTML route, not only its APIs.
 - Sessions persist across refreshes. Use the storefront sign-out control to invalidate the session.
-- The product catalog, saved pieces, cart, and checkout remain a browser-side demo. Checkout does not take payments or create real orders.
+- The catalog is loaded from the SQLite products table. The account cart and demo orders are stored in SQLite and validated by server-side APIs; saved items remain browser-local. Checkout creates a pending demonstration order, deducts stock, and records order-item snapshots, but does not collect payment, dispatch shipping, or send email. Explicitly seed the pre-existing sample catalog using npm.cmd run products:seed. The sample entries are marked in the database, and their costs are unknown until supplied.
+
+## Seed the existing sample catalog
+
+From this directory, run npm.cmd run products:seed. It inserts the four product definitions already in src/products.js with sample stock and marks them is_sample=1. It does not overwrite existing products; costs are deliberately left blank. To also create the opt-in demo user and administrator accounts, set ENABLE_DEMO_ACCOUNTS=true and run npm.cmd run demo:seed as described above. Do not leave public demonstration credentials active on a production website.
 
 ## Tests and build verification
 
-Run npm.cmd run check and npm.cmd test. Tests use SQLite, mock Google token verification, and exercise seeded demo-account login, server-side role separation, logout, and persistence through a database close/reopen. Real Google sign-in still needs your client ID and browser testing. Email password recovery needs an email delivery provider before it can be enabled.
+Run npm.cmd run check and npm.cmd test. The test suite exercises auth, CSRF, server-side role separation, sample catalog seeding, live catalog queries, DB-backed carts, checkout totals/stock/idempotency, order history, admin product and order management, analytics, logout, and database restart persistence. Real Google sign-in still needs your client ID and browser testing. Email password recovery needs an email delivery provider. Payment collection is not configured; collected revenue intentionally remains zero for demonstration orders.

@@ -1,10 +1,12 @@
-# Dia+ API route inventory and deployment notes
+# Dia+ API inventory and operational notes
 
-## Request flow
+## Request flow and root-cause diagnosis
 
-Dia+ is a vanilla HTML/CSS/JavaScript frontend served by the Node.js/Express application in `src/server.js`. The browser uses same-origin relative API paths such as `/api/auth/csrf`; there is no separate frontend API base URL in the current source. The Express app registers the API routes before its final `/api` fallback handler.
+Dia+ uses vanilla HTML/CSS/JavaScript served by Express (src/server.js) and SQLite (src/db.js). The browser sends same-origin relative requests such as POST /api/auth/register; the frontend does not have a separate API base URL. Express registers authentication routes in src/server.js and product/cart/order/admin routes in src/store-routes.js. The final /api handler intentionally returns 404 ENDPOINT_NOT_FOUND for an unmatched method/path instead of pretending the request succeeded.
 
-For local development, run the server from this directory:
+The recurring message **“The requested API endpoint was not found” is not a registration error produced by the current registration handler**. Current source registers POST /api/auth/register. That message means the server handling a request did not match the requested method/path. Common causes are: opening the app through Live Server/static hosting instead of Express; an older process/build still running; a deployed Render service still linked to an older branch; or the client requesting another method/path. Check the HTTP method and path in the ENDPOINT_NOT_FOUND JSON and the matching [api-route-not-found] server-log line. Do not add a fake success route to suppress this diagnostic.
+
+Run locally from the dia-web-app directory:
 
 ```powershell
 npm.cmd install
@@ -13,46 +15,110 @@ npm.cmd test
 npm.cmd start
 ```
 
-Open `http://localhost:3000`. Do not open `index.html` directly, and do not use VS Code Live Server as the application server: a static server cannot run these Express endpoints. A production deployment must run this Node.js application (Node.js 20+) and serve both the frontend and `/api/*` from the same origin. This repository currently has a CI workflow, but no provider-specific production deployment configuration; a live deployment cannot be inferred from this repository alone.
+Open http://localhost:3000. Do not open index.html directly or use VS Code Live Server; neither runs the Express API. A hosted build must run this Node.js application and serve the frontend and API on the same origin.
 
-## API endpoints
+## Authentication and session routes
 
-| Method | Path | Purpose and frontend caller | Access and success |
+| Method | Path | Purpose | Access / success |
 |---|---|---|---|
-| GET | `/api/health` | Health check; operational verification | Public; `200 { "status": "ok" }` |
-| GET | `/api/config` | Read optional public Google client ID; `auth.js` | Public; `200 { "googleClientId": string }`; empty string means Google sign-in is not configured |
-| GET | `/api/auth/csrf` | Start/reuse a session and obtain CSRF token; `auth.js`, `admin.js` | Public; `200 { "csrfToken": string }`; sets an HttpOnly session cookie |
-| GET | `/api/auth/me` | Read current session identity; `auth.js`, `admin.js` | Public introspection; `200` with user/session fields or `401` with `authenticated: false` |
-| GET | `/api/products` | Return product catalog | Public; `200 { "products": [...] }` |
-| GET | `/api/profile` | Return current customer profile | Active signed-in user; `200 { "user": ... }` |
-| POST | `/api/auth/register` | Create customer account; `auth.js` | CSRF token required; `201` with customer and refreshed CSRF token |
-| POST | `/api/auth/login` | Customer email/password login; `auth.js` | CSRF token required; `200` with customer/session; Google is not required |
-| POST | `/api/auth/google` | Optional server-verified Google login; `auth.js` | CSRF token required; `200` with customer/session |
-| POST | `/api/auth/admin-login` | Administrator password login; `admin.js` | CSRF token required; `200` with administrator/session |
-| POST | `/api/auth/logout` | Invalidate current session; `auth.js`, `admin.js` | CSRF token required; `200 { "ok": true }` |
-| GET | `/api/admin/stats` | Load admin summary; `admin.js` | Requires active administrator role **and** an admin-password session; `200 { "stats": ... }` |
-| GET | `/api/admin/users` | Search/filter/paginate accounts; `admin.js` | Requires active administrator role and admin-password session; `200 { "users": [...], "pagination": ... }` |
-| PATCH | `/api/admin/users/:id` | Change account role/status; `admin.js` | Requires administrator session and CSRF token; `200 { "user": ... }` |
+| GET | /api/health | Health check | Public, 200 {status:"ok"} |
+| GET | /api/config | Optional public Google client ID | Public |
+| GET | /api/auth/csrf | Start/reuse session and issue CSRF token | Public, sets HttpOnly session cookie |
+| GET | /api/auth/me | Inspect current session | Public introspection; 401 when signed out |
+| GET | /api/profile | Customer profile | Active signed-in user |
+| POST | /api/auth/register | Create normal customer and session | CSRF required; 201; duplicate email 409 |
+| POST | /api/auth/login | Normal email/password login | CSRF required; normal role only |
+| POST | /api/auth/google | Optional verified Google login | CSRF required; normal customer only |
+| POST | /api/auth/admin-login | Separate admin password login | CSRF required; active admin role only |
+| POST | /api/auth/logout | Revoke current session | CSRF required |
 
-## Expected failures
+Registration creates the user row and session within one SQLite transaction. Passwords use bcrypt; the application does not need a Google account to register a normal customer.
 
-- `400`: invalid request fields, password policy/confirmation failures, or invalid account changes.
-- `401`: missing/expired login session on a protected endpoint, or invalid credentials. The `/api/auth/me` endpoint intentionally returns `401` when no user is signed in.
-- `403`: missing/invalid CSRF token, disallowed request origin, disabled account, or insufficient administrator permissions.
-- `404`: unknown API path or wrong HTTP method for a path. The API fallback logs the method and pathname (without query parameters) and returns `error.code = "ENDPOINT_NOT_FOUND"` with the unmatched method/path to make misrouting diagnosable.
-- `409`: duplicate email or account-linking conflict.
-- `429`: login/registration rate limit reached.
-- `503`: Google login was attempted while `GOOGLE_CLIENT_ID` is unset. Email/password authentication remains available.
+## Catalog routes
 
-## Production configuration
+| Method | Path | Purpose | Access |
+|---|---|---|---|
+| GET | /api/categories | Categories and active product counts | Public |
+| GET | /api/products | Search/filter/sort active products | Public; query parameters below |
+| GET | /api/products/:id | One active product | Public |
 
-The current architecture expects the Express server to serve the frontend and API on the same HTTPS origin. Deploy this project to a Node.js-capable host rather than static-only hosting. Set environment variables in the host's private configuration:
+GET /api/products accepts q, category, minPrice, maxPrice and sort (featured, price-asc, price-desc, newest, name). The public response does not expose product cost prices. The app's existing four catalog items are imported explicitly with npm.cmd run products:seed; the seed is idempotent, marks inserted rows as sample inventory, and never overwrites existing product edits. Sample costs remain unknown/null.
 
-- `NODE_ENV=production`
-- `APP_ORIGIN=https://the-exact-public-origin` (scheme and host, with no path; must match the browser's origin)
-- `PORT` only if required by the hosting platform (the server also accepts the platform-provided `PORT`)
-- `DATABASE_PATH` pointed to a writable persistent disk path. Default ephemeral container storage may lose SQLite data on redeploy.
-- `GOOGLE_CLIENT_ID` only if optional Google sign-in is desired
-- Admin provisioning credentials only during provisioning; never commit secrets
+## Customer cart and order routes
 
-No production URL, host settings, secrets, browser session, or production database are embedded in this repository, so the live deployment cannot be verified from source inspection alone.
+| Method | Path | Purpose | Access |
+|---|---|---|---|
+| GET | /api/cart | Read current account cart | Active customer |
+| POST | /api/cart/items | Add product/size/quantity | CSRF + active customer |
+| PUT | /api/cart/items | Set quantity (zero removes) | CSRF + active customer |
+| DELETE | /api/cart/items | Remove product/size | CSRF + active customer |
+| POST | /api/orders | Create a pending demo order from database cart | CSRF + active customer |
+| GET | /api/orders | Current customer's order history | Active customer |
+| GET | /api/orders/:id | One order belonging to current customer | Active customer; owner must match |
+
+Cart changes are stored in SQLite, not merely localStorage. Prices, sizes and stock are checked on the server. Checkout recalculates totals from database values inside a transaction, decreases stock, stores order-item snapshots, clears the cart, and accepts an idempotency key to avoid duplicate orders. Current checkout is a non-payment demo flow: it records pending orders, does not collect payment, does not send emails and does not initiate shipping.
+
+## Administrator routes
+
+Every admin route requires an active server-side admin role and an administrator-password session (auth method admin). A frontend role flag alone grants no access.
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | /api/admin/stats | User, product, inventory, order and financial summary |
+| GET | /api/admin/users | Search/filter/paginate accounts |
+| PATCH | /api/admin/users/:id | Change account role/status with safeguards |
+| GET | /api/admin/products | Product inventory including private unit costs |
+| POST | /api/admin/products | Create a product |
+| PATCH | /api/admin/products/:id | Edit product, cost, stock, or active/archive status |
+| DELETE | /api/admin/products/:id | Archive a product and remove it from carts |
+| GET | /api/admin/orders | Search/filter orders and inspect line items |
+| PATCH | /api/admin/orders/:id | Change order status using allowed transitions |
+| GET | /api/admin/analytics?days=7 | Completed-order trend, best sellers, category summaries and statuses |
+
+Admin product fields and order status changes are validated by the backend. Cost price is not returned to normal customers. Product deletion archives rather than permanently deleting a product referenced by historical order items.
+
+## Financial definitions and limits
+
+- **Completed order value** totals orders whose current status is completed. It is not proof that money was paid.
+- **Collected revenue** totals only orders marked payment_status=paid that are neither cancelled nor refunded. Demo checkout sets payment_status=not_collected, so this metric stays zero until a verified payment integration exists.
+- **Gross profit** is available only when paid completed order-item records exist and every eligible line has a recorded unit-cost snapshot: line total minus (unit cost multiplied by quantity). Otherwise the dashboard shows unavailable rather than guessing.
+- **Net profit** is not calculated. Taxes, payment fees, shipping expense and operating expenses are not tracked.
+
+To estimate profit, enter known unit costs in the admin product form before orders are placed so checkout snapshots the cost. Historical order items whose cost was unknown stay unknown unless separately corrected with an audit. The dashboard does not manufacture users, inventory, paid sales or profit.
+
+## Error behavior
+
+- 400: validation failure, including invalid size/quantity/product fields.
+- 401: no active session or invalid credentials.
+- 403: CSRF/Origin rejection, disabled account, or insufficient admin role/session.
+- 404: unknown API path, wrong HTTP method, or unavailable resource.
+- 409: duplicate email, empty cart, insufficient stock, or invalid order status transition.
+- 429: authentication/registration rate limit.
+- 503: optional Google sign-in attempted without GOOGLE_CLIENT_ID.
+
+Unknown API calls return error.code = ENDPOINT_NOT_FOUND with the actual method and path; the server logs only method/path, excluding query parameters.
+
+## Local demo setup
+
+Run in PowerShell from dia-web-app:
+
+```powershell
+npm.cmd install
+npm.cmd run check
+npm.cmd test
+npm.cmd run products:seed
+
+$env:ENABLE_DEMO_ACCOUNTS = "true"
+npm.cmd run demo:seed
+Remove-Item Env:ENABLE_DEMO_ACCOUNTS
+
+npm.cmd start
+```
+
+Demo seeding is opt-in and never overwrites existing accounts. Normal user: demo@example.com / DemoUser2026!. Administrator form at /admin: admin@example.com / AdminDemo2026!. These are public demonstration credentials; disable them with npm.cmd run demo:disable after your demonstration.
+
+## Deployment requirements
+
+render.yaml uses the Node/Express server and a persistent SQLite disk, with the branch set to main. After updating production code, ensure the actual Render service is connected to main and deploys the latest commit. Set DATABASE_PATH to persistent storage and APP_ORIGIN to the exact deployed HTTPS origin when needed. The Blueprint defaults to DATABASE_PATH=/var/data/dia.sqlite and uses Render's RENDER_EXTERNAL_URL for same-origin validation unless overridden.
+
+A running hosted service, its URL, environment variables and persistent data cannot be proven by repository inspection alone. After deployment, verify https://your-host/api/health, GET /api/products, user registration, and admin APIs against the actual URL.

@@ -527,3 +527,16 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .header-signout-button:focus-visible{outline:2px solid var(--cream);outline-offset:2px}
 @media(max-width:900px){.dia-auth-tabs{margin-bottom:18px}.dia-form-panel label{font-size:.57rem}.dia-auth-input{height:44px}.dia-auth-switch{margin-top:18px}.dia-trust{margin-top:20px}.store-header{gap:4px}.header-note{font-size:5.5px;letter-spacing:.09em}}
 @media(prefers-reduced-motion:reduce){.dia-spinner{animation:none!important}}
+
+
+/* Server-backed catalog filters and order history */
+.store-selectors{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 20px;align-items:center}
+.store-selectors label{display:flex;align-items:center;gap:8px;font-size:.7rem;color:#788372}
+.store-selectors select{max-width:100%;min-height:38px;border:1px solid #e0e5d9;border-radius:7px;padding:0 9px;background:#fffefa;color:#304333;font:inherit}
+.order-history{display:grid;gap:14px}
+.order-history-card{padding:17px;border:1px solid #e5e9df;border-radius:10px;background:#fffefa}
+.order-history-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.order-history-card>p{color:#818a7a;font-size:.72rem;line-height:1.6}
+.order-history-card ul{margin:12px 0;padding-left:18px;color:#5b6757;font-size:.78rem;line-height:1.8}
+.order-history-total{display:block;text-align:right;font-size:1rem;color:#253b2b}
+.bottom-nav .nav-item{min-width:0}

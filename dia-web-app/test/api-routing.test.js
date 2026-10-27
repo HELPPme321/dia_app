@@ -7,17 +7,36 @@ const path = require('node:path');
 const request = require('supertest');
 const { createDatabase } = require('../src/db');
 const { createApp } = require('../src/server');
+const { seedSampleProducts } = require('../scripts/seed-sample-products');
 
 const root = path.join(__dirname, '..');
 const serverSource = fs.readFileSync(path.join(root, 'src', 'server.js'), 'utf8');
+const storeRouteSource = fs.readFileSync(path.join(root, 'src', 'store-routes.js'), 'utf8');
+const routeSources = serverSource + '\n' + storeRouteSource;
 
 const routeContract = [
   ['GET', '/api/health'],
   ['GET', '/api/config'],
   ['GET', '/api/auth/csrf'],
   ['GET', '/api/auth/me'],
+  ['GET', '/api/categories'],
   ['GET', '/api/products'],
+  ['GET', '/api/products/:id'],
   ['GET', '/api/profile'],
+  ['GET', '/api/cart'],
+  ['POST', '/api/cart/items'],
+  ['PUT', '/api/cart/items'],
+  ['DELETE', '/api/cart/items'],
+  ['POST', '/api/orders'],
+  ['GET', '/api/orders'],
+  ['GET', '/api/orders/:id'],
+  ['GET', '/api/admin/products'],
+  ['POST', '/api/admin/products'],
+  ['PATCH', '/api/admin/products/:id'],
+  ['DELETE', '/api/admin/products/:id'],
+  ['GET', '/api/admin/orders'],
+  ['PATCH', '/api/admin/orders/:id'],
+  ['GET', '/api/admin/analytics'],
   ['POST', '/api/auth/register'],
   ['POST', '/api/auth/login'],
   ['POST', '/api/auth/google'],
@@ -31,7 +50,7 @@ const routeContract = [
 test('frontend API calls use methods and paths registered by Express', () => {
   const routePattern = /app\.(get|post|patch|put|delete)\(\s*['"]([^'"]+)['"]/g;
   const registered = new Set(
-    [...serverSource.matchAll(routePattern)].map((match) => `${match[1].toUpperCase()} ${match[2]}`)
+    [...routeSources.matchAll(routePattern)].map((match) => `${match[1].toUpperCase()} ${match[2]}`)
   );
   for (const [method, route] of routeContract) {
     assert.ok(registered.has(`${method} ${route}`), `Missing backend route: ${method} ${route}`);
@@ -45,9 +64,18 @@ test('frontend API calls use methods and paths registered by Express', () => {
     ['auth.js', "api('/api/auth/logout'"],
     ['auth.js', "api('/api/config'"],
     ['auth.js', "fetch('/api/auth/me'"],
+    ['script.js', "fetch('/api/products?'"],
+    ['script.js', "storeApi('/api/cart'"],
+    ['script.js', "storeApi('/api/cart/items'"],
+    ['script.js', "storeApi('/api/orders'"],
     ['admin.js', "api('/api/admin/stats'"],
     ['admin.js', "api('/api/admin/users?'"],
     ['admin.js', "api('/api/admin/users/'"],
+    ['admin.js', "api('/api/admin/products?'"],
+    ['admin.js', "api(id ? '/api/admin/products/'"],
+    ['admin.js', "api('/api/admin/orders?'"],
+    ['admin.js', "api('/api/admin/orders/'"],
+    ['admin.js', "api('/api/admin/analytics?days='"],
     ['admin.js', "api('/api/auth/admin-login'"],
     ['admin.js', "api('/api/auth/logout'"],
     ['admin.js', "fetch('/api/auth/me'"]
@@ -61,6 +89,7 @@ test('frontend API calls use methods and paths registered by Express', () => {
 test('health, config, products, and protected endpoints return their expected behavior', async () => {
   const db = createDatabase(':memory:');
   try {
+    seedSampleProducts({ db, logger: { log() {} } });
     const { app } = createApp({
       db,
       env: { NODE_ENV: 'test', APP_ORIGIN: 'http://localhost:3000' }

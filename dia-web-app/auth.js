@@ -8,7 +8,7 @@
   let busy = false;
   function message(text, success = false) { notice.textContent=text; notice.classList.toggle('success',success); notice.hidden=!text; }
   function showAuth(text) { auth.hidden=false; app.style.display='none'; if(text)message(text); }
-  function showApp(successMessage='') { auth.hidden=true; app.style.display=''; if(successMessage){const toast=$('#toast');toast.textContent=successMessage;toast.classList.add('is-visible');window.setTimeout(()=>toast.classList.remove('is-visible'),2800);} }
+  function showApp(successMessage='') { auth.hidden=true; app.style.display=''; document.dispatchEvent(new CustomEvent('dia:auth-success')); if(successMessage){const toast=$('#toast');toast.textContent=successMessage;toast.classList.add('is-visible');window.setTimeout(()=>toast.classList.remove('is-visible'),2800);} }
   function setMode(mode) {
     const signup=mode==='signup';
     $('#loginPanel').hidden=signup;$('#signupPanel').hidden=!signup;
@@ -64,7 +64,7 @@
     $('#showSignupLink').addEventListener('click',()=>setMode('signup'));$('#showLoginLink').addEventListener('click',()=>setMode('login'));
     $('#userLoginForm').addEventListener('submit',submitLogin);$('#userSignupForm').addEventListener('submit',submitSignup);
     $('#forgotPassword').addEventListener('click',()=>message('Password recovery email is not configured yet. Please contact the Dia+ administrator to regain access.'));
-    $('#userSignOut').addEventListener('click',async()=>{const button=$('#userSignOut');button.disabled=true;try{await api('/api/auth/logout',{method:'POST',body:'{}'});csrf='';await csrfToken();setMode('login');showAuth('You have signed out securely.');}catch(e){message(e.message||'Sign out failed. Please try again.');}finally{button.disabled=false;}});
+    $('#userSignOut').addEventListener('click',async()=>{const button=$('#userSignOut');button.disabled=true;try{await api('/api/auth/logout',{method:'POST',body:'{}'});document.dispatchEvent(new CustomEvent('dia:auth-logout'));csrf='';await csrfToken();setMode('login');showAuth('You have signed out securely.');}catch(e){message(e.message||'Sign out failed. Please try again.');}finally{button.disabled=false;}});
     passwordToggles();
     try{
       await csrfToken();const config=await api('/api/config'),me=await fetch('/api/auth/me',{credentials:'same-origin'});
