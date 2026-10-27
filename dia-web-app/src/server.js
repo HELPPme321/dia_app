@@ -183,7 +183,20 @@ function createApp(options = {}) {
     app.get('/'+file,(_req,res)=>res.sendFile(path.join(ROOT,file)));
   }
   app.use('/assets',express.static(path.join(ROOT,'assets'),{dotfiles:'deny',index:false}));
-  app.use('/api',(_req,res)=>error(res,404,'ENDPOINT_NOT_FOUND','The requested API endpoint was not found.'));
+  // Keep API misses distinguishable from authentication/database failures. The requested
+  // path deliberately excludes its query string so diagnostics never log search terms or tokens.
+  app.use('/api',(req,res)=>{
+    const requestPath=req.originalUrl.split('?')[0];
+    console.warn('[api-route-not-found]',req.method,requestPath);
+    return res.status(404).json({
+      error:{
+        code:'ENDPOINT_NOT_FOUND',
+        message:`No API endpoint is registered for ${req.method} ${requestPath}.`,
+        method:req.method,
+        path:requestPath
+      }
+    });
+  });
   app.use((_req,res)=>res.status(404).type('text/plain').send('Not found'));
   app.use((err,_req,res,_next)=>{if(res.headersSent)return;res.status(500).json({error:{code:'INTERNAL_ERROR',message:'Something went wrong. Please try again.'}});});
   return {app,db};
