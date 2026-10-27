@@ -4,7 +4,7 @@ services:
   - type: web
     name: dia-app-helppme321
     repo: https://github.com/HELPPme321/dia_app
-    branch: feature/render-deployment
+    branch: main
     runtime: node
     plan: starter
     region: singapore
