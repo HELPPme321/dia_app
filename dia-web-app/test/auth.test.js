@@ -17,15 +17,15 @@ async function register(a,email='member@example.net',password='A-strong-password
 async function login(a,email='member@example.net',password='A-strong-password-123',rememberMe=false){const c=await csrf(a);return a.post('/api/auth/login').set('x-csrf-token',c).send({email,password,rememberMe});}
 
 test('standard registration creates a hashed customer account without Google',async()=>{
-  const r=await register(agent,'Person@Example.net').expect(201);
+  const r=await register(agent,'Person@Example.net');assert.equal(r.status,201);
   assert.equal(r.body.user.role,'user');assert.equal(r.body.user.email,'person@example.net');assert.ok(r.body.csrfToken);
   const saved=db.prepare('SELECT password_hash,google_sub,role FROM users WHERE email=?').get('person@example.net');
   assert.notEqual(saved.password_hash,'A-strong-password-123');assert.ok(saved.password_hash.startsWith('$2'));assert.equal(saved.google_sub,null);assert.equal(saved.role,'user');
   await agent.get('/api/auth/me').expect(200);
 });
 test('registration normalizes email and prevents duplicate accounts',async()=>{
-  await register(agent,'Person@Example.net').expect(201);
-  const r=await register(agent,' person@example.NET ').expect(409);
+  assert.equal((await register(agent,'Person@Example.net')).status,201);
+  const r=await register(agent,' person@example.NET ');assert.equal(r.status,409);
   assert.equal(r.body.error.code,'EMAIL_ALREADY_REGISTERED');
   assert.equal(db.prepare('SELECT COUNT(*) count FROM users').get().count,1);
 });
@@ -37,21 +37,21 @@ test('registration rejects weak or mismatched passwords',async()=>{
   assert.equal(r.body.error.code,'PASSWORD_MISMATCH');
 });
 test('customer can log in with email and password and session persists',async()=>{
-  await register(agent).expect(201);
+  assert.equal((await register(agent)).status,201);
   const browser=request.agent(app);
-  const r=await login(browser).expect(200);
+  const r=await login(browser);assert.equal(r.status,200);
   assert.equal(r.body.user.role,'user');assert.equal(r.body.user.email,'member@example.net');
   const profile=await browser.get('/api/profile').expect(200);assert.equal(profile.body.user.email,'member@example.net');
   assert.equal((await browser.get('/api/auth/me').expect(200)).body.authenticated,true);
 });
 test('invalid customer credentials produce a generic error',async()=>{
-  await register(agent).expect(201);
+  assert.equal((await register(agent)).status,201);
   const browser=request.agent(app);
-  const r=await login(browser,'member@example.net','wrong-password-123').expect(401);
+  const r=await login(browser,'member@example.net','wrong-password-123');assert.equal(r.status,401);
   assert.equal(r.body.error.code,'INVALID_CREDENTIALS');assert.equal(r.body.error.message,'Email or password is incorrect.');
 });
 test('logout invalidates the customer session',async()=>{
-  await register(agent).expect(201);
+  assert.equal((await register(agent)).status,201);
   await agent.get('/api/profile').expect(200);
   const c=await csrf();
   await agent.post('/api/auth/logout').set('x-csrf-token',c).send({}).expect(200);
@@ -74,7 +74,7 @@ test('state-changing authentication endpoints require CSRF',async()=>{
   assert.equal(r.body.error.code,'CSRF_VALIDATION_FAILED');
 });
 test('customer session cannot access administrator API',async()=>{
-  await register(agent).expect(201);
+  assert.equal((await register(agent)).status,201);
   const r=await agent.get('/api/admin/stats').expect(403);
   assert.equal(r.body.error.code,'ADMIN_ACCESS_REQUIRED');
 });
