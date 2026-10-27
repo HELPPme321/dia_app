@@ -34,7 +34,8 @@ function createApp(options = {}) {
   const google = options.googleClient || new OAuth2Client();
   const prod = env.NODE_ENV === 'production';
   const cookieName = prod ? '__Host-dia.sid' : 'dia.sid';
-  const origin = (env.APP_ORIGIN || 'http://localhost:3000').replace(/\/$/,'');
+  // Render exposes the public HTTPS origin automatically; APP_ORIGIN overrides it for custom domains.
+  const origin = (env.APP_ORIGIN || env.RENDER_EXTERNAL_URL || 'http://localhost:3000').replace(/\/$/,'');
   app.disable('x-powered-by');
   app.set('trust proxy', prod ? 1 : false);
   app.use(helmet({crossOriginOpenerPolicy:{policy:'same-origin-allow-popups'},contentSecurityPolicy:{directives:{

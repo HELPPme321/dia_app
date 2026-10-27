@@ -8,6 +8,10 @@ This app is not a static-only website. The frontend uses relative same-origin AP
 
 From this `dia-web-app` directory, run `npm.cmd install`, `npm.cmd run check`, `npm.cmd test`, then `npm.cmd start`; open `http://localhost:3000`. For production, deploy this Node.js application to a Node-capable host that runs the Express server and serves the frontend and `/api/*` routes on the same origin. No provider-specific production deployment configuration is present in this repository. See [API_ROUTES.md](API_ROUTES.md) for the endpoint inventory, expected status codes, and production environment requirements.
 
+## Deploy online
+
+The repository includes a Render Blueprint. See [../DEPLOY_RENDER.md](../DEPLOY_RENDER.md) for production setup, persistent SQLite storage, initial administrator provisioning, optional Google OAuth, hosting costs, and updates. Render must run this Express server; static hosting and Live Server cannot provide the API. A free service with an ephemeral filesystem is not safe for real account data.
+
 ## Run locally
 
 Requirements: Node.js 20 or newer. In PowerShell:

@@ -1,0 +1,31 @@
+# Render Blueprint for the Dia+ Express app.
+# The persistent disk is intentional: the application stores user and session data in SQLite.
+services:
+  - type: web
+    name: dia-app-helppme321
+    repo: https://github.com/HELPPme321/dia_app
+    branch: feature/render-deployment
+    runtime: node
+    plan: starter
+    region: singapore
+    rootDir: dia-web-app
+    buildCommand: npm install && npm run check && npm test
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: checksPass
+    disk:
+      name: dia-sqlite-data
+      mountPath: /var/data
+      sizeGB: 1
+    initialDeployHook: npm run admin:provision
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_PATH
+        value: /var/data/dia.sqlite
+      # Render asks for these values during initial Blueprint setup.
+      # Remove ADMIN_PASSWORD from the service environment immediately after provisioning.
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false

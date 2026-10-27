@@ -22,3 +22,7 @@ The frontend and API must run together through the Express server. Static-only h
 The app supports normal email/password accounts, optional Google sign-in, and a separate administrator login. Configure Google credentials only if you want Google sign-in; standard registration and login work without Google. Password recovery email delivery is not configured yet, and checkout remains a demo.
 
 Do not commit .env or real credentials.
+
+## Deploy online
+
+The app requires its Express backend and persistent SQLite storage; do not deploy it as a static-only site. See [Render deployment instructions](DEPLOY_RENDER.md) and the [Render Blueprint](render.yaml). Render assigns the public URL after a service is created. The current SQLite database requires a paid persistent disk for durable hosted accounts; review the cost and authorize hosting resources before provisioning them.
