@@ -20,7 +20,8 @@ async function registerCustomer(agent, email = 'shopper@example.net') {
   const token = await csrf(agent);
   return agent.post('/api/auth/register')
     .set('x-csrf-token', token)
-    .send({ name: 'Test Shopper', email, password: customerPassword, confirmPassword: customerPassword });
+    .send({ name: 'Test Shopper', email, password: customerPassword, confirmPassword: customerPassword })
+    .expect(201);
 }
 async function adminSignIn(agent, db) {
   const now = new Date().toISOString();
@@ -64,7 +65,7 @@ test('customer signup, DB cart, stock-safe demo order, order history, and admin 
 
     // Signup uses the actual /api/auth/register endpoint and inserts a normal user record.
     const customer = request.agent(app);
-    const registered = await registerCustomer(customer).expect(201);
+    const registered = await registerCustomer(customer);
     assert.equal(registered.body.user.role, 'user');
     assert.equal(db.prepare('SELECT role FROM users WHERE email=?').get('shopper@example.net').role, 'user');
 
@@ -205,7 +206,7 @@ test('order checkout rejects invalid quantities, sizes, empty carts and unauthor
     await publicClient.get('/api/cart').expect(401);
     await publicClient.get('/api/orders').expect(401);
     const emptyUser = request.agent(app);
-    await registerCustomer(emptyUser).expect(201);
+    await registerCustomer(emptyUser);
     let token = await csrf(emptyUser);
     const empty = await emptyUser.post('/api/orders').set('x-csrf-token', token)
       .send({ customerName:'Test User', customerEmail:'shopper@example.net', customerAddress:'1 Demo Street', idempotencyKey:'empty-bag-test' })
