@@ -9,6 +9,7 @@ const { OAuth2Client } = require('google-auth-library');
 const { rateLimit } = require('express-rate-limit');
 const { createDatabase } = require('./db');
 const { registerStoreRoutes } = require('./store-routes');
+const APP_VERSION = require('../package.json').version;
 
 const ROOT = path.join(__dirname, '..');
 const TTL = 7 * 24 * 60 * 60 * 1000;
@@ -33,6 +34,11 @@ function createApp(options = {}) {
   const db = options.db || createDatabase(env.DATABASE_PATH);
   const google = options.googleClient || new OAuth2Client();
   const prod = env.NODE_ENV === 'production';
+  const runtime = Object.freeze({
+    service: 'dia-plus-api',
+    version: APP_VERSION,
+    buildCommit: env.RENDER_GIT_COMMIT || env.GITHUB_SHA || null
+  });
   const cookieName = prod ? '__Host-dia.sid' : 'dia.sid';
   // Render exposes the public HTTPS origin automatically; APP_ORIGIN overrides it for custom domains.
   const origin = (env.APP_ORIGIN || env.RENDER_EXTERNAL_URL || 'http://localhost:3000').replace(/\/$/,'');
@@ -72,7 +78,7 @@ function createApp(options = {}) {
   function admin(req,res,next){if(!req.user)return error(res,401,'AUTHENTICATION_REQUIRED','Administrator sign-in is required.');if(req.user.role!=='admin'||req.user.status!=='active'||req.session?.auth_method!=='admin')return error(res,403,'ADMIN_ACCESS_REQUIRED','Administrator password sign-in is required.');next();}
   const limiter=rateLimit({windowMs:15*60*1000,limit:12,standardHeaders:'draft-8',legacyHeaders:false,message:{error:{code:'TOO_MANY_ATTEMPTS',message:'Too many sign-in attempts. Please wait before trying again.'}}});
   const registrationLimiter=rateLimit({windowMs:60*60*1000,limit:8,standardHeaders:'draft-8',legacyHeaders:false,message:{error:{code:'REGISTRATION_RATE_LIMITED',message:'Too many registration attempts. Please wait and try again.'}}});
-  app.get('/api/health',(_req,res)=>res.json({status:'ok'}));
+  app.get('/api/health',(_req,res)=>res.json({status:'ok', ...runtime}));
   app.get('/api/config',(_req,res)=>res.json({googleClientId:env.GOOGLE_CLIENT_ID||''}));
   app.get('/api/auth/csrf',(req,res)=>{db.prepare('DELETE FROM sessions WHERE expires_at<=?').run(Date.now());if(req.session)return res.json({csrfToken:req.session.csrf_token});return res.json({csrfToken:startSession(req,res,null,TTL,'anonymous')});});
   app.get('/api/auth/me',(req,res)=>req.user?res.json({authenticated:true,user:safeUser(req.user),authMethod:req.session.auth_method}):res.status(401).json({authenticated:false,user:null,authMethod:null}));
@@ -244,6 +250,7 @@ function createApp(options = {}) {
     console.warn('[api-route-not-found]',req.method,requestPath);
     return res.status(404).json({
       error:{
+        ...runtime,
         code:'ENDPOINT_NOT_FOUND',
         message:`No API endpoint is registered for ${req.method} ${requestPath}.`,
         method:req.method,
@@ -255,5 +262,5 @@ function createApp(options = {}) {
   app.use((err,_req,res,_next)=>{if(res.headersSent)return;res.status(500).json({error:{code:'INTERNAL_ERROR',message:'Something went wrong. Please try again.'}});});
   return {app,db};
 }
-if(require.main===module){const {app}=createApp();const port=Number.parseInt(process.env.PORT,10)||3000;app.listen(port,()=>{console.log('Dia+ running on http://localhost:'+port);if(!process.env.GOOGLE_CLIENT_ID)console.warn('Configure GOOGLE_CLIENT_ID in .env to enable Google sign-in.');});}
+if(require.main===module){const {app}=createApp();const port=Number.parseInt(process.env.PORT,10)||3000;app.listen(port,()=>{console.log('Dia+ running on http://localhost:'+port);console.log('Dia+ API version '+APP_VERSION+' commit='+(process.env.RENDER_GIT_COMMIT||process.env.GITHUB_SHA||'local'));if(!process.env.GOOGLE_CLIENT_ID)console.warn('Configure GOOGLE_CLIENT_ID in .env to enable Google sign-in.');});}
 module.exports={createApp,safeUser};
