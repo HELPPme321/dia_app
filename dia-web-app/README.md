@@ -80,18 +80,14 @@ Official docs:
 
 ## Provision administrator access
 
-Set ADMIN_EMAIL and ADMIN_PASSWORD in the private .env. Use a unique password of at least 14 characters. Run:
-
-    npm.cmd run admin:provision
-
-Open http://localhost:3000/admin. Unset ADMIN_PASSWORD after provisioning. Do not commit .env or share administrator credentials. Google sign-in never grants admin access; administrator API calls require a server-verified admin role and an admin-password session.
+Run `npm.cmd run admin:provision` from `dia-web-app`. In an interactive terminal it securely prompts for an administrator email and a hidden password, then creates or intentionally promotes/resets that exact account in the configured SQLite database. You may instead set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in a private `.env` before running it; use a unique password of at least 14 characters and never commit `.env`. Open `http://localhost:3000/admin` and use those credentials. Remove `ADMIN_PASSWORD` from the environment after provisioning. Never share administrator credentials. Google sign-in never grants admin access; administrator API calls require a server-verified admin role and an admin-password session.
 
 ## Security
 
 - SQLite database by default at data/dia.sqlite; data and environment files are ignored by Git.
 - Random session IDs in HttpOnly cookies, only SHA-256 token digests in SQLite, server-side expiry, CSRF tokens for changing requests, rate limiting, Helmet headers, and same-origin request checks.
 - Password hashing with bcrypt, generic invalid-login responses, server-side role checks, self-lockout and last-active-admin safeguards.
-- Web serving is restricted to known frontend files and the assets directory; backend source and package metadata are not served as static files. A logged-in customer is also denied the administrator HTML route, not only its APIs.
+- Web serving is restricted to known frontend files and the assets directory; backend source and package metadata are not served as static files. The public administrator HTML route provides only the sign-in shell, including when a customer is already signed in, so the same browser can switch accounts. The administrator dashboard APIs remain protected by server-side role/status/auth-method checks.
 - Sessions persist across refreshes. Use the storefront sign-out control to invalidate the session.
 - The catalog is loaded from the SQLite products table. The account cart and demo orders are stored in SQLite and validated by server-side APIs; saved items remain browser-local. Checkout creates a pending demonstration order, deducts stock, and records order-item snapshots, but does not collect payment, dispatch shipping, or send email. Explicitly seed the pre-existing sample catalog using npm.cmd run products:seed. The sample entries are marked in the database, and their costs are unknown until supplied.
 
