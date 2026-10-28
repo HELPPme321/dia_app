@@ -493,7 +493,9 @@
       });
       $('#adminPassword').value = '';
       if (data.user?.role !== 'admin') throw new Error('Administrator access is required.');
-      showDashboard(data.user);
+      // Re-enter through Express so the dashboard only opens if the new admin cookie
+      // was persisted and the server's /admin authorization guard accepts the session.
+      window.location.replace('/admin');
     } catch (error) {
       notice($('#adminNotice'), error.message);
     } finally {
@@ -548,6 +550,34 @@
     orderSearchTimer = setTimeout(() => loadOrders().catch((error) => notice($('#dashNotice'), error.message)), 250);
   });
   $('#analyticsDays').addEventListener('change', () => loadAnalytics().catch((error) => notice($('#dashNotice'), error.message)));
+
+  const adminNavLinks = Array.from(document.querySelectorAll('[data-admin-nav]'));
+  adminNavLinks.forEach((link) => link.addEventListener('click', () => {
+    adminNavLinks.forEach((item) => {
+      const active = item === link;
+      item.classList.toggle('is-active', active);
+      if (active) item.setAttribute('aria-current', 'location');
+      else item.removeAttribute('aria-current');
+    });
+  }));
+  if ('IntersectionObserver' in window) {
+    const sections = adminNavLinks
+      .map((link) => document.getElementById(link.dataset.adminNav))
+      .filter(Boolean);
+    const sectionObserver = new IntersectionObserver((entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!visible) return;
+      adminNavLinks.forEach((link) => {
+        const active = link.dataset.adminNav === visible.target.id;
+        link.classList.toggle('is-active', active);
+        if (active) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+    }, { rootMargin: '-18% 0px -65% 0px', threshold: [0, 0.1, 0.25, 0.5] });
+    sections.forEach((section) => sectionObserver.observe(section));
+  }
 
   (async () => {
     try {
