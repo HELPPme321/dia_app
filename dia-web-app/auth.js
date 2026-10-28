@@ -88,7 +88,7 @@
     passwordToggles();
     try{
       await csrfToken();const config=await api('/api/config'),me=await fetch('/api/auth/me',{credentials:'same-origin'});
-      if(me.ok){const current=await me.json();if(current.user&&current.user.role==='admin'){window.location.href='/admin';return;}showApp();}else showAuth();
+      if(me.ok){const current=await me.json();if(current.user&&current.user.role==='admin'){if(current.authMethod==='admin'){window.location.replace('/admin');return;}showAuth('This account has administrator privileges. Sign in through the administrator portal to open the dashboard.');return;}showApp();}else showAuth();
       if(config.googleClientId){
         if(window.google&&window.google.accounts&&window.google.accounts.id)initializeGoogle(config.googleClientId);
         else{const script=document.createElement('script');script.src='https://accounts.google.com/gsi/client';script.async=true;script.defer=true;script.onload=()=>initializeGoogle(config.googleClientId);script.onerror=()=>{$('#googleButton').hidden=true;$('#googleDivider').hidden=true;$('#googleHint').hidden=false;};document.head.append(script);}

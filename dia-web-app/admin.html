@@ -3,111 +3,161 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#203326">
-  <title>Dia+ Admin</title>
+  <meta name="theme-color" content="#23372a">
+  <meta name="description" content="Dia+ secure administrator console for catalog, inventory, orders, and store analytics.">
+  <title>Dia+ · Studio Console</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/admin.css">
   <script src="/admin.js" defer></script>
 </head>
 <body class="admin-body">
 <main class="admin-wrap">
-  <section id="adminLogin" class="admin-login">
-    <a class="admin-brand" href="/">dia<span>+</span><small>ADMIN CONSOLE</small></a>
-    <p class="admin-kicker">SECURE ADMINISTRATION</p>
-    <h1>Good work<br><em>starts here.</em></h1>
-    <p class="admin-lede">Sign in with your administrator credentials to manage the Dia+ storefront.</p>
-    <div id="adminNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
-    <form id="adminLoginForm">
-      <label for="adminEmail">EMAIL ADDRESS</label>
-      <input id="adminEmail" type="email" autocomplete="username" required maxlength="254">
-      <label for="adminPassword">PASSWORD</label>
-      <div class="admin-password"><input id="adminPassword" type="password" autocomplete="current-password" required maxlength="1024"><button type="button" id="togglePassword" aria-label="Show password">Show</button></div>
-      <button id="adminSubmit" class="admin-primary" type="submit">Sign in securely <span>↗</span></button>
-    </form>
-    <a class="admin-back" href="/">← Back to Dia+</a>
+  <section id="adminLogin" class="admin-login" aria-labelledby="adminLoginTitle">
+    <div class="admin-login-visual">
+      <a class="admin-brand" href="/" aria-label="Dia+ storefront">dia<span>+</span><small>STUDIO CONSOLE</small></a>
+      <div class="admin-login-copy">
+        <p class="admin-kicker">THE BUSINESS OF GOOD DESIGN</p>
+        <h1>Make room<br>for <em>what matters.</em></h1>
+        <p>Your collections, customers, and orders — brought together in one considered workspace for Dia+.</p>
+      </div>
+      <div class="admin-login-stamp">DIA+ STUDIO <span>·</span> PRIVATE WORKSPACE <span>·</span> CEBU, PH</div>
+    </div>
+    <div class="admin-login-panel">
+      <div class="admin-login-card">
+        <a class="admin-brand admin-login-mobile-brand" href="/">dia<span>+</span><small>ADMIN ACCESS</small></a>
+        <p class="admin-kicker">SECURE ADMINISTRATION</p>
+        <h2 id="adminLoginTitle">Welcome<br><em>back.</em></h2>
+        <p class="admin-lede">Sign in with your provisioned administrator credentials to open the store dashboard.</p>
+        <div id="adminNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
+        <form id="adminLoginForm">
+          <label for="adminEmail">ADMINISTRATOR EMAIL</label>
+          <input id="adminEmail" name="email" type="email" autocomplete="username" placeholder="you@yourstore.com" required maxlength="254">
+          <label for="adminPassword">PASSWORD</label>
+          <div class="admin-password">
+            <input id="adminPassword" name="password" type="password" autocomplete="current-password" placeholder="Your admin password" required maxlength="1024">
+            <button type="button" id="togglePassword" aria-label="Show password">Show</button>
+          </div>
+          <button id="adminSubmit" class="admin-primary" type="submit">Enter the studio <span aria-hidden="true">↗</span></button>
+        </form>
+        <p class="admin-login-help">Admin access is provisioned by the server operator. If your account was never created, its role was changed, or the password was lost, run the private administrator setup command against the same database used by the running server.</p>
+        <a class="admin-back" href="/">← Back to the storefront</a>
+      </div>
+    </div>
   </section>
 
-  <section id="adminDashboard" hidden>
-    <header class="admin-top">
-      <a class="admin-brand" href="/">dia<span>+</span><small>ADMIN CONSOLE</small></a>
-      <div><span id="adminIdentity"></span><button id="adminLogout" class="admin-secondary" type="button">Sign out</button></div>
-    </header>
-    <div class="admin-hero">
-      <p class="admin-kicker">DIA+ / OVERVIEW</p>
-      <h1>Your store,<br><em>considered.</em></h1>
-      <p>Database-backed users, catalog, inventory, and order records.</p>
-    </div>
-    <div id="dashNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
-    <p class="admin-data-note">Demo checkout records orders but does not collect payment. “Collected revenue” remains zero until a verified payment integration records paid orders. Product costs are optional; gross profit is unavailable until recorded costs exist for all eligible sales.</p>
+  <section id="adminDashboard" class="admin-dashboard" hidden aria-label="Administrator dashboard">
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="/" aria-label="Dia+ home">dia<span>+</span><small>STUDIO CONSOLE</small></a>
+      <p class="admin-sidebar-label">WORKSPACE</p>
+      <nav class="admin-sidebar-nav" aria-label="Dashboard sections">
+        <a class="admin-nav-link is-active" href="#overview" data-admin-nav="overview"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</a>
+        <a class="admin-nav-link" href="#analytics" data-admin-nav="analytics"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 5-7"/></svg>Analytics</a>
+        <a class="admin-nav-link" href="#inventory" data-admin-nav="inventory"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12.1V21"/></svg>Products & inventory</a>
+        <a class="admin-nav-link" href="#orders" data-admin-nav="orders"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v17H5zM8 8h8M8 12h8M8 16h5"/></svg>Orders</a>
+        <a class="admin-nav-link" href="#users" data-admin-nav="users"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1M17 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 4v2"/></svg>Customers & access</a>
+      </nav>
+      <div class="admin-sidebar-bottom"><strong>Thoughtful by design.</strong>Private tools for the people behind the pieces.</div>
+    </aside>
 
-    <div class="admin-stats">
-      <article><span>Customer accounts</span><strong id="statUsers">—</strong></article>
-      <article><span>Active customers</span><strong id="statActive">—</strong></article>
-      <article><span>Administrators</span><strong id="statAdmins">—</strong></article>
-      <article><span>New users (7 days)</span><strong id="statNew">—</strong></article>
-      <article><span>Active products</span><strong id="statProducts">—</strong></article>
-      <article><span>In-stock products</span><strong id="statStock">—</strong></article>
-      <article><span>Low stock (1–5)</span><strong id="statLowStock">—</strong></article>
-      <article><span>Out of stock</span><strong id="statOutStock">—</strong></article>
-      <article><span>Total orders</span><strong id="statOrders">—</strong></article>
-      <article><span>Pending orders</span><strong id="statPending">—</strong></article>
-      <article><span>Completed order value</span><strong id="statCompletedValue">—</strong></article>
-      <article><span>Collected revenue</span><strong id="statRevenue">—</strong></article>
-      <article><span>Gross profit</span><strong id="statProfit">—</strong></article>
-    </div>
-
-    <section class="admin-users admin-panel">
-      <div class="admin-users-head"><div><p class="admin-kicker">SALES ANALYTICS</p><h2>Order performance.</h2></div><label class="admin-inline-filter" for="analyticsDays">Period <select id="analyticsDays"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">12 months</option></select></label></div>
-      <p class="admin-data-note">Chart uses actual completed-order totals, not proof of payment or collected revenue.</p>
-      <div id="salesChart" class="sales-chart"><p>No completed orders in this period.</p></div>
-      <div class="admin-analytics-grid">
-        <div><h3>Best-selling products</h3><div class="admin-table-scroll"><table><thead><tr><th>PRODUCT</th><th>UNITS</th><th>ORDER VALUE</th></tr></thead><tbody id="topProductRows"><tr><td colspan="3">Loading…</td></tr></tbody></table></div></div>
-        <div><h3>By category</h3><div class="admin-table-scroll"><table><thead><tr><th>CATEGORY</th><th>UNITS</th><th>ORDER VALUE</th></tr></thead><tbody id="categoryRows"><tr><td colspan="3">Loading…</td></tr></tbody></table></div></div>
-      </div>
-    </section>
-
-    <section class="admin-users admin-panel">
-      <div class="admin-users-head"><div><p class="admin-kicker">PRODUCT CATALOG</p><h2>Manage clothing.</h2></div><div class="admin-panel-actions"><select id="productStatusFilter" aria-label="Product status"><option value="">All statuses</option><option value="active">Active</option><option value="archived">Archived</option></select><button id="refreshProducts" class="admin-secondary" type="button">Refresh ↻</button></div></div>
-      <p class="admin-data-note">Sample products are marked in the database. Cost price is private to administrators and is never returned by the public catalog API.</p>
-      <form id="productForm" class="admin-product-form">
-        <input id="productId" type="hidden">
-        <label for="productName">Name</label><input id="productName" required minlength="2" maxlength="120">
-        <label for="productCategory">Category</label><input id="productCategory" required minlength="2" maxlength="60" placeholder="Tops, Pants, Dresses…">
-        <label for="productDescription">Description</label><textarea id="productDescription" rows="2" maxlength="3000"></textarea>
-        <div class="admin-form-row">
-          <div><label for="productPrice">Selling price (₱)</label><input id="productPrice" type="number" min="0" max="100000000" step="1" required></div>
-          <div><label for="productCostPrice">Unit cost (₱, optional)</label><input id="productCostPrice" type="number" min="0" max="100000000" step="1" placeholder="Unknown"></div>
-          <div><label for="productStock">Stock quantity</label><input id="productStock" type="number" min="0" max="1000000" step="1" required></div>
+    <div class="admin-main">
+      <header class="admin-top">
+        <a class="admin-brand" href="/">dia<span>+</span><small>STUDIO</small></a>
+        <div>
+          <div class="admin-identity-wrap">
+            <div class="admin-avatar" aria-hidden="true">D</div>
+            <div class="admin-top-meta"><strong id="adminIdentity">Administrator</strong><small>Authorized administrator</small></div>
+          </div>
+          <button id="adminLogout" class="admin-secondary" type="button">Sign out ↗</button>
         </div>
-        <div class="admin-form-row">
-          <div><label for="productColor">Color</label><input id="productColor" maxlength="80" required></div>
-          <div><label for="productSizes">Sizes (comma-separated)</label><input id="productSizes" maxlength="200" placeholder="S, M, L, XL" required></div>
-          <div><label for="productTag">Tag</label><input id="productTag" maxlength="40" value="New arrival" required></div>
+      </header>
+
+      <section id="overview" class="admin-overview" aria-labelledby="overviewTitle">
+        <div class="admin-hero">
+          <div>
+            <p class="admin-kicker">DIA+ / OVERVIEW</p>
+            <h1 id="overviewTitle">The studio<br><em>at a glance.</em></h1>
+            <p>Your store's live operational picture, based on the current SQLite database.</p>
+          </div>
+          <div class="admin-hero-aside"><span>Workspace status</span><strong>Connected to store data</strong><span>Inventory · orders · customer access</span></div>
         </div>
-        <label for="productImage">Image path or HTTPS URL</label><input id="productImage" maxlength="2048" value="/assets/dia-editorial.webp" required>
-        <label for="productImagePosition">Image position</label><input id="productImagePosition" maxlength="40" value="center center" required>
-        <div class="admin-form-actions"><button class="admin-primary" id="productSubmit" type="submit">Add product</button><button class="admin-secondary" id="productReset" type="button">Clear form</button></div>
-      </form>
-      <div id="productNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
-      <div class="admin-filters"><input id="productSearch" type="search" placeholder="Search products" aria-label="Search products"></div>
-      <div class="admin-table-scroll"><table><thead><tr><th>PRODUCT</th><th>PRICE</th><th>COST</th><th>STOCK</th><th>STATUS</th><th>ACTIONS</th></tr></thead><tbody id="productRows"><tr><td colspan="6">Loading products…</td></tr></tbody></table></div>
-    </section>
+        <div id="dashNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
+        <p class="admin-data-note">Financial integrity: completed order value is not proof of payment. Collected revenue counts only records marked paid; the current demo checkout does not collect payments. Gross profit appears only when the eligible paid order items have reliable cost snapshots.</p>
+        <div class="admin-stats" aria-label="Live store statistics">
+          <article><span>Customer accounts</span><strong id="statUsers">—</strong></article>
+          <article><span>Active customers</span><strong id="statActive">—</strong></article>
+          <article><span>Administrators</span><strong id="statAdmins">—</strong></article>
+          <article><span>New users · 7 days</span><strong id="statNew">—</strong></article>
+          <article><span>Active products</span><strong id="statProducts">—</strong></article>
+          <article><span>In-stock products</span><strong id="statStock">—</strong></article>
+          <article><span>Low stock · 1–5</span><strong id="statLowStock">—</strong></article>
+          <article><span>Out of stock</span><strong id="statOutStock">—</strong></article>
+          <article><span>Total orders</span><strong id="statOrders">—</strong></article>
+          <article><span>Pending orders</span><strong id="statPending">—</strong></article>
+          <article><span>Completed order value</span><strong id="statCompletedValue">—</strong></article>
+          <article><span>Collected revenue</span><strong id="statRevenue">—</strong></article>
+          <article><span>Gross profit</span><strong id="statProfit">—</strong></article>
+        </div>
+      </section>
 
-    <section class="admin-users admin-panel">
-      <div class="admin-users-head"><div><p class="admin-kicker">ORDER MANAGEMENT</p><h2>Customer orders.</h2></div><button id="refreshOrders" class="admin-secondary" type="button">Refresh ↻</button></div>
-      <div class="admin-filters"><input id="orderSearch" type="search" placeholder="Search order, name, or email" aria-label="Search orders"><select id="orderStatusFilter" aria-label="Filter by order status"><option value="">All statuses</option><option>pending</option><option>confirmed</option><option>processing</option><option>shipped</option><option>completed</option><option>cancelled</option><option>refunded</option></select></div>
-      <div class="admin-table-scroll"><table><thead><tr><th>ORDER</th><th>CUSTOMER</th><th>ITEMS</th><th>TOTAL</th><th>STATUS</th><th>UPDATE STATUS</th></tr></thead><tbody id="orderRows"><tr><td colspan="6">Loading orders…</td></tr></tbody></table></div>
-    </section>
+      <section id="analytics" class="admin-panel" aria-labelledby="analyticsTitle">
+        <div class="admin-panel-head">
+          <div><p class="admin-kicker">SALES ANALYTICS</p><h2 id="analyticsTitle">Order performance.</h2><p class="admin-panel-subtitle">Daily values use completed orders from the database, not proof of payment.</p></div>
+          <label class="admin-inline-filter" for="analyticsDays">Period <select id="analyticsDays"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">12 months</option></select></label>
+        </div>
+        <div id="salesChart" class="sales-chart"><p>No completed orders in this period.</p></div>
+        <div class="admin-analytics-grid">
+          <div><h3>Best-selling products</h3><div class="admin-table-scroll"><table><thead><tr><th>PRODUCT</th><th>UNITS</th><th>ORDER VALUE</th></tr></thead><tbody id="topProductRows"><tr><td colspan="3">Loading…</td></tr></tbody></table></div></div>
+          <div><h3>By category</h3><div class="admin-table-scroll"><table><thead><tr><th>CATEGORY</th><th>UNITS</th><th>ORDER VALUE</th></tr></thead><tbody id="categoryRows"><tr><td colspan="3">Loading…</td></tr></tbody></table></div></div>
+        </div>
+      </section>
 
-    <section class="admin-users admin-panel">
-      <div class="admin-users-head"><div><p class="admin-kicker">ACCOUNT DIRECTORY</p><h2>People in Dia+.</h2></div><button id="refreshUsers" class="admin-secondary" type="button">Refresh ↻</button></div>
-      <div class="admin-filters"><input id="userSearch" type="search" placeholder="Search name or email" aria-label="Search users"><select id="roleFilter" aria-label="Filter by role"><option value="">All roles</option><option value="user">Customer</option><option value="admin">Admin</option></select><select id="statusFilter" aria-label="Filter by status"><option value="">All statuses</option><option value="active">Active</option><option value="disabled">Disabled</option></select></div>
-      <div class="admin-table-scroll"><table><thead><tr><th>ACCOUNT</th><th>ROLE</th><th>STATUS</th><th>JOINED</th><th>ACTIONS</th></tr></thead><tbody id="userRows"><tr><td colspan="5">Sign in to load accounts.</td></tr></tbody></table></div>
-      <div class="admin-pagination"><span id="pageLabel">—</span><div><button id="prevPage" class="admin-secondary" type="button">Previous</button><button id="nextPage" class="admin-secondary" type="button">Next</button></div></div>
-    </section>
-    <footer class="admin-footer">DIA+ · LESS, BUT BETTER.</footer>
+      <section id="inventory" class="admin-panel" aria-labelledby="inventoryTitle">
+        <div class="admin-panel-head">
+          <div><p class="admin-kicker">PRODUCT CATALOG</p><h2 id="inventoryTitle">Manage clothing.</h2><p class="admin-panel-subtitle">Create, edit, restore, or archive catalog products and stock.</p></div>
+          <div class="admin-panel-actions"><select id="productStatusFilter" aria-label="Product status"><option value="">All statuses</option><option value="active">Active</option><option value="archived">Archived</option></select><button id="refreshProducts" class="admin-secondary" type="button">Refresh ↻</button></div>
+        </div>
+        <p class="admin-data-note">Sample products are marked in the database. Cost price is private to administrators and is never returned by the public catalog API.</p>
+        <form id="productForm" class="admin-product-form">
+          <input id="productId" type="hidden">
+          <label for="productName">Product name</label><input id="productName" required minlength="2" maxlength="120">
+          <label for="productCategory">Category</label><input id="productCategory" required minlength="2" maxlength="60" placeholder="Tops, Pants, Dresses…">
+          <label for="productDescription">Description</label><textarea id="productDescription" rows="2" maxlength="3000" placeholder="Describe the fit, feel, and details…"></textarea>
+          <div class="admin-form-row">
+            <div><label for="productPrice">Selling price (₱)</label><input id="productPrice" type="number" min="0" max="100000000" step="1" required></div>
+            <div><label for="productCostPrice">Unit cost (₱, optional)</label><input id="productCostPrice" type="number" min="0" max="100000000" step="1" placeholder="Unknown"></div>
+            <div><label for="productStock">Stock quantity</label><input id="productStock" type="number" min="0" max="1000000" step="1" required></div>
+          </div>
+          <div class="admin-form-row">
+            <div><label for="productColor">Color</label><input id="productColor" maxlength="80" required></div>
+            <div><label for="productSizes">Sizes (comma-separated)</label><input id="productSizes" maxlength="200" placeholder="S, M, L, XL" required></div>
+            <div><label for="productTag">Collection tag</label><input id="productTag" maxlength="40" value="New arrival" required></div>
+          </div>
+          <label for="productImage">Image path or HTTPS URL</label><input id="productImage" maxlength="2048" value="/assets/dia-editorial.webp" required>
+          <label for="productImagePosition">Image position</label><input id="productImagePosition" maxlength="40" value="center center" required>
+          <div class="admin-form-actions"><button class="admin-primary" id="productSubmit" type="submit">Add product</button><button class="admin-secondary" id="productReset" type="button">Clear form</button></div>
+        </form>
+        <div id="productNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
+        <div class="admin-filters"><input id="productSearch" type="search" placeholder="Search catalog" aria-label="Search products"></div>
+        <div class="admin-table-scroll"><table><thead><tr><th>PRODUCT</th><th>PRICE</th><th>COST</th><th>STOCK</th><th>STATUS</th><th>ACTIONS</th></tr></thead><tbody id="productRows"><tr><td colspan="6">Loading products…</td></tr></tbody></table></div>
+      </section>
+
+      <section id="orders" class="admin-panel" aria-labelledby="ordersTitle">
+        <div class="admin-panel-head"><div><p class="admin-kicker">ORDER MANAGEMENT</p><h2 id="ordersTitle">Customer orders.</h2><p class="admin-panel-subtitle">Update fulfillment status using the permitted order lifecycle.</p></div><button id="refreshOrders" class="admin-secondary" type="button">Refresh ↻</button></div>
+        <div class="admin-filters"><input id="orderSearch" type="search" placeholder="Search order, name, or email" aria-label="Search orders"><select id="orderStatusFilter" aria-label="Filter by order status"><option value="">All statuses</option><option>pending</option><option>confirmed</option><option>processing</option><option>shipped</option><option>completed</option><option>cancelled</option><option>refunded</option></select></div>
+        <div class="admin-table-scroll"><table><thead><tr><th>ORDER</th><th>CUSTOMER</th><th>ITEMS</th><th>TOTAL</th><th>STATUS</th><th>UPDATE STATUS</th></tr></thead><tbody id="orderRows"><tr><td colspan="6">Loading orders…</td></tr></tbody></table></div>
+      </section>
+
+      <section id="users" class="admin-panel" aria-labelledby="usersTitle">
+        <div class="admin-panel-head"><div><p class="admin-kicker">ACCOUNT DIRECTORY</p><h2 id="usersTitle">People in Dia+.</h2><p class="admin-panel-subtitle">Manage customer access, status, and verified administrator roles.</p></div><button id="refreshUsers" class="admin-secondary" type="button">Refresh ↻</button></div>
+        <div class="admin-filters"><input id="userSearch" type="search" placeholder="Search name or email" aria-label="Search users"><select id="roleFilter" aria-label="Filter by role"><option value="">All roles</option><option value="user">Customer</option><option value="admin">Admin</option></select><select id="statusFilter" aria-label="Filter by status"><option value="">All statuses</option><option value="active">Active</option><option value="disabled">Disabled</option></select></div>
+        <div class="admin-table-scroll"><table><thead><tr><th>ACCOUNT</th><th>ROLE</th><th>STATUS</th><th>JOINED</th><th>ACTIONS</th></tr></thead><tbody id="userRows"><tr><td colspan="5">Sign in to load accounts.</td></tr></tbody></table></div>
+        <div class="admin-pagination"><span id="pageLabel">—</span><div><button id="prevPage" class="admin-secondary" type="button">Previous</button><button id="nextPage" class="admin-secondary" type="button">Next</button></div></div>
+      </section>
+      <footer class="admin-footer">DIA+ STUDIO <span>·</span> LESS, BUT BETTER.</footer>
+    </div>
   </section>
 </main>
 <dialog id="adminConfirm"><form method="dialog"><p class="admin-kicker">CONFIRM ACCOUNT CHANGE</p><h2 id="confirmTitle">Review this change.</h2><p id="confirmText"></p><label id="promoteLabel" for="promotePassword" hidden>NEW ADMIN PASSWORD (14+ CHARACTERS)</label><input id="promotePassword" type="password" minlength="14" autocomplete="new-password" hidden><div class="admin-dialog-actions"><button id="cancelConfirm" class="admin-secondary" value="cancel">Cancel</button><button id="applyConfirm" class="admin-primary" value="confirm">Confirm change</button></div></form></dialog>

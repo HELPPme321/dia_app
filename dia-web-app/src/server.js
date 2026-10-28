@@ -223,7 +223,14 @@ function createApp(options = {}) {
     if(target.id===req.user.id&&((changes.role&&changes.role!=='admin')||changes.status==='disabled'))return error(res,400,'SELF_LOCKOUT_PREVENTED','You cannot remove your own administrator access.');
     if(target.role==='admin'&&target.status==='active'&&((changes.role&&changes.role!=='admin')||changes.status==='disabled')&&db.prepare("SELECT COUNT(*) count FROM users WHERE role='admin' AND status='active'").get().count<=1)return error(res,409,'LAST_ADMIN_PROTECTED','At least one active administrator must remain.');
     const sets=[],values=[];for(const [k,v] of Object.entries(changes)){sets.push(k+'=?');values.push(v);}if(passwordHash){sets.push('password_hash=?');values.push(passwordHash);}sets.push('updated_at=?');values.push(new Date().toISOString(),id);
-    db.prepare('UPDATE users SET '+sets.join(',')+' WHERE id=?').run(...values);
+    db.transaction(()=>{
+      db.prepare('UPDATE users SET '+sets.join(',')+' WHERE id=?').run(...values);
+      // Any role/status change invalidates old sessions. Admin privileges require a fresh
+      // password-authenticated admin session, not a stale customer or Google session.
+      if (promotion || Object.hasOwn(changes,'role') || changes.status==='disabled') {
+        db.prepare('DELETE FROM sessions WHERE user_id=?').run(id);
+      }
+    })();
     res.json({user:safeUser(db.prepare('SELECT id,email,name,picture_url,role,status,created_at,last_login_at FROM users WHERE id=?').get(id))});
   });
   registerStoreRoutes(app,{db,auth,admin,csrf});

@@ -584,6 +584,9 @@
         if (actionElement.dataset.page === "home") openHome();
         else navigate(actionElement.dataset.page);
         break;
+      case "skip-intro":
+        navigate("shop");
+        break;
       case "open-product":
         openProduct(productId);
         break;
@@ -714,6 +717,7 @@
   });
 
   document.getElementById("enterButton").addEventListener("click", () => navigate("shop"));
+  document.getElementById("skipIntro")?.addEventListener("click", () => navigate("shop"));
   document.getElementById("heroExplore").addEventListener("click", () => navigate("shop"));
 
   updateCartBadges();

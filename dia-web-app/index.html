@@ -10,9 +10,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <script src="script.js" defer></script>\n  <script src="auth.js" defer></script>
+  <link rel="stylesheet" href="premium.css" />
+  <script src="script.js" defer></script>
+  <script src="auth.js" defer></script>
 </head>
-<body>\n
+<body>
+
   <main id="diaAuth" class="dia-auth" hidden>
     <section class="dia-auth-art">
       <div class="dia-auth-brand"><span class="dia-mark">D<span>✦</span></span><span>dia<span>+</span></span></div>
@@ -92,6 +95,7 @@
           </button>
           <p class="hero-tagline">WEAR YOUR STORY</p>
           <p class="hero-edition">A quieter kind of statement.</p>
+          <button class="skip-intro" id="skipIntro" type="button">Skip intro <span aria-hidden="true">↗</span></button>
           <button class="enter-button" id="enterButton" aria-label="Enter the Dia+ store" title="Explore collection">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
           </button>

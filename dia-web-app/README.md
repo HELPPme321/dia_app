@@ -78,13 +78,22 @@ Official docs:
 - https://developers.google.com/identity
 - https://developers.google.com/identity/gsi/web/guides/verify-google-id-token
 
-## Provision administrator access
+## Provision or repair administrator access
 
-Set ADMIN_EMAIL and ADMIN_PASSWORD in the private .env. Use a unique password of at least 14 characters. Run:
+Administrator credentials are separate from customer credentials. The current admin login accepts only an active database account with `role='admin'`, a password hash, and an administrator-password session. No default admin account is created automatically.
+
+From the `dia-web-app` directory:
+
+    npm.cmd run admin:status
+    npm.cmd run admin:setup
+
+`admin:status` reports the exact SQLite database path and whether administrator accounts exist, without printing hashes. `admin:setup` prompts for an email and a new password (password input is masked). It creates the administrator if missing, or deliberately promotes the supplied existing email and resets its password. It revokes old sessions after a role/password repair so you must sign in again at http://localhost:3000/admin.
+
+For non-interactive setup, put a unique email in `ADMIN_EMAIL` and a password of at least 14 characters containing a letter and number in your private `.env`, then run:
 
     npm.cmd run admin:provision
 
-Open http://localhost:3000/admin. Unset ADMIN_PASSWORD after provisioning. Do not commit .env or share administrator credentials. Google sign-in never grants admin access; administrator API calls require a server-verified admin role and an admin-password session.
+Both commands use the configured `DATABASE_PATH` (by default `data/dia.sqlite`). Run them from the same service/container and database location used by the server; provisioning a different SQLite file will not repair the running site's account. Unset `ADMIN_PASSWORD` after provisioning. Do not commit `.env` or share admin credentials. Google sign-in never grants admin access; administrator APIs require an active administrator role and an admin-password session.
 
 ## Security
 
