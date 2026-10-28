@@ -141,7 +141,8 @@ test('promoting a customer to admin revokes their existing customer session',asy
     .send({role:'admin',adminPassword:password}).expect(200);
 
   await customerBrowser.get('/api/profile').expect(401);
-  await customerBrowser.get('/admin').expect(403);
+  const adminPage=await customerBrowser.get('/admin').expect(200);
+  assert.match(adminPage.text,/id="adminLogin"/);
   const nextCsrf=await csrf(customerBrowser);
   const adminLogin=await customerBrowser.post('/api/auth/admin-login').set('x-csrf-token',nextCsrf)
     .send({email:'promoted@example.com',password}).expect(200);
