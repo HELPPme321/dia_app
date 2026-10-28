@@ -5,6 +5,7 @@ const request=require('supertest');
 const bcrypt=require('bcryptjs');
 const {createDatabase}=require('../src/db');
 const {createApp}=require('../src/server');
+const {provisionAdmin}=require('../scripts/provision-admin');
 
 let db,agent,app;
 const valid='valid-google-id-token-sentinel-for-a-mocked-verifier';
@@ -78,6 +79,46 @@ test('customer session cannot access administrator API',async()=>{
   const r=await agent.get('/api/admin/stats').expect(403);
   assert.equal(r.body.error.code,'ADMIN_ACCESS_REQUIRED');
 });
+test('admin provisioning repairs an existing account and enables the protected dashboard',async()=>{
+  assert.equal((await register(agent,'admin.candidate@example.net','A-customer-password-123')).status,201);
+  await agent.get('/api/profile').expect(200);
+  const previousSessions=db.prepare("SELECT COUNT(*) count FROM sessions WHERE user_id=(SELECT id FROM users WHERE email=?)").get('admin.candidate@example.net').count;
+  assert.ok(previousSessions>0);
+
+  const password='A-new-admin-password-2026';
+  const result=await provisionAdmin({
+    db,
+    env:{ADMIN_EMAIL:' Admin.Candidate@Example.NET ',ADMIN_PASSWORD:password,DATABASE_PATH:':memory:'},
+    logger:{log(){}}
+  });
+  assert.equal(result.created,false);
+  const saved=db.prepare('SELECT role,status,password_hash,is_demo FROM users WHERE email=?').get('admin.candidate@example.net');
+  assert.equal(saved.role,'admin');
+  assert.equal(saved.status,'active');
+  assert.equal(saved.is_demo,0);
+  assert.notEqual(saved.password_hash,password);
+  assert.equal(await bcrypt.compare(password,saved.password_hash),true);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM sessions WHERE user_id=(SELECT id FROM users WHERE email=?)").get('admin.candidate@example.net').count,0);
+
+  const adminBrowser=request.agent(app);
+  const c=await csrf(adminBrowser);
+  const response=await adminBrowser.post('/api/auth/admin-login').set('x-csrf-token',c).send({email:'admin.candidate@example.net',password}).expect(200);
+  assert.equal(response.body.user.role,'admin');
+  assert.equal(response.body.authenticated,true);
+  const me=await adminBrowser.get('/api/auth/me').expect(200);
+  assert.equal(me.body.authMethod,'admin');
+  await adminBrowser.get('/admin').expect(200);
+  const stats=await adminBrowser.get('/api/admin/stats').expect(200);
+  assert.equal(stats.body.stats.administrators,1);
+});
+
+test('a signed-in customer cannot open the admin page',async()=>{
+  assert.equal((await register(agent,'store.customer@example.net')).status,201);
+  await agent.get('/admin').expect(403);
+  const stats=await agent.get('/api/admin/stats').expect(403);
+  assert.equal(stats.body.error.code,'ADMIN_ACCESS_REQUIRED');
+});
+
 test('admin session accesses live database statistics',async()=>{
   const password=admin(),c=await csrf();
   await agent.post('/api/auth/admin-login').set('x-csrf-token',c).send({email:'admin@example.com',password}).expect(200);
