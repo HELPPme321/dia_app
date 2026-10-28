@@ -7,7 +7,7 @@ const bcrypt = require('bcryptjs');
 const { createDatabase } = require('../src/db');
 
 const validEmail = (value) => typeof value === 'string' && value.length <= 254 &&
-  /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value);
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const validPassword = (value) => typeof value === 'string' &&
   value.length >= 14 && value.length <= 1024 && /[A-Za-z]/.test(value) && /[0-9]/.test(value);
 
