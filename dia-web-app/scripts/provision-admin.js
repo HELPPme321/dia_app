@@ -70,18 +70,17 @@ async function readTerminal(prompt, { secret = false } = {}) {
       input.removeListener('data', onData);
       input.setRawMode(false);
       input.pause();
-      process.stdout.write('\\n');
+      process.stdout.write('\n');
       if (error) reject(error); else resolve(value);
     };
     const onData = (chunk) => {
       for (const character of String(chunk)) {
-        if (character === '\\u0003') return finish(new Error('Administrator setup cancelled.'));
-        if (character === '\\r' || character === '\\n') return finish();
-        if (character === '\\u007f' || character === '\\b') {
+        if (character === '\u0003') return finish(new Error('Administrator setup cancelled.'));
+        if (character === '\r' || character === '\n') return finish();
+        if (character === '\u007f' || character === '\b') {
           if (value.length) {
             value = value.slice(0, -1);
-            if (secret) process.stdout.write('\\b \\b');
-            else process.stdout.write('\\b \\b');
+            process.stdout.write('\b \b');
           }
           continue;
         }
@@ -96,7 +95,6 @@ async function readTerminal(prompt, { secret = false } = {}) {
     input.on('data', onData);
   });
 }
-
 async function setupInteractively() {
   const email = (process.env.ADMIN_EMAIL || await readTerminal('Administrator email: ')).trim().toLowerCase();
   const password = process.env.ADMIN_PASSWORD || await readTerminal('New admin password (hidden, 14+ characters): ', { secret: true });
