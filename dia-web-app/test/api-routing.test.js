@@ -81,8 +81,8 @@ test('frontend API calls use methods and paths registered by Express', () => {
     ['admin.js', "api('/api/auth/logout'"],
     ['admin.js', "fetch('/api/auth/me'"]
   ];
-  for (const page of ['/login', '/admin/login', '/dashboard', '/forgot-password']) {
-    assert.ok(fs.existsSync(path.join(root, page.replace(/^\\//, '') + '.html')) || page === '/dashboard', 'Expected a page file for ' + page);
+  for (const file of ['login.html', 'admin-login.html', 'dashboard.html', 'forgot-password.html']) {
+    assert.ok(fs.existsSync(path.join(root, file)), 'Expected dedicated page file: ' + file);
   }
   for (const [file, expression] of frontendCalls) {
     const source = fs.readFileSync(path.join(root, file), 'utf8');
