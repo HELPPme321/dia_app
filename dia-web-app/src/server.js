@@ -121,7 +121,7 @@ function createApp(options = {}) {
     if(!validIdentifier(identifier)||typeof password!=='string'||password.length===0||password.length>1024)return error(res,400,'INVALID_INPUT','Enter your email or username and password.');
     const u=db.prepare('SELECT * FROM users WHERE email=? OR username=?').get(identifier,identifier);
     let ok=false;try{ok=await bcrypt.compare(password,u?.password_hash||DUMMY_HASH);}catch{}
-    if(!u||u.role!=='user'||u.status!=='active'||!u.password_hash||!ok)return error(res,401,'INVALID_CREDENTIALS','Email or username or password is incorrect.');
+    if(!u||u.role!=='user'||u.status!=='active'||!u.password_hash||!ok)return error(res,401,'INVALID_CREDENTIALS','Email, username, or password is incorrect.');
     const now=new Date().toISOString();db.prepare('UPDATE users SET last_login_at=?,updated_at=? WHERE id=?').run(now,now,u.id);
     const remember=req.body?.rememberMe===true,csrfToken=startSession(req,res,u.id,remember?30*DAY:DAY,'password');
     return res.json({authenticated:true,user:safeUser(db.prepare('SELECT * FROM users WHERE id=?').get(u.id)),csrfToken});
@@ -159,7 +159,7 @@ function createApp(options = {}) {
     if(!validIdentifier(identifier)||typeof password!=='string'||password.length===0||password.length>1024)return error(res,400,'INVALID_INPUT','Enter your email or username and password.');
     const u=db.prepare('SELECT * FROM users WHERE email=? OR username=?').get(identifier,identifier);
     let ok=false;try{ok=await bcrypt.compare(password,u?.password_hash||DUMMY_HASH);}catch{}
-    if(!u||u.role!=='admin'||u.status!=='active'||!u.password_hash||!ok)return error(res,401,'INVALID_ADMIN_CREDENTIALS','The email or username or password is incorrect.');
+    if(!u||u.role!=='admin'||u.status!=='active'||!u.password_hash||!ok)return error(res,401,'INVALID_ADMIN_CREDENTIALS','Email, username, or password is incorrect.');
     const now=new Date().toISOString();db.prepare('UPDATE users SET last_login_at=?,updated_at=? WHERE id=?').run(now,now,u.id);
     const csrfToken=startSession(req,res,u.id,ADMIN_TTL,'admin');
     return res.json({authenticated:true,user:safeUser(db.prepare('SELECT * FROM users WHERE id=?').get(u.id)),csrfToken});
