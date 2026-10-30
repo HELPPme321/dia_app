@@ -58,6 +58,7 @@ test('frontend API calls use methods and paths registered by Express', () => {
 
   const frontendCalls = [
     ['auth.js', "fetch('/api/auth/csrf'"],
+    ['js/auth.js', "fetch('/api/auth/csrf'"],
     ['login.js', "DiaAuth.request('/api/auth/login'"],
     ['login.js', "DiaAuth.request('/api/auth/register'"],
     ['login.js', "DiaAuth.request('/api/auth/google'"],
@@ -81,27 +82,35 @@ test('frontend API calls use methods and paths registered by Express', () => {
     ['admin.js', "api('/api/auth/logout'"],
     ['admin.js', "fetch('/api/auth/me'"]
   ];
-  for (const file of ['login.html', 'admin-login.html', 'dashboard.html', 'forgot-password.html']) {
+  for (const file of ['index.html', 'login.html', 'admin-login.html', 'dashboard.html', 'forgot.html', 'forgot-password.html']) {
     assert.ok(fs.existsSync(path.join(root, file)), 'Expected dedicated page file: ' + file);
   }
+  const homePage = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  assert.ok(homePage.includes('id="intro"'), 'The homepage must own the one-time brand intro');
+  assert.ok(homePage.includes('class="site-nav"'), 'Homepage must use normal website navigation');
+  assert.ok(homePage.includes('class="home-hero"'), 'Homepage must use the desktop fashion hero');
+  assert.ok(!homePage.includes('phone-frame'), 'Homepage must not be a phone mock-up');
   for (const file of ['login.html', 'admin-login.html']) {
     const page = fs.readFileSync(path.join(root, file), 'utf8');
-    assert.ok(page.includes('<script src="/auth.js" defer></script>'), file + ' must load shared authentication helpers');
-    assert.ok(page.includes('id="diaIntro"'), file + ' must include the skippable Dia brand intro');
-    assert.ok(page.includes('class="fashion-art"'), file + ' must include the inline SVG fashion showcase');
+    assert.ok(page.includes('<script src="/js/auth.js" defer></script>'), file + ' must load shared auth helpers');
+    assert.ok(page.includes('<script src="/js/fashion.js" defer></script>'), file + ' must load the fashion showcase');
+    assert.ok(page.includes('data-fashion-stage'), file + ' must include the animated fashion showcase');
+    assert.ok(!page.includes('id="intro"'), file + ' must not replay the homepage intro');
   }
-  const sharedAuth = fs.readFileSync(path.join(root, 'auth.js'), 'utf8');
-  assert.ok(sharedAuth.includes('function playBrandIntro()'), 'Shared auth must control the once-per-session intro');
-  assert.ok(sharedAuth.includes('sessionStorage'), 'Intro display must be tracked per session');
+  const sharedAuth = fs.readFileSync(path.join(root, 'js', 'auth.js'), 'utf8');
+  assert.ok(sharedAuth.includes('function getCsrf()'), 'Shared auth must handle CSRF tokens');
+  assert.ok(sharedAuth.includes('function redirectByRole('), 'Shared auth must provide role-aware redirects');
+  const fashionSource = fs.readFileSync(path.join(root, 'js', 'fashion.js'), 'utf8');
+  assert.ok(fashionSource.includes('sessionStorage'), 'Homepage intro must be tracked once per session');
+  assert.ok(fashionSource.includes('function playHomeIntro()'), 'Homepage fashion script must initialize the intro');
+  const newCss = fs.readFileSync(path.join(root, 'css', 'style.css'), 'utf8');
+  assert.ok(newCss.includes('#0B3D2E'), 'Dia website should use the requested emerald brand color');
+  assert.ok(newCss.includes('#D4AF37'), 'Dia website should use the requested champagne gold');
+  assert.ok(newCss.includes('introMaster'), 'Homepage intro must use a coordinated master timeline');
+  assert.ok(newCss.includes('prefers-reduced-motion'), 'All page motion must respect user preferences');
   const loginSource = fs.readFileSync(path.join(root, 'login.js'), 'utf8');
   assert.ok(loginSource.includes("DiaAuth.request('/api/auth/admin-login'"), 'Role-aware login must support administrator sign-in');
   assert.ok(loginSource.includes("error.code !== 'INVALID_CREDENTIALS'"), 'Admin fallback must only run after normal invalid credentials');
-  const introCss = fs.readFileSync(path.join(root, 'auth-pages.css'), 'utf8');
-  assert.ok(introCss.includes('diaIntroMaster var(--dia-intro-duration)'), 'Intro must use its shared 4.5-second master timeline');
-  assert.ok(introCss.includes('prefers-reduced-motion:reduce'), 'Intro must respect reduced-motion preferences');
-  assert.ok(introCss.includes('#0B3D2E'), 'Dia login should use the requested emerald brand color');
-  assert.ok(introCss.includes('#D4AF37'), 'Dia login should use the requested champagne-gold accent');
-  assert.ok(introCss.includes('fashion-piece'), 'Fashion illustrations should have individually animated fashion pieces');
   for (const [file, expression] of frontendCalls) {
     const source = fs.readFileSync(path.join(root, file), 'utf8');
     assert.ok(source.includes(expression), `Expected API call not found in ${file}: ${expression}`);
