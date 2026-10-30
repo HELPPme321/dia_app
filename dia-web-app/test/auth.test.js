@@ -224,21 +224,34 @@ test('empty identifiers and wrong username passwords are handled safely',async()
   assert.match(wrong.body.error.message,/username.*password/i);
 });
 
-test('dedicated sign-in, forgot-password, and dashboard pages have separate route guards',async()=>{
+test('desktop Dia pages are separate, role-aware, and protected',async()=>{
+  await agent.get('/').expect(200).expect((r)=>{
+    assert.match(r.text,/id="intro"/);
+    assert.match(r.text,/class="site-nav"/);
+    assert.match(r.text,/class="home-hero"/);
+    assert.match(r.text,/id="collections"/);
+    assert.match(r.text,/id="about"/);
+    assert.doesNotMatch(r.text,/phone-frame|appScreen|bottom-nav/);
+  });
   await agent.get('/login').expect(200).expect((r)=>{
     assert.match(r.text,/id="loginForm"/);
     assert.match(r.text,/id="loginIdentifier"[^>]*type="text"/);
-    assert.match(r.text,/id="diaIntro"/);
-    assert.match(r.text,/Cormorant\+Garamond/);
+    assert.match(r.text,/placeholder="Email or Username"/);
+    assert.match(r.text,/href="\\/forgot.html"/);
+    assert.doesNotMatch(r.text,/id="intro"|id="diaIntro"/);
+    assert.match(r.text,/src="\\/js\\/fashion.js"/);
+    assert.match(r.text,/src="\\/js\\/auth.js"/);
   });
   await agent.get('/admin/login').expect(200).expect((r)=>{
     assert.match(r.text,/id="adminLoginForm"/);
     assert.match(r.text,/id="adminIdentifier"[^>]*type="text"/);
     assert.match(r.text,/Email or Username/);
     assert.match(r.text,/placeholder="Email or Username"/);
-    assert.match(r.text,/id="diaIntro"/);
+    assert.match(r.text,/milesadmin/);
+    assert.doesNotMatch(r.text,/id="intro"|id="diaIntro"/);
   });
-  await agent.get('/forgot-password').expect(200).expect((r)=>assert.match(r.text,/Password reset emails are not configured/));
+  await agent.get('/forgot.html').expect(200).expect((r)=>assert.match(r.text,/password-reset email service has not been configured/));
+  await agent.get('/forgot-password').expect(200).expect((r)=>assert.match(r.text,/password-reset email service has not been configured/));
   await agent.get('/dashboard').expect(302).expect('Location','/login');
   const password=admin();
   const c=await csrf();
