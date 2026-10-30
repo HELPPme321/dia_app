@@ -68,7 +68,7 @@ button:disabled { cursor: wait; opacity: .7; }
 .fashion-stage:before { content: ""; position: absolute; z-index: -1; inset: 0; opacity: .13; pointer-events: none; background: repeating-linear-gradient(108deg,transparent 0 6px,rgba(233,211,166,.16) 7px,transparent 8px 17px),repeating-linear-gradient(5deg,transparent 0 14px,rgba(0,0,0,.16) 15px,transparent 16px 28px); }
 .fashion-stage:after { content: ""; position: absolute; z-index: -1; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center,transparent 28%,rgba(0,0,0,.2) 100%); }
 .fashion-stage .stage-caption { position: absolute; right: 29px; bottom: 25px; z-index: 2; color: rgba(233,211,166,.68); font-size: .57rem; font-weight: 800; letter-spacing: .19em; }
-.fashion-item { position: absolute; left: var(--x); top: var(--y); width: var(--size); opacity: 0; transform-origin: center; animation: fashionAppear .9s var(--ease) var(--appear) forwards, fashionFloat var(--duration) ease-in-out calc(var(--appear) + 1.1s) infinite alternate; }
+.fashion-item { position: absolute; left: var(--x); top: var(--y); width: var(--size); opacity: 0; transform-origin: center; animation: fashionAppear .9s var(--ease) var(--appear) forwards, fashionFloat var(--duration) ease-in-out calc(var(--draw) + 2.35s) infinite alternate; }
 .fashion-item svg { display: block; width: 100%; overflow: visible; fill: none; stroke: var(--gold); stroke-width: 1.35; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 7px rgba(212,175,55,.12)); }
 .fashion-item path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: fashionDraw 2.3s var(--ease) var(--draw) forwards; }
 .fashion-item:nth-child(even) { animation-name: fashionAppear, fashionFloatReverse; }
@@ -299,8 +299,8 @@ button:disabled { cursor: wait; opacity: .7; }
   *,*::before,*::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
   .fashion-item { opacity: .9; transform: none; animation: none !important; }
   .fashion-item path { stroke-dashoffset: 0; animation: none !important; }
-  #intro.is-running { animation: introReduced .9s ease both; }
+  #intro.is-running { animation: introReduced .9s ease both; animation-duration: .9s !important; }
   #intro.is-running .intro-glow,#intro.is-running svg,#intro.is-running .skip { display: none; }
-  #intro.is-running .intro-word { position: relative; margin: 0; opacity: 1; transform: none; animation: reducedWord .9s ease both; letter-spacing: .12em; }
+  #intro.is-running .intro-word { position: relative; margin: 0; opacity: 1; transform: none; animation: reducedWord .9s ease both; animation-duration: .9s !important; letter-spacing: .12em; }
   #intro.is-running .intro-word:after { display: none; }
 }
