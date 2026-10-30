@@ -203,7 +203,7 @@ test('legacy non-email admin identifier remains usable through email-column fall
   const response=await browser.post('/api/auth/admin-login').set('x-csrf-token',c)
     .send({identifier:'MILESADMIN',password}).expect(200);
   assert.equal(response.body.user.role,'admin');
-  assert.equal(response.body.user.username,'milesadmin');
+  assert.equal(response.body.user.email,'milesadmin');
   await browser.get('/admin').expect(200);
 });
 
