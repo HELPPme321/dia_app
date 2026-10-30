@@ -57,12 +57,12 @@ test('frontend API calls use methods and paths registered by Express', () => {
   }
 
   const frontendCalls = [
-    ['login.js', "fetch('/api/auth/csrf'"],
+    ['auth.js', "fetch('/api/auth/csrf'"],
     ['login.js', "DiaAuth.request('/api/auth/login'"],
     ['login.js', "DiaAuth.request('/api/auth/register'"],
     ['login.js', "DiaAuth.request('/api/auth/google'"],
-    ['login.js', "fetch('/api/config'"],
-    ['login.js', "fetch('/api/auth/me'"],
+    ['login.js', "DiaAuth.request('/api/config'"],
+    ['login.js', "DiaAuth.request('/api/auth/me'"],
     ['dashboard.js', "api('/api/auth/logout'"],
     ['dashboard.js', "api('/api/orders'"],
     ['script.js', "fetch('/api/products?'"],
