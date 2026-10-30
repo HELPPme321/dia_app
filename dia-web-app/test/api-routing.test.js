@@ -92,8 +92,8 @@ test('frontend API calls use methods and paths registered by Express', () => {
   assert.ok(!homePage.includes('phone-frame'), 'Homepage must not be a phone mock-up');
   for (const file of ['login.html', 'admin-login.html']) {
     const page = fs.readFileSync(path.join(root, file), 'utf8');
-    assert.ok(page.includes('<script src="/js/auth.js" defer></script>'), file + ' must load shared auth helpers');
-    assert.ok(page.includes('<script src="/js/fashion.js" defer></script>'), file + ' must load the fashion showcase');
+    assert.ok(page.includes('<script src="/js/auth.js?v=dia-desktop-20261030" defer></script>'), file + ' must load shared auth helpers');
+    assert.ok(page.includes('<script src="/js/fashion.js?v=dia-desktop-20261030" defer></script>'), file + ' must load the fashion showcase');
     assert.ok(page.includes('data-fashion-stage'), file + ' must include the animated fashion showcase');
     assert.ok(!page.includes('id="intro"'), file + ' must not replay the homepage intro');
   }
