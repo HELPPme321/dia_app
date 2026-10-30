@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#23372a">
-  <meta name="description" content="Dia+ secure administrator console for catalog, inventory, orders, and store analytics.">
-  <title>Dia+ · Studio Console</title>
+  <meta name="description" content="Dia secure administrator console for catalog, inventory, orders, and store analytics.">
+  <title>Dia · Studio Console</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
 <main class="admin-wrap">
   <section id="adminDashboard" class="admin-dashboard" aria-label="Administrator dashboard">
     <aside class="admin-sidebar">
-      <a class="admin-brand" href="/" aria-label="Dia+ home">dia<span>+</span><small>STUDIO CONSOLE</small></a>
+      <a class="admin-brand" href="/" aria-label="Dia home">Dia<span>✳</span><small>STUDIO CONSOLE</small></a>
       <p class="admin-sidebar-label">WORKSPACE</p>
       <nav class="admin-sidebar-nav" aria-label="Dashboard sections">
         <a class="admin-nav-link is-active" href="#overview" data-admin-nav="overview"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</a>
@@ -31,7 +31,7 @@
 
     <div class="admin-main">
       <header class="admin-top">
-        <a class="admin-brand" href="/">dia<span>+</span><small>STUDIO</small></a>
+        <a class="admin-brand" href="/">Dia<span>✳</span><small>STUDIO</small></a>
         <div>
           <div class="admin-identity-wrap">
             <div class="admin-avatar" aria-hidden="true">D</div>
@@ -118,7 +118,7 @@
       </section>
 
       <section id="users" class="admin-panel" aria-labelledby="usersTitle">
-        <div class="admin-panel-head"><div><p class="admin-kicker">ACCOUNT DIRECTORY</p><h2 id="usersTitle">People in Dia+.</h2><p class="admin-panel-subtitle">Manage customer access, status, and verified administrator roles.</p></div><button id="refreshUsers" class="admin-secondary" type="button">Refresh ↻</button></div>
+        <div class="admin-panel-head"><div><p class="admin-kicker">ACCOUNT DIRECTORY</p><h2 id="usersTitle">People in Dia.</h2><p class="admin-panel-subtitle">Manage customer access, status, and verified administrator roles.</p></div><button id="refreshUsers" class="admin-secondary" type="button">Refresh ↻</button></div>
         <div class="admin-filters"><input id="userSearch" type="search" placeholder="Search name or email" aria-label="Search users"><select id="roleFilter" aria-label="Filter by role"><option value="">All roles</option><option value="user">Customer</option><option value="admin">Admin</option></select><select id="statusFilter" aria-label="Filter by status"><option value="">All statuses</option><option value="active">Active</option><option value="disabled">Disabled</option></select></div>
         <div class="admin-table-scroll"><table><thead><tr><th>ACCOUNT</th><th>ROLE</th><th>STATUS</th><th>JOINED</th><th>ACTIONS</th></tr></thead><tbody id="userRows"><tr><td colspan="5">Sign in to load accounts.</td></tr></tbody></table></div>
         <div class="admin-pagination"><span id="pageLabel">—</span><div><button id="prevPage" class="admin-secondary" type="button">Previous</button><button id="nextPage" class="admin-secondary" type="button">Next</button></div></div>
