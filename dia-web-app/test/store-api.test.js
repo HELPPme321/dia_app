@@ -20,7 +20,7 @@ async function registerCustomer(agent, email = 'shopper@example.net') {
   const token = await csrf(agent);
   return agent.post('/api/auth/register')
     .set('x-csrf-token', token)
-    .send({ name: 'Test Shopper', email, password: customerPassword, confirmPassword: customerPassword })
+    .send({ name: 'Test Shopper', username: email.split('@')[0], email, password: customerPassword, confirmPassword: customerPassword })
     .expect(201);
 }
 async function adminSignIn(agent, db) {
