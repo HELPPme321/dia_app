@@ -271,6 +271,7 @@ test('desktop Dia pages are separate, role-aware, and protected',async()=>{
     assert.doesNotMatch(r.text,/id="intro"|id="diaIntro"/);
     assert.ok(r.text.includes('<script src="/js/fashion.js?v=dia-desktop-20261030" defer></script>'));
     assert.ok(r.text.includes('<script src="/js/auth.js?v=dia-desktop-20261030" defer></script>'));
+    assert.ok(r.text.includes('<script src="/login.js?v=dia-username-unrestricted-20261031" defer></script>'));
   });
   await agent.get('/admin/login').expect(200).expect((r)=>{
     assert.match(r.text,/id="adminLoginForm"/);
