@@ -6,6 +6,7 @@ const crypto = require('node:crypto');
 const dotenv = require('dotenv');
 const { seedDemoAccounts } = require('./seed-demo-accounts');
 const { seedSampleProducts } = require('./seed-sample-products');
+const { createDatabase } = require('../src/db');
 
 const DEFAULTS = Object.freeze({
   DEMO_USER_EMAIL: 'demo@example.test',
@@ -60,8 +61,16 @@ async function setupDemoEnvironment({
   try { fs.chmodSync(envPath, 0o600); } catch { /* Windows ACLs are controlled by the current user. */ }
 
   const demoEnv = { ...runtimeEnv, ...existing, ...config, NODE_ENV: 'development', ENABLE_DEMO_ACCOUNTS: 'true' };
-  seedSampleProducts({ db, logger });
-  const result = await seedDemoAccounts({ env: demoEnv, db, logger });
+  const database = db || createDatabase(demoEnv.DATABASE_PATH);
+  const ownsDatabase = !db;
+  let result;
+  try {
+    // Seed both the catalog and demo accounts against the same .env-configured database.
+    seedSampleProducts({ db: database, logger });
+    result = await seedDemoAccounts({ env: demoEnv, db: database, logger });
+  } finally {
+    if (ownsDatabase) database.close();
+  }
   logger.log('Local Dia demo setup is complete. Generated passwords are stored only in your ignored .env file.');
   logger.log('Customer account: ' + config.DEMO_USER_EMAIL);
   logger.log('Demo administrator: ' + config.DEMO_ADMIN_EMAIL);
