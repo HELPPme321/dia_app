@@ -10,15 +10,19 @@
     element.hidden = !text;
   }
 
-  function failureMessage(response, data, method, url) {
+  function apiFailureMessage(response, data, method, url, fallback) {
+    let requestPath = String(url).split('?')[0];
+    try { requestPath = new URL(url, window.location.href).pathname; } catch {}
     const messageText = data?.error?.message || data?.message;
     if (messageText) return messageText;
     if (response.status === 404) {
-      let route = url;
-      try { route = new URL(url, window.location.href).pathname; } catch {}
-      return 'The sign-in service could not be reached (' + method + ' ' + route + '). Open Dia through its Express server and check that it is up to date.';
+      return 'The request ' + method + ' ' + requestPath + ' returned HTTP 404. Verify this page is served by the current Dia Express application.';
     }
-    return 'The request could not be completed. Please try again.';
+    return fallback || 'The request could not be completed. Please try again.';
+  }
+
+  function failureMessage(response, data, method, url) {
+    return apiFailureMessage(response, data, method, url, 'The request could not be completed. Please try again.');
   }
 
   async function getCsrf() {
