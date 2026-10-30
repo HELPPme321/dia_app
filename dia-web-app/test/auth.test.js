@@ -227,6 +227,7 @@ test('empty identifiers and wrong username passwords are handled safely',async()
 test('dedicated sign-in, forgot-password, and dashboard pages have separate route guards',async()=>{
   await agent.get('/login').expect(200).expect((r)=>assert.match(r.text,/id="loginForm"/));
   await agent.get('/admin/login').expect(200).expect((r)=>assert.match(r.text,/id="adminLoginForm"/));
+  await agent.get('/admin/login').expect(200).expect((r)=>assert.match(r.text,/Email or Username/));
   await agent.get('/forgot-password').expect(200).expect((r)=>assert.match(r.text,/Password reset emails are not configured/));
   await agent.get('/dashboard').expect(302).expect('Location','/login');
   const password=admin();
