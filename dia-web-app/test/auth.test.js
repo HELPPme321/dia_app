@@ -14,7 +14,7 @@ beforeEach(()=>{db=createDatabase(':memory:');({app}=createApp({db,env:{NODE_ENV
 afterEach(()=>db.close());
 async function csrf(a=agent){return(await a.get('/api/auth/csrf').expect(200)).body.csrfToken;}
 function admin(){const now=new Date().toISOString(),password='a-unique-test-password-at-least-14';db.prepare("INSERT INTO users(id,email,password_hash,name,role,status,created_at,updated_at) VALUES('admin-1','admin@example.com',?,'Admin','admin','active',?,?)").run(bcrypt.hashSync(password,4),now,now);return password;}
-async function register(a,email='member@example.net',password='A-strong-password-123',username){const c=await csrf(a);return a.post('/api/auth/register').set('x-csrf-token',c).send({name:'Dia Customer',email,password,confirmPassword:password,username});}
+async function register(a,email='member@example.net',password='A-strong-password-123',username='dia-customer'){const c=await csrf(a);return a.post('/api/auth/register').set('x-csrf-token',c).send({name:'Dia Customer',email,password,confirmPassword:password,username});}
 async function login(a,email='member@example.net',password='A-strong-password-123',rememberMe=false){const c=await csrf(a);return a.post('/api/auth/login').set('x-csrf-token',c).send({email,password,rememberMe});}
 
 test('standard registration creates a hashed customer account without Google',async()=>{
@@ -32,9 +32,9 @@ test('registration normalizes email and prevents duplicate accounts',async()=>{
 });
 test('registration rejects weak or mismatched passwords',async()=>{
   const c=await csrf();
-  await agent.post('/api/auth/register').set('x-csrf-token',c).send({name:'Dia Customer',email:'weak@example.net',password:'short1',confirmPassword:'short1'}).expect(400);
+  await agent.post('/api/auth/register').set('x-csrf-token',c).send({name:'Dia Customer',username:'weak-member',email:'weak@example.net',password:'short1',confirmPassword:'short1'}).expect(400);
   const c2=await csrf();
-  const r=await agent.post('/api/auth/register').set('x-csrf-token',c2).send({name:'Dia Customer',email:'mismatch@example.net',password:'A-strong-password-123',confirmPassword:'A-different-password-456'}).expect(400);
+  const r=await agent.post('/api/auth/register').set('x-csrf-token',c2).send({name:'Dia Customer',username:'mismatch-member',email:'mismatch@example.net',password:'A-strong-password-123',confirmPassword:'A-different-password-456'}).expect(400);
   assert.equal(r.body.error.code,'PASSWORD_MISMATCH');
 });
 test('customer can log in with email and password and session persists',async()=>{
@@ -165,15 +165,41 @@ test('admin user list returns pagination metadata without password hashes',async
   const r=await agent.get('/api/admin/users?page=1&limit=10').expect(200);
   assert.equal(r.body.pagination.total,2);assert.ok(r.body.users.every(u=>!Object.hasOwn(u,'password_hash')));
 });
-test('customer can sign in using a case-insensitive username',async()=>{
-  await register(agent,'customer-username@example.net','A-strong-password-123','Miles.Shop');
+test('customer can sign up and sign in with a trimmed, case-insensitive username without an @ sign',async()=>{
+  const created=await register(agent,'customer-username@example.net','A-strong-password-123','  MilesAdmin  ');
+  assert.equal(created.status,201);
+  assert.equal(created.body.user.username,'milesadmin');
+  const duplicate=await register(agent,'another-customer@example.net','A-strong-password-123','MILESADMIN');
+  assert.equal(duplicate.status,409);
+  assert.equal(duplicate.body.error.code,'USERNAME_ALREADY_TAKEN');
   const browser=request.agent(app);
   const c=await csrf(browser);
   const response=await browser.post('/api/auth/login').set('x-csrf-token',c)
-    .send({identifier:'MILES.SHOP',password:'A-strong-password-123'}).expect(200);
+    .send({identifier:'MILESADMIN',password:'A-strong-password-123'}).expect(200);
   assert.equal(response.body.user.role,'user');
-  assert.equal(response.body.user.username,'miles.shop');
+  assert.equal(response.body.user.username,'milesadmin');
   await browser.get('/api/profile').expect(200);
+});
+
+test('registration requires a non-empty username after trimming',async()=>{
+  const empty=await register(agent,'empty-username@example.net','A-strong-password-123','   ');
+  assert.equal(empty.status,400);
+  assert.equal(empty.body.error.code,'USERNAME_REQUIRED');
+  assert.equal(empty.body.error.message,'Enter a username.');
+  assert.equal(db.prepare('SELECT COUNT(*) count FROM users').get().count,0);
+});
+
+test('customer usernames accept punctuation and are not limited by username length',async()=>{
+  const rawUsername=('Long username with punctuation! @ # $ % ^ & * ( ) - _ + = / ? <tag> ').repeat(8);
+  const expected=rawUsername.trim().toLowerCase();
+  const created=await register(agent,'long-username@example.net','A-strong-password-123','  '+rawUsername+'  ');
+  assert.equal(created.status,201);
+  assert.equal(created.body.user.username,expected);
+  const browser=request.agent(app);
+  const c=await csrf(browser);
+  const response=await browser.post('/api/auth/login').set('x-csrf-token',c)
+    .send({identifier:expected.toUpperCase(),password:'A-strong-password-123'}).expect(200);
+  assert.equal(response.body.user.username,expected);
 });
 
 test('administrator can sign in using the milesadmin username and reaches the dashboard',async()=>{
@@ -237,6 +263,10 @@ test('desktop Dia pages are separate, role-aware, and protected',async()=>{
     assert.match(r.text,/id="loginForm"/);
     assert.match(r.text,/id="loginIdentifier"[^>]*type="text"/);
     assert.match(r.text,/placeholder="Email or Username"/);
+    const signupUsername=r.text.match(/<input[^>]*id="registerUsername"[^>]*>/)?.[0]||'';
+    assert.ok(signupUsername.includes('required'));
+    assert.doesNotMatch(signupUsername,/maxlength|minlength|pattern/i);
+    assert.doesNotMatch(r.text,/3–32 characters|Use 3–32 characters|\(optional\)/i);
     assert.ok(r.text.includes('href="/forgot.html"'));
     assert.doesNotMatch(r.text,/id="intro"|id="diaIntro"/);
     assert.ok(r.text.includes('<script src="/js/fashion.js?v=dia-desktop-20261030" defer></script>'));
@@ -245,6 +275,7 @@ test('desktop Dia pages are separate, role-aware, and protected',async()=>{
   await agent.get('/admin/login').expect(200).expect((r)=>{
     assert.match(r.text,/id="adminLoginForm"/);
     assert.match(r.text,/id="adminIdentifier"[^>]*type="text"/);
+    assert.doesNotMatch(r.text,/id="adminIdentifier"[^>]*maxlength=/i);
     assert.match(r.text,/Email or Username/);
     assert.match(r.text,/placeholder="Email or Username"/);
     assert.match(r.text,/milesadmin/);
