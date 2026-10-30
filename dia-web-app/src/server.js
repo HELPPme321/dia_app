@@ -269,9 +269,16 @@ function createApp(options = {}) {
   app.get('/dashboard',customerDashboardPage);
   app.get('/forgot.html',(_req,res)=>res.sendFile(path.join(ROOT,'forgot.html')));
   app.get('/forgot-password',(_req,res)=>res.sendFile(path.join(ROOT,'forgot.html')));
-  app.get('/css/style.css',(_req,res)=>res.sendFile(path.join(ROOT,'css','style.css')));
-  app.get('/js/auth.js',(_req,res)=>res.sendFile(path.join(ROOT,'js','auth.js')));
-  app.get('/js/fashion.js',(_req,res)=>res.sendFile(path.join(ROOT,'js','fashion.js')));
+  // Serve the shared frontend assets from dedicated directories so every
+  // stylesheet and script remains reachable in local and hosted environments.
+  app.use('/css',express.static(path.join(ROOT,'css'),{
+    dotfiles:'deny',index:false,fallthrough:true,maxAge:0,
+    setHeaders(res){res.setHeader('Cache-Control','no-cache');}
+  }));
+  app.use('/js',express.static(path.join(ROOT,'js'),{
+    dotfiles:'deny',index:false,fallthrough:true,maxAge:0,
+    setHeaders(res){res.setHeader('Cache-Control','no-cache');}
+  }));
   app.get('/',(_req,res)=>res.sendFile(path.join(ROOT,'index.html')));
   for(const file of ['index.html','style.css','premium.css','script.js','admin.css','admin.js','auth-pages.css','auth.js','login.js','admin-login.js','dashboard.js']){
     app.get('/'+file,(_req,res)=>res.sendFile(path.join(ROOT,file)));
