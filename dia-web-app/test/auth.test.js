@@ -254,9 +254,16 @@ test('desktop Dia pages are separate, role-aware, and protected',async()=>{
   await agent.get('/').expect(200).expect((r)=>{
     assert.match(r.text,/id="intro"/);
     assert.match(r.text,/class="site-nav"/);
-    assert.match(r.text,/class="home-hero"/);
+    assert.match(r.text,/class="editorial-hero"/);
+    assert.match(r.text,/id="featuredProducts"/);
+    assert.match(r.text,/id="bagDrawer"/);
+    assert.match(r.text,/id="introSound"/);
+    assert.match(r.text,/id="skipIntro"/);
+    assert.ok(r.text.includes('<script src="/js/fashion.js?v=dia-cinematic-login-20261031" defer></script>'));
+    assert.ok(r.text.includes('<script src="/js/storefront.js?v=dia-live-storefront-20261031" defer></script>'));
+    assert.ok(r.text.includes("images.unsplash.com"));
     assert.match(r.text,/id="collections"/);
-    assert.match(r.text,/id="about"/);
+    assert.match(r.text,/id="story"/);
     assert.doesNotMatch(r.text,/phone-frame|appScreen|bottom-nav/);
   });
   await agent.get('/login').expect(200).expect((r)=>{
@@ -269,9 +276,8 @@ test('desktop Dia pages are separate, role-aware, and protected',async()=>{
     assert.doesNotMatch(r.text,/3–32 characters|Use 3–32 characters|\(optional\)/i);
     assert.ok(r.text.includes('href="/forgot.html"'));
     assert.doesNotMatch(r.text,/id="intro"|id="diaIntro"/);
-    assert.ok(r.text.includes('<script src="/js/fashion.js?v=dia-desktop-20261030" defer></script>'));
-    assert.ok(r.text.includes('<script src="/js/auth.js?v=dia-desktop-20261030" defer></script>'));
-    assert.ok(r.text.includes('<script src="/login.js?v=dia-username-unrestricted-20261031" defer></script>'));
+    assert.ok(r.text.includes('<script src="/js/auth.js?v=dia-cinematic-login-20261031" defer></script>'));
+    assert.ok(r.text.includes('<script src="/login.js?v=dia-post-login-cinematic-20261031" defer></script>'));
   });
   await agent.get('/admin/login').expect(200).expect((r)=>{
     assert.match(r.text,/id="adminLoginForm"/);
@@ -289,6 +295,22 @@ test('desktop Dia pages are separate, role-aware, and protected',async()=>{
   const c=await csrf();
   await agent.post('/api/auth/admin-login').set('x-csrf-token',c).send({email:'admin@example.com',password}).expect(200);
   await agent.get('/dashboard').expect(302).expect('Location','/admin');
+});
+
+test('successful customer login arms a one-shot cinematic redirect while returning sessions do not',async()=>{
+  const fs=require('node:fs'),path=require('node:path');
+  const authJs=fs.readFileSync(path.join(__dirname,'../js/auth.js'),'utf8');
+  const loginJs=fs.readFileSync(path.join(__dirname,'../login.js'),'utf8');
+  const fashionJs=fs.readFileSync(path.join(__dirname,'../js/fashion.js'),'utf8');
+  assert.match(authJs,/options\.cinematic === true/);
+  assert.match(authJs,/sessionStorage\.setItem\('dia_intro_pending','1'\)/);
+  assert.match(authJs,/window\.location\.replace\('\/'\)/);
+  assert.match(loginJs,/redirectByRole\(result\.user, result\.authMethod, \{ cinematic: true \}\)/);
+  assert.match(fashionJs,/getItem\('dia_intro_pending'\)/);
+  assert.match(fashionJs,/removeItem\('dia_intro_pending'\)/);
+  assert.match(fashionJs,/skip\.addEventListener\('click', finish/);
+  assert.match(fashionJs,/sound\.addEventListener\('click'/);
+  assert.match(fashionJs,/prefers-reduced-motion/);
 });
 
 test('normal password login cannot be used for administrator accounts',async()=>{

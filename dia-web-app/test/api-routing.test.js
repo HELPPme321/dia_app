@@ -66,6 +66,12 @@ test('frontend API calls use methods and paths registered by Express', () => {
     ['login.js', "DiaAuth.request('/api/auth/me'"],
     ['dashboard.js', "api('/api/auth/logout'"],
     ['dashboard.js', "api('/api/orders'"],
+    ['js/storefront.js', "fetch('/api/products'"],
+    ['js/storefront.js', "api('/api/cart'"],
+    ['js/storefront.js', "api('/api/cart/items'"],
+    ['js/storefront.js', "api('/api/orders'"],
+    ['js/storefront.js', "api('/api/auth/me'"],
+    ['js/storefront.js', "api('/api/auth/logout'"],
     ['script.js', "fetch('/api/products?'"],
     ['script.js', "storeApi('/api/cart'"],
     ['script.js', "storeApi('/api/cart/items'"],
@@ -88,12 +94,17 @@ test('frontend API calls use methods and paths registered by Express', () => {
   const homePage = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   assert.ok(homePage.includes('id="intro"'), 'The homepage must own the one-time brand intro');
   assert.ok(homePage.includes('class="site-nav"'), 'Homepage must use normal website navigation');
-  assert.ok(homePage.includes('class="home-hero"'), 'Homepage must use the desktop fashion hero');
+  assert.ok(homePage.includes('class="editorial-hero"'), 'Homepage must use the editorial fashion hero');
+  assert.ok(homePage.includes('id="featuredProducts"'), 'Homepage must render the live product catalog');
+  assert.ok(homePage.includes('id="bagDrawer"'), 'Homepage must include the account-backed bag');
+  assert.ok(homePage.includes('id="introSound"') && homePage.includes('id="skipIntro"'), 'Cinematic intro must expose sound and skip controls');
   assert.ok(!homePage.includes('phone-frame'), 'Homepage must not be a phone mock-up');
   for (const file of ['login.html', 'admin-login.html']) {
     const page = fs.readFileSync(path.join(root, file), 'utf8');
-    assert.ok(page.includes('<script src="/js/auth.js?v=dia-desktop-20261030" defer></script>'), file + ' must load shared auth helpers');
-    assert.ok(page.includes('<script src="/js/fashion.js?v=dia-desktop-20261030" defer></script>'), file + ' must load the fashion showcase');
+    const authVersion = file === 'login.html' ? 'dia-cinematic-login-20261031' : 'dia-desktop-20261030';
+    const fashionVersion = file === 'login.html' ? 'dia-cinematic-login-20261031' : 'dia-desktop-20261030';
+    assert.ok(page.includes('<script src="/js/auth.js?v=' + authVersion + '" defer></script>'), file + ' must load shared auth helpers');
+    assert.ok(page.includes('<script src="/js/fashion.js?v=' + fashionVersion + '" defer></script>'), file + ' must load the fashion showcase');
     assert.ok(page.includes('data-fashion-stage'), file + ' must include the animated fashion showcase');
     assert.ok(!page.includes('id="intro"'), file + ' must not replay the homepage intro');
   }
@@ -200,26 +211,30 @@ test('frontend asset URLs deliver Dia design rules and shared scripts', async ()
   try {
     const { app } = createApp({ db, env: { NODE_ENV: 'test', APP_ORIGIN: 'http://localhost:3000' } });
     const home = await request(app).get('/').expect(200);
-    assert.ok(home.text.includes('href="/css/style.css?v=dia-desktop-20261030"'));
-    assert.ok(home.text.includes('src="/js/fashion.js?v=dia-desktop-20261030"'));
+    assert.ok(home.text.includes('href="/css/style.css?v=dia-editorial-storefront-20261031"'));
+    assert.ok(home.text.includes('src="/js/fashion.js?v=dia-cinematic-login-20261031"'));
+    assert.ok(home.text.includes('src="/js/storefront.js?v=dia-live-storefront-20261031"'));
 
     const login = await request(app).get('/login').expect(200);
     assert.ok(login.text.includes('href="/css/style.css?v=dia-desktop-20261030"'));
-    assert.ok(login.text.includes('src="/js/auth.js?v=dia-desktop-20261030"'));
-    assert.ok(login.text.includes('src="/js/fashion.js?v=dia-desktop-20261030"'));
+    assert.ok(login.text.includes('src="/js/auth.js?v=dia-cinematic-login-20261031"'));
+    assert.ok(login.text.includes('src="/js/fashion.js?v=dia-cinematic-login-20261031"'));
 
-    const css = await request(app).get('/css/style.css?v=dia-desktop-20261030').expect(200);
+    const css = await request(app).get('/css/style.css?v=dia-editorial-storefront-20261031').expect(200);
     assert.ok(css.headers['content-type'].includes('text/css'));
-    for (const selector of ['.site-nav', '.home-hero', '.fashion-stage', '.login-layout', '.login-card', '.gold-button']) {
+    for (const selector of ['.site-nav', '.editorial-hero', '.product-grid', '.product-visual', '.fashion-stage', '.login-layout', '.login-card', '.gold-button']) {
       assert.ok(css.text.includes(selector), 'Dia stylesheet must include ' + selector);
     }
 
-    const auth = await request(app).get('/js/auth.js?v=dia-desktop-20261030').expect(200);
+    const auth = await request(app).get('/js/auth.js?v=dia-cinematic-login-20261031').expect(200);
     assert.ok(auth.headers['content-type'].includes('javascript'));
     assert.ok(auth.text.includes('function getCsrf()'));
-    const fashion = await request(app).get('/js/fashion.js?v=dia-desktop-20261030').expect(200);
+    const fashion = await request(app).get('/js/fashion.js?v=dia-cinematic-login-20261031').expect(200);
     assert.ok(fashion.headers['content-type'].includes('javascript'));
     assert.ok(fashion.text.includes('function playHomeIntro()'));
+    const storefront = await request(app).get('/js/storefront.js?v=dia-live-storefront-20261031').expect(200);
+    assert.ok(storefront.headers['content-type'].includes('javascript'));
+    assert.ok(storefront.text.includes("api('/api/cart')"));
     await request(app).get('/forgot.html').expect(200);
     await request(app).get('/forgot-password').expect(200);
   } finally {

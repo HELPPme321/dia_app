@@ -6,8 +6,8 @@ const bcrypt = require('bcryptjs');
 const { createDatabase } = require('../src/db');
 
 const DEFAULTS = Object.freeze({
-  user: Object.freeze({ email: 'demo@example.com', password: 'DemoUser2026!', name: 'Demo User', role: 'user' }),
-  admin: Object.freeze({ email: 'admin@example.com', password: 'AdminDemo2026!', name: 'Demo Administrator', role: 'admin' })
+  user: Object.freeze({ email: 'demo@example.test', name: 'Demo User', role: 'user' }),
+  admin: Object.freeze({ email: 'admin.demo@example.test', name: 'Demo Administrator', role: 'admin' })
 });
 const validEmail = (value) => value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const validPassword = (value, minimum) => typeof value === 'string' &&
@@ -16,9 +16,10 @@ const validPassword = (value, minimum) => typeof value === 'string' &&
 function accountFromEnvironment(env, kind) {
   const base = DEFAULTS[kind];
   const email = String(env[kind === 'user' ? 'DEMO_USER_EMAIL' : 'DEMO_ADMIN_EMAIL'] || base.email).trim().toLowerCase();
-  const password = env[kind === 'user' ? 'DEMO_USER_PASSWORD' : 'DEMO_ADMIN_PASSWORD'] || base.password;
+  const password = env[kind === 'user' ? 'DEMO_USER_PASSWORD' : 'DEMO_ADMIN_PASSWORD'] || '';
   const minimum = kind === 'admin' ? 14 : 12;
   if (!validEmail(email)) throw new Error('Invalid demo ' + kind + ' email address.');
+  if (!password) throw new Error('Set DEMO_' + kind.toUpperCase() + '_PASSWORD in your private .env or run npm.cmd run demo:setup.');
   if (!validPassword(password, minimum)) throw new Error('Demo ' + kind + ' password must be at least ' + minimum + ' characters and include a letter and a number.');
   return { ...base, email, password };
 }
@@ -32,6 +33,10 @@ async function seedDemoAccounts({ env = process.env, db: suppliedDb, logger = co
   if (env.ENABLE_DEMO_ACCOUNTS !== 'true') {
     logger.log('Demo account seeding is disabled. Set ENABLE_DEMO_ACCOUNTS=true and run this command only in an intentional demonstration environment.');
     return { enabled: false, created: [], skipped: [], conflicts: [] };
+  }
+
+  if (!['development', 'test'].includes(env.NODE_ENV)) {
+    throw new Error('Demo account seeding is allowed only when NODE_ENV=development (or test for automated tests).');
   }
 
   const accounts = [accountFromEnvironment(env, 'user'), accountFromEnvironment(env, 'admin')];

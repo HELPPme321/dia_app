@@ -4,100 +4,162 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#06261C">
-  <meta name="description" content="Dia — dresses, shoes, bags and eyewear, made to be worn for years.">
-  <title>Dia · Fashion</title>
+  <meta name="description" content="Dia — considered fashion, expressive essentials and a wardrobe made to stay.">
+  <title>Dia — Wear the Moment</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=dia-desktop-20261030">
-  <script src="/js/fashion.js?v=dia-desktop-20261030" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=dia-editorial-storefront-20261031">
+  <script src="/js/fashion.js?v=dia-cinematic-login-20261031" defer></script>
+  <script src="/js/storefront.js?v=dia-live-storefront-20261031" defer></script>
 </head>
 <body class="home-page">
-  <div id="intro" aria-hidden="true" hidden>
-    <div class="intro-glow" aria-hidden="true"></div>
-    <svg viewBox="0 0 200 200" aria-hidden="true" focusable="false">
-      <g class="intro-drawing">
-        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z"/>
-        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(45 100 100)"/>
-        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(90 100 100)"/>
-        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(135 100 100)"/>
-        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(180 100 100)"/>
-        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(225 100 100)"/>
-        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(270 100 100)"/>
-        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(315 100 100)"/>
-        <circle pathLength="1" cx="100" cy="100" r="13"/>
-        <path pathLength="1" d="M100 113 C98 134 102 151 100 181"/>
-        <path pathLength="1" d="M100 146 C80 133 64 141 56 157 C74 160 91 158 100 146Z"/>
-        <path pathLength="1" d="M100 157 C119 145 136 150 145 166 C127 168 111 166 100 157Z"/>
-      </g>
-      <g class="intro-petals">
-        <path class="intro-petal" style="--petal-delay:0ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z"/>
-        <g transform="rotate(45 100 100)"><path class="intro-petal" style="--petal-delay:70ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z"/></g>
-        <g transform="rotate(90 100 100)"><path class="intro-petal" style="--petal-delay:140ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z"/></g>
-        <g transform="rotate(135 100 100)"><path class="intro-petal" style="--petal-delay:210ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z"/></g>
-        <g transform="rotate(180 100 100)"><path class="intro-petal" style="--petal-delay:280ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z"/></g>
-        <g transform="rotate(225 100 100)"><path class="intro-petal" style="--petal-delay:350ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z"/></g>
-        <g transform="rotate(270 100 100)"><path class="intro-petal" style="--petal-delay:420ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z"/></g>
-        <g transform="rotate(315 100 100)"><path class="intro-petal" style="--petal-delay:490ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z"/></g>
-      </g>
-      <circle class="intro-center" cx="100" cy="100" r="4" fill="currentColor"/>
-    </svg>
-    <div class="intro-word shim">Dia</div>
-    <button class="skip" type="button" tabindex="-1">Skip intro <span aria-hidden="true">↗</span></button>
+  <div id="intro" class="cinematic-intro" aria-hidden="true" hidden>
+    <div class="intro-scenes" aria-hidden="true">
+      <figure class="intro-scene is-active" data-intro-scene>
+        <img src="https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=1800&amp;q=82" alt="" fetchpriority="high">
+        <figcaption>01 / THE ART OF ARRIVING</figcaption>
+      </figure>
+      <figure class="intro-scene" data-intro-scene>
+        <img src="https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=1800&amp;q=82" alt="">
+        <figcaption>02 / FORM MEETS FEELING</figcaption>
+      </figure>
+      <figure class="intro-scene" data-intro-scene>
+        <img src="https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=1800&amp;q=82" alt="">
+        <figcaption>03 / MADE TO MOVE WITH YOU</figcaption>
+      </figure>
+    </div>
+    <div class="intro-grain" aria-hidden="true"></div>
+    <div class="intro-topline"><span>DIA / CEBU</span><span>THE NEW CHAPTER · 2026</span></div>
+    <div class="intro-lockup">
+      <span class="intro-overline">A PERSONAL EXPRESSION OF STYLE</span>
+      <p class="intro-wordmark">Dia<span>®</span></p>
+      <p class="intro-tagline">Wear the moment.</p>
+    </div>
+    <div class="intro-controls">
+      <button id="introSound" class="intro-control" type="button" aria-pressed="false">Sound off</button>
+      <button id="skipIntro" class="intro-control intro-skip" type="button">Skip introduction <span aria-hidden="true">↗</span></button>
+    </div>
   </div>
 
-  <nav class="site-nav" aria-label="Main navigation">
-    <a class="brand shim" href="/" aria-label="Dia home">Dia<span class="brand-mark">✳</span></a>
-    <ul class="nav-links">
-      <li><a href="#collections">Collections</a></li>
-      <li><a href="#about">About</a></li>
-      <li><a class="gold-button" href="/login">Sign in <span aria-hidden="true">↗</span></a></li>
-    </ul>
-  </nav>
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <a class="brand shim" href="/" aria-label="Dia home">Dia<span class="brand-mark">✳</span></a>
+      <div class="nav-links">
+        <a href="#collections">Collections</a>
+        <a href="#featured">New arrivals</a>
+        <a href="#story">Our story</a>
+      </div>
+      <div class="nav-actions">
+        <a id="signInLink" class="nav-signin" href="/login">Sign in</a>
+        <a id="myAccountLink" class="nav-account" href="/dashboard" hidden>My account</a>
+        <button id="signOutButton" class="nav-signout" type="button" hidden>Sign out</button>
+        <button id="bagToggle" class="bag-toggle" type="button" aria-controls="bagDrawer" aria-expanded="false">Bag <span id="bagCount">0</span></button>
+      </div>
+    </nav>
+  </header>
 
   <main>
-    <section class="home-hero">
-      <div class="home-copy">
-        <p class="eyebrow">THE DIA COLLECTION · CEBU</p>
-        <h1>Dressed in<br><em>quiet gold.</em></h1>
-        <p>Clothes, shoes, bags and eyewear with a little more thought in every detail. Personal style, designed to stay with you.</p>
-        <a class="gold-button" href="#collections">Explore collections <span aria-hidden="true">↗</span></a>
-        <div class="home-meta">CLOTHES · SHOES · BAGS · EYEWEAR</div>
+    <section class="editorial-hero" aria-labelledby="heroTitle">
+      <div class="hero-copy">
+        <p class="eyebrow">THE DIA EDIT · CEBU</p>
+        <h1 id="heroTitle">Wear the<br><em>moment.</em></h1>
+        <p class="hero-description">A considered wardrobe of expressive essentials. Thoughtful shapes, enduring details, and pieces that feel unmistakably yours.</p>
+        <a class="gold-button" href="#featured">Discover the collection <span aria-hidden="true">↗</span></a>
+        <div class="hero-footnote"><span>01 — 04</span><span>STYLE, WITH INTENTION</span></div>
       </div>
-      <div class="fashion-stage" data-fashion-stage aria-label="Animated Dia fashion line-art showcase">
-        <span class="stage-caption">OBJECTS OF EVERYDAY ELEGANCE · Nº 01</span>
-      </div>
-    </section>
-
-    <section class="section" id="collections">
-      <div class="section-heading">
-        <div><p class="eyebrow">CURATED FOR YOUR EVERY DAY</p><h2>Collections</h2></div>
-        <p>Four considered edits. A wardrobe that feels effortless, distinctive and entirely your own.</p>
-      </div>
-      <div class="collection-grid">
-        <article class="collection-card" data-fashion-tile="dress"><div class="collection-card__art"></div><h3>Dresses</h3><p>Form, flow and feeling</p></article>
-        <article class="collection-card" data-fashion-tile="sneaker"><div class="collection-card__art"></div><h3>Shoes</h3><p>Every step, considered</p></article>
-        <article class="collection-card" data-fashion-tile="bag"><div class="collection-card__art"></div><h3>Bags</h3><p>Carry your point of view</p></article>
-        <article class="collection-card" data-fashion-tile="shades"><div class="collection-card__art"></div><h3>Eyewear</h3><p>The finishing detail</p></article>
+      <div class="hero-composition">
+        <figure class="hero-main-photo">
+          <img src="https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=1800&amp;q=84" alt="Fashion editorial portrait in a sculptural cream outfit" fetchpriority="high">
+          <figcaption>THE ART OF EVERYDAY ELEGANCE</figcaption>
+        </figure>
+        <figure class="hero-detail-photo">
+          <img src="https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Model wearing a softly tailored cream look" loading="lazy">
+        </figure>
+        <span class="hero-stamp">D<br>I<br>A</span>
       </div>
     </section>
 
-    <section class="section about-section" id="about">
-      <div><p class="eyebrow">A LITTLE ABOUT US</p><h2>Made to be<br>remembered.</h2></div>
-      <div class="about-copy">
-        <p>Dia is a fashion house built around clean lines, expressive details and the pleasure of choosing well. We believe the best pieces earn their place in your wardrobe — not just for a season, but for the stories you make in them.</p>
-        <div class="gold-rule"></div>
-        <p>Explore dresses, shoes, bags and eyewear selected to work beautifully together. Sign in to manage your account and keep track of your orders.</p>
-        <a class="gold-button" href="/login">Enter Dia <span aria-hidden="true">↗</span></a>
+    <section class="brand-ribbon" aria-label="Dia collection categories">
+      <span>CLOTHING</span><i>✳</i><span>ACCESSORIES</span><i>✳</i><span>EVERYDAY OBJECTS</span><i>✳</i><span>PERSONAL STYLE</span>
+    </section>
+
+    <section id="collections" class="editorial-section collections-section">
+      <div class="section-heading editorial-heading">
+        <div><p class="eyebrow">CURATED, NOT COMPLICATED</p><h2>Find your<br><em>own rhythm.</em></h2></div>
+        <p>Each edit is built around the way you move through the day. Explore the details, discover a new favorite, and make it yours.</p>
+      </div>
+      <div class="campaign-grid">
+        <a class="campaign-card campaign-tall" href="#featured" aria-label="Explore the form collection">
+          <img src="https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=1100&amp;q=82" alt="Minimal cream fashion look" loading="lazy">
+          <span class="campaign-index">01 / THE FORM EDIT</span><span class="campaign-title">The Form Edit <b>↗</b></span>
+        </a>
+        <a class="campaign-card" href="#featured" aria-label="Explore the everyday collection">
+          <img src="https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=1100&amp;q=82" alt="Modern outdoor fashion editorial" loading="lazy">
+          <span class="campaign-index">02 / EVERYDAY, ELEVATED</span><span class="campaign-title">Everyday, elevated <b>↗</b></span>
+        </a>
+        <div class="campaign-note">
+          <span class="note-mark">D✳</span>
+          <p>“The best style is the one that feels like you.”</p>
+          <span class="note-caption">A DIA POINT OF VIEW</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="featured" class="editorial-section featured-section">
+      <div class="section-heading featured-heading">
+        <div><p class="eyebrow">THE PIECES TO KNOW</p><h2>New arrivals<span class="heading-period">.</span></h2></div>
+        <p>Discover the current Dia selection, chosen for comfort, character, and repeat wear.</p>
+      </div>
+      <div id="catalogStatus" class="catalog-status" role="status" aria-live="polite">Curating the collection…</div>
+      <div id="featuredProducts" class="product-grid" aria-live="polite"></div>
+    </section>
+
+    <section id="story" class="story-section">
+      <div class="story-image">
+        <img src="https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=1500&amp;q=82" alt="Fashion editorial in a calm green outdoor setting" loading="lazy">
+        <span>THE DIA POINT OF VIEW / 2026</span>
+      </div>
+      <div class="story-copy">
+        <p class="eyebrow">LESS, BUT MORE MEANINGFUL</p>
+        <h2>Made to be<br><em>remembered.</em></h2>
+        <p>Dia is built around clean lines, expressive details, and the pleasure of choosing well. We believe the best pieces earn their place in your wardrobe — not just for a season, but for the stories you make in them.</p>
+        <a class="text-link" href="#featured">Explore the edit <span aria-hidden="true">↗</span></a>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer">
+  <footer class="site-footer editorial-footer">
     <a class="brand" href="/">Dia<span class="brand-mark">✳</span></a>
-    <span>© <span id="year">2026</span> DIA · CLOTHES · SHOES · BAGS · EYEWEAR</span>
-    <nav aria-label="Footer navigation"><a href="#about">About</a><a href="/login">Sign in</a></nav>
+    <span>© <span id="year">2026</span> DIA · CLOTHES WITH INTENTION</span>
+    <nav aria-label="Footer navigation"><a href="#collections">Collections</a><a href="#story">Our story</a><a href="/login">Sign in</a></nav>
   </footer>
-  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+
+  <dialog id="productDialog" class="product-dialog" aria-labelledby="productDialogTitle">
+    <button class="dialog-close" type="button" data-action="close-product" aria-label="Close product details">×</button>
+    <div id="productDialogContent"></div>
+  </dialog>
+
+  <div id="bagBackdrop" class="bag-backdrop" hidden></div>
+  <aside id="bagDrawer" class="bag-drawer" aria-labelledby="bagTitle" aria-hidden="true" hidden>
+    <div class="bag-drawer-head"><div><p class="eyebrow">YOUR SELECTION</p><h2 id="bagTitle">The bag<span>.</span></h2></div><button id="bagClose" class="drawer-close" type="button" aria-label="Close bag">×</button></div>
+    <div id="bagItems" class="bag-items"><p class="bag-empty">Your bag is waiting for something lovely.</p></div>
+    <div class="bag-drawer-foot"><div><span>Subtotal</span><strong id="bagSubtotal">₱0</strong></div><button id="checkoutOpen" class="gold-button" type="button" disabled>Continue to checkout <span aria-hidden="true">↗</span></button><p>Demo checkout saves your order to your account. No payment is collected.</p></div>
+  </aside>
+  <dialog id="checkoutDialog" class="checkout-dialog" aria-labelledby="checkoutTitle">
+    <button id="checkoutClose" class="dialog-close" type="button" aria-label="Close checkout">×</button>
+    <div id="checkoutDialogContent">
+      <div class="checkout-heading"><p class="eyebrow">ONE LAST DETAIL</p><h2 id="checkoutTitle">Make it <em>yours.</em></h2><p>Your demo order will be saved to your Dia account. No payment details are requested or collected.</p></div>
+      <form id="checkoutForm" class="checkout-form">
+        <label for="checkoutName">Full name</label><input id="checkoutName" name="customerName" autocomplete="name" required minlength="2" maxlength="120">
+        <label for="checkoutEmail">Email address</label><input id="checkoutEmail" name="customerEmail" type="email" autocomplete="email" required maxlength="254">
+        <label for="checkoutAddress">Delivery address</label><textarea id="checkoutAddress" name="customerAddress" rows="3" autocomplete="street-address" required minlength="6" maxlength="500"></textarea>
+        <p id="checkoutError" class="checkout-error" role="status"></p>
+        <button id="checkoutSubmit" class="gold-button" type="submit">Place demo order <span aria-hidden="true">↗</span></button>
+      </form>
+    </div>
+  </dialog>
+  <div id="storeToast" class="store-toast" role="status" aria-live="polite" hidden></div>
 </body>
 </html>
