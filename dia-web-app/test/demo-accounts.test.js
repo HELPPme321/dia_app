@@ -89,6 +89,29 @@ test('demo setup generates private local credentials and stores only password ha
   } finally { db.close(); removeTemp(temp.dir); }
 });
 
+
+test('demo setup seeds both products and accounts into the configured SQLite database', async () => {
+  const temp = temporaryDatabase();
+  const envPath = path.join(temp.dir, '.env');
+  const databasePath = path.join(temp.dir, 'configured.sqlite');
+  fs.writeFileSync(envPath, 'NODE_ENV=development\nDATABASE_PATH=' + databasePath + '\n');
+  let db;
+  try {
+    const result = await setupDemoEnvironment({
+      envPath,
+      runtimeEnv: { NODE_ENV: 'development' },
+      logger: quiet
+    });
+    assert.equal(result.created.length, 2);
+    db = createDatabase(databasePath);
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM users WHERE is_demo=1').get().count, 2);
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM products WHERE is_sample=1').get().count, 4);
+  } finally {
+    if (db) db.close();
+    removeTemp(temp.dir);
+  }
+});
+
 test('opt-in seed creates correctly hashed roles and is repeatable without overwriting accounts', async () => {
   const db = createDatabase(':memory:');
   try {
