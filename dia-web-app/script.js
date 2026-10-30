@@ -288,7 +288,7 @@
       return `<div class="page-heading"><p class="page-kicker">A GOOD CHOICE</p><h1 class="page-title">Your bag.</h1><p class="page-subtitle">A few considered essentials, picked just for you.</p></div>`;
     }
     if (currentPage === "orders") {
-      return `<div class="page-heading"><p class="page-kicker">YOUR DIA+ ACCOUNT</p><h1 class="page-title">Your orders.</h1><p class="page-subtitle">A record of orders placed through this account. Demo orders do not collect payment.</p></div>`;
+      return `<div class="page-heading"><p class="page-kicker">YOUR DIA ACCOUNT</p><h1 class="page-title">Your orders.</h1><p class="page-subtitle">A record of orders placed through this account. Demo orders do not collect payment.</p></div>`;
     }
     return `<div class="page-heading"><p class="page-kicker">THE DIA EDIT · DROP Nº 01</p><h1 class="page-title">Find your form.</h1><p class="page-subtitle">Everyday essentials. Quietly different, made to be worn your way.</p></div>`;
   }
