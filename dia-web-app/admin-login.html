@@ -3,51 +3,101 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#23372a">
-  <meta name="description" content="Secure administrator sign-in for the Dia+ studio workspace.">
-  <title>Dia+ · Administrator Sign-in</title>
+  <meta name="theme-color" content="#1c1420">
+  <meta name="description" content="Secure administrator sign-in for the Dia studio workspace.">
+  <title>Dia · Administrator Sign-in</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="/admin.css">
+  <link rel="stylesheet" href="/auth-pages.css">
+  <script src="/auth.js" defer></script>
   <script src="/admin-login.js" defer></script>
 </head>
-<body class="admin-body">
-<main class="admin-wrap">
-  <section class="admin-login" aria-labelledby="adminLoginTitle">
-    <div class="admin-login-visual">
-      <a class="admin-brand" href="/" aria-label="Dia+ storefront">dia<span>+</span><small>STUDIO CONSOLE</small></a>
-      <div class="admin-login-copy">
-        <p class="admin-kicker">THE BUSINESS OF GOOD DESIGN</p>
-        <h1>Make room<br>for <em>what matters.</em></h1>
-        <p>Your collections, customers, and orders — brought together in one considered workspace for Dia+.</p>
-      </div>
-      <div class="admin-login-stamp">DIA+ STUDIO <span>·</span> PRIVATE WORKSPACE <span>·</span> CEBU, PH</div>
+<body class="auth-body">
+
+<div class="dia-intro" id="diaIntro" aria-hidden="true" hidden>
+  <div class="dia-intro__glow" aria-hidden="true"></div>
+  <svg class="dia-intro__flower" viewBox="0 0 320 320" aria-hidden="true" focusable="false">
+    <g class="dia-intro__outline" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+      <path pathLength="100" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z"/>
+      <path pathLength="100" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(45 160 160)"/>
+      <path pathLength="100" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(90 160 160)"/>
+      <path pathLength="100" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(135 160 160)"/>
+      <path pathLength="100" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(180 160 160)"/>
+      <path pathLength="100" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(225 160 160)"/>
+      <path pathLength="100" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(270 160 160)"/>
+      <path pathLength="100" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(315 160 160)"/>
+      <circle pathLength="100" cx="160" cy="160" r="14"/>
+      <path pathLength="100" d="M160 175 C158 203 164 224 160 252"/>
+      <path pathLength="100" d="M160 220 C133 208 119 218 106 239 C129 241 147 237 160 220Z"/>
+      <path pathLength="100" d="M160 234 C184 220 205 224 216 245 C193 249 174 247 160 234Z"/>
+    </g>
+    <g class="dia-intro__petals" fill="none" stroke="currentColor" stroke-width="1.25">
+      <path class="dia-intro__petal" style="--petal-stagger:0ms" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z"/>
+      <path class="dia-intro__petal" style="--petal-stagger:70ms" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(45 160 160)"/>
+      <path class="dia-intro__petal" style="--petal-stagger:140ms" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(90 160 160)"/>
+      <path class="dia-intro__petal" style="--petal-stagger:210ms" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(135 160 160)"/>
+      <path class="dia-intro__petal" style="--petal-stagger:280ms" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(180 160 160)"/>
+      <path class="dia-intro__petal" style="--petal-stagger:350ms" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(225 160 160)"/>
+      <path class="dia-intro__petal" style="--petal-stagger:420ms" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(270 160 160)"/>
+      <path class="dia-intro__petal" style="--petal-stagger:490ms" d="M160 157 C130 129 121 83 160 26 C199 83 190 129 160 157Z" transform="rotate(315 160 160)"/>
+    </g>
+    <circle class="dia-intro__center" cx="160" cy="160" r="5" fill="currentColor"/>
+  </svg>
+  <div class="dia-intro__wordmark" aria-label="Dia">Dia</div>
+  <button type="button" class="dia-intro__skip" id="diaIntroSkip" tabindex="-1">Skip intro <span aria-hidden="true">↗</span></button>
+</div>
+<main class="auth-shell auth-shell--admin">
+  <section class="auth-visual" aria-label="Dia studio">
+    <div class="auth-visual__top">
+      <a class="auth-brand" href="/" aria-label="Dia home"><span class="auth-brand__word">Dia</span><span class="auth-brand__dot">✳</span></a>
+      <span class="auth-visual__edition">PRIVATE STUDIO</span>
     </div>
-    <div class="admin-login-panel">
-      <div class="admin-login-card">
-        <a class="admin-brand admin-login-mobile-brand" href="/">dia<span>+</span><small>ADMIN ACCESS</small></a>
-        <p class="admin-kicker">SECURE ADMINISTRATION</p>
-        <h2 id="adminLoginTitle">Welcome<br><em>back.</em></h2>
-        <p class="admin-lede">Use the administrator username or email assigned to your account.</p>
-        <div id="adminNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
-        <form id="adminLoginForm" novalidate>
-          <label for="adminIdentifier">Email or Username</label>
-          <input id="adminIdentifier" name="identifier" type="text" inputmode="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Email or Username" required maxlength="254" aria-describedby="adminIdentifierHint">
-          <p class="admin-field-hint" id="adminIdentifierHint">You can sign in with a username such as milesadmin or your account email.</p>
-          <label for="adminPassword">PASSWORD</label>
-          <div class="admin-password">
-            <input id="adminPassword" name="password" type="password" autocomplete="current-password" placeholder="Your admin password" required maxlength="1024">
-            <button type="button" id="togglePassword" aria-label="Show password" aria-controls="adminPassword">Show</button>
-          </div>
-          <button id="adminSubmit" class="admin-primary" type="submit"><span>Enter the studio</span><span aria-hidden="true">↗</span></button>
-        </form>
-        <p class="admin-login-help">Access is granted only when this account is active and its saved role is Administrator. A username by itself never grants administrator privileges.</p>
-        <a class="admin-back" href="/">← Back to the storefront</a>
-        <a class="admin-back" href="/login">Customer sign-in →</a>
-      </div>
+    
+<svg class="auth-flower" viewBox="0 0 360 360" aria-hidden="true" focusable="false">
+  <g class="auth-flower__petals" fill="none" stroke="currentColor" stroke-width="1.15">
+    <path d="M180 177 C145 144 136 95 180 38 C224 95 215 144 180 177Z"/>
+    <path d="M180 177 C145 144 136 95 180 38 C224 95 215 144 180 177Z" transform="rotate(45 180 180)"/>
+    <path d="M180 177 C145 144 136 95 180 38 C224 95 215 144 180 177Z" transform="rotate(90 180 180)"/>
+    <path d="M180 177 C145 144 136 95 180 38 C224 95 215 144 180 177Z" transform="rotate(135 180 180)"/>
+    <path d="M180 177 C145 144 136 95 180 38 C224 95 215 144 180 177Z" transform="rotate(180 180 180)"/>
+    <path d="M180 177 C145 144 136 95 180 38 C224 95 215 144 180 177Z" transform="rotate(225 180 180)"/>
+    <path d="M180 177 C145 144 136 95 180 38 C224 95 215 144 180 177Z" transform="rotate(270 180 180)"/>
+    <path d="M180 177 C145 144 136 95 180 38 C224 95 215 144 180 177Z" transform="rotate(315 180 180)"/>
+  </g>
+  <circle cx="180" cy="180" r="15" fill="none" stroke="currentColor" stroke-width="1.15"/>
+  <circle cx="180" cy="180" r="3" fill="currentColor"/>
+</svg>
+    <div class="auth-visual-copy">
+      <p class="auth-kicker">BEHIND THE DETAILS</p>
+      <h1>Make room<br><em>for what matters.</em></h1>
+      <p>Your collections, customers, and orders — brought together in one considered workspace.</p>
     </div>
+    <div class="auth-visual-footer"><span>02</span><i></i><span>DIA STUDIO ACCESS</span></div>
+  </section>
+  <section class="auth-panel">
+    <div class="auth-card">
+      <div class="auth-card__brand"><a class="auth-brand auth-brand--compact" href="/">Dia<span class="auth-brand__dot">✳</span></a><span>STUDIO CONSOLE</span></div>
+      <p class="auth-kicker">SECURE ADMINISTRATION</p>
+      <h2 id="adminLoginTitle">Welcome<br><em>back.</em></h2>
+      <p class="auth-lede">Sign in with your administrator username or email to open the studio dashboard.</p>
+      <div id="adminNotice" class="auth-notice" role="status" aria-live="polite" hidden></div>
+      <form id="adminLoginForm" class="auth-form" novalidate>
+        <label for="adminIdentifier">Email or Username</label>
+        <input class="auth-input" id="adminIdentifier" name="identifier" type="text" inputmode="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Email or Username" required maxlength="254" aria-describedby="adminIdentifierHint">
+        <p class="auth-field-hint" id="adminIdentifierHint">Use your account username (for example, milesadmin) or email address.</p>
+        <label for="adminPassword">PASSWORD</label>
+        <span class="auth-password"><input class="auth-input" id="adminPassword" name="password" type="password" autocomplete="current-password" placeholder="Your admin password" required maxlength="1024"><button class="auth-toggle" type="button" data-password-toggle="adminPassword" aria-label="Show password">Show</button></span>
+        <div class="auth-options auth-options--single">
+          <a class="auth-link-button" href="/forgot-password">Need help signing in?</a>
+        </div>
+        <button id="adminSubmit" class="auth-submit" type="submit"><span>Enter the studio</span><span aria-hidden="true">↗</span></button>
+      </form>
+      <p class="auth-help">Administrator access is based on the account's saved role and active status. The username itself never grants privileges.</p>
+      <a class="auth-admin-link" href="/login"><span>Not an administrator?</span><strong>Customer sign-in ↗</strong></a>
+    </div>
+    <footer class="auth-footer"><span>© <span id="adminYear"></span> DIA</span><span>PRIVATE WORKSPACE.</span></footer>
   </section>
 </main>
 </body>
