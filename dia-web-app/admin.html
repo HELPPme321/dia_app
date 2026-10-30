@@ -15,40 +15,7 @@
 </head>
 <body class="admin-body">
 <main class="admin-wrap">
-  <section id="adminLogin" class="admin-login" aria-labelledby="adminLoginTitle">
-    <div class="admin-login-visual">
-      <a class="admin-brand" href="/" aria-label="Dia+ storefront">dia<span>+</span><small>STUDIO CONSOLE</small></a>
-      <div class="admin-login-copy">
-        <p class="admin-kicker">THE BUSINESS OF GOOD DESIGN</p>
-        <h1>Make room<br>for <em>what matters.</em></h1>
-        <p>Your collections, customers, and orders — brought together in one considered workspace for Dia+.</p>
-      </div>
-      <div class="admin-login-stamp">DIA+ STUDIO <span>·</span> PRIVATE WORKSPACE <span>·</span> CEBU, PH</div>
-    </div>
-    <div class="admin-login-panel">
-      <div class="admin-login-card">
-        <a class="admin-brand admin-login-mobile-brand" href="/">dia<span>+</span><small>ADMIN ACCESS</small></a>
-        <p class="admin-kicker">SECURE ADMINISTRATION</p>
-        <h2 id="adminLoginTitle">Welcome<br><em>back.</em></h2>
-        <p class="admin-lede">Sign in with your provisioned administrator credentials to open the store dashboard.</p>
-        <div id="adminNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
-        <form id="adminLoginForm">
-          <label for="adminEmail">ADMINISTRATOR EMAIL</label>
-          <input id="adminEmail" name="email" type="email" autocomplete="username" placeholder="you@yourstore.com" required maxlength="254">
-          <label for="adminPassword">PASSWORD</label>
-          <div class="admin-password">
-            <input id="adminPassword" name="password" type="password" autocomplete="current-password" placeholder="Your admin password" required maxlength="1024">
-            <button type="button" id="togglePassword" aria-label="Show password">Show</button>
-          </div>
-          <button id="adminSubmit" class="admin-primary" type="submit">Enter the studio <span aria-hidden="true">↗</span></button>
-        </form>
-        <p class="admin-login-help">Admin access is provisioned by the server operator. If your account was never created, its role was changed, or the password was lost, run the private administrator setup command against the same database used by the running server.</p>
-        <a class="admin-back" href="/">← Back to the storefront</a>
-      </div>
-    </div>
-  </section>
-
-  <section id="adminDashboard" class="admin-dashboard" hidden aria-label="Administrator dashboard">
+  <section id="adminDashboard" class="admin-dashboard" aria-label="Administrator dashboard">
     <aside class="admin-sidebar">
       <a class="admin-brand" href="/" aria-label="Dia+ home">dia<span>+</span><small>STUDIO CONSOLE</small></a>
       <p class="admin-sidebar-label">WORKSPACE</p>

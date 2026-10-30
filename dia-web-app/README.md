@@ -1,6 +1,6 @@
 # Dia+ — storefront with standard accounts and optional Google sign-in
 
-The application keeps the existing Dia+ storefront and adds normal email/password registration and login, optional Google Identity Services login, and a separate administrator login with a protected dashboard.
+The application uses separate server-served pages for the storefront, customer sign-in and registration, customer dashboard, administrator sign-in, administrator dashboard, and password recovery. Authentication is handled by Express and SQLite; the storefront remains independently browsable.
 
 ## Important: run the backend server
 
@@ -23,16 +23,16 @@ Requirements: Node.js 20 or newer. In PowerShell:
     npm.cmd test
     npm.cmd start
 
-Open http://localhost:3000. If .env already exists, do not overwrite your private configuration.
+Open http://localhost:3000 for the storefront, `/login` for customer sign-in, `/admin/login` for administrator sign-in, and `/forgot-password` for recovery guidance. If .env already exists, do not overwrite your private configuration.
 
 ## Normal user accounts
 
 - Select **Create account** on the login screen.
 - Enter a full name, any valid email address (Gmail is not required), a password of at least 12 characters containing a letter and a number, and confirm the password.
 - Registration creates a normal customer account in SQLite and signs the customer in. Passwords are stored as bcrypt hashes, not plaintext.
-- Existing customers sign in on the **Log in** tab. The Remember me option uses a longer server-side session expiration.
+- Existing customers sign in at `/login` using either their email address or username. The Remember me option uses a longer server-side session expiration. After sign-in, customers are sent to `/dashboard`.
 - Login and registration responses do not expose password hashes. Email addresses are normalized to lowercase and duplicate accounts are rejected.
-- **Forgot password** currently displays a notice because no email delivery provider or password-reset email flow is configured. Do not rely on this link for recovery until a mail service and expiring reset-token workflow are implemented.
+- `/forgot-password` is a dedicated recovery information page. Automated reset emails are not available until an email provider and expiring one-time reset-token workflow are configured; the page never falsely reports that an email was sent.
 
 ## Demonstration accounts (opt-in only)
 
@@ -80,7 +80,9 @@ Official docs:
 
 ## Provision or repair administrator access
 
-Administrator credentials are separate from customer credentials. The current admin login accepts only an active database account with `role='admin'`, a password hash, and an administrator-password session. No default admin account is created automatically.
+Administrator credentials are separate from customer credentials. The admin login at `/admin/login` accepts an email or username, then checks that the matching database account has `role='admin'`, `status='active'`, and a valid password hash before creating an administrator session. The label “Administrator” is the friendly name for the stored `admin` role; the typed username never grants a role. No default admin account is created automatically.
+
+A migration adds a case-insensitive `username` column. For older records whose `email` value is actually a non-email identifier (for example `milesadmin`), the migration copies that value into `username` so existing credentials remain usable. If your admin row already has a real email and a separate username was never stored, set the username on that exact record through a trusted database/operator process; do not promote an account solely because its username is familiar.
 
 From the `dia-web-app` directory:
 

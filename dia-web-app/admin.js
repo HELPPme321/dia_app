@@ -72,15 +72,8 @@
     return data;
   }
 
-  function showLogin(message = '') {
-    $('#adminLogin').hidden = false;
-    $('#adminDashboard').hidden = true;
-    notice($('#adminNotice'), message);
-  }
   function showDashboard(user) {
-    $('#adminLogin').hidden = true;
-    $('#adminDashboard').hidden = false;
-    $('#adminIdentity').textContent = user.name + ' · ' + user.email;
+    $('#adminIdentity').textContent = (user.name || 'Administrator') + ' · ' + (user.username || user.email || '');
     loadAll();
   }
 
@@ -473,50 +466,20 @@
     if (failed) {
       const error = failed.reason;
       if (error?.status === 401 || error?.status === 403) {
-        showLogin('Your administrator session expired or no longer has access. Please sign in again.');
+        window.location.replace('/admin/login');
         return;
       }
       notice($('#dashNotice'), error?.message || 'Some dashboard data could not be loaded. Use Refresh to retry.');
     }
   }
 
-  $('#adminLoginForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    notice($('#adminNotice'), '');
-    const button = $('#adminSubmit');
-    button.disabled = true;
-    button.textContent = 'Verifying credentials…';
-    try {
-      const data = await api('/api/auth/admin-login', {
-        method: 'POST',
-        body: JSON.stringify({ email: $('#adminEmail').value.trim(), password: $('#adminPassword').value })
-      });
-      $('#adminPassword').value = '';
-      if (data.user?.role !== 'admin') throw new Error('Administrator access is required.');
-      // Re-enter through Express so the dashboard only opens if the new admin cookie
-      // was persisted and the server's /admin authorization guard accepts the session.
-      window.location.replace('/admin');
-    } catch (error) {
-      notice($('#adminNotice'), error.message);
-    } finally {
-      button.disabled = false;
-      button.innerHTML = 'Sign in securely <span>↗</span>';
-    }
-  });
-  $('#togglePassword').addEventListener('click', () => {
-    const input = $('#adminPassword');
-    const show = input.type === 'password';
-    input.type = show ? 'text' : 'password';
-    $('#togglePassword').textContent = show ? 'Hide' : 'Show';
-    $('#togglePassword').setAttribute('aria-label', show ? 'Hide password' : 'Show password');
-  });
   $('#adminLogout').addEventListener('click', async () => {
     const button = $('#adminLogout');
     button.disabled = true;
     try {
       await api('/api/auth/logout', { method: 'POST', body: '{}' });
       csrf = '';
-      showLogin('You have signed out securely.');
+      window.location.replace('/admin/login?loggedOut=1');
     } catch (error) {
       notice($('#dashNotice'), 'Sign out failed: ' + error.message);
     } finally {
@@ -588,12 +551,12 @@
       if (response.ok && data.user?.role === 'admin' && data.authMethod === 'admin') {
         showDashboard(data.user);
       } else if (response.ok && data.user) {
-        showLogin('This session does not have administrator access. Use administrator password sign-in.');
+        window.location.replace('/admin/login');
       } else {
-        showLogin();
+        window.location.replace('/admin/login');
       }
     } catch (error) {
-      showLogin('Authentication service unavailable. Check that the Dia+ server is running. ' + error.message);
+      document.body.insertAdjacentHTML('afterbegin', '<p role="alert" class="admin-notice">Authentication service unavailable. Check that the Dia+ server is running.</p>');
     }
   })();
 })();

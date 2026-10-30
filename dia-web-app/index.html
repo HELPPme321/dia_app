@@ -12,62 +12,8 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="premium.css" />
   <script src="script.js" defer></script>
-  <script src="auth.js" defer></script>
 </head>
 <body>
-
-  <main id="diaAuth" class="dia-auth" hidden>
-    <section class="dia-auth-art">
-      <div class="dia-auth-brand"><span class="dia-mark">D<span>✦</span></span><span>dia<span>+</span></span></div>
-      <div class="dia-auth-copy"><p class="dia-kicker">CONSIDERED ESSENTIALS · DROP Nº 01</p><h1>Wear your<br><em>own story.</em></h1><p>Good pieces. Quiet confidence. The essentials you reach for, made to feel like you.</p><div class="dia-auth-line"><span></span>MADE FOR EVERYDAY, NOT EVERYONE.</div></div>
-      <div class="dia-orbit dia-orbit-one"></div><div class="dia-orbit dia-orbit-two"></div><div class="dia-auth-bottom"><span>01 / THE DIA EDIT</span><span>CEBU · PHILIPPINES</span></div>
-    </section>
-    <section class="dia-auth-panel"><div class="dia-auth-card">
-      <div class="dia-auth-mobile-brand">dia<span>+</span></div>
-      <p class="dia-kicker dark">YOUR DIA+ ACCOUNT</p>
-      <h2 id="diaAuthTitle">Sign in and<br><em>feel at home.</em></h2>
-      <p class="dia-auth-description" id="diaAuthDescription">Sign in to explore the collection, save your favorites, and keep your bag close.</p>
-      <div class="dia-auth-notice" id="diaAuthNotice" role="status" aria-live="polite" hidden></div>
-      <div class="dia-auth-tabs" role="tablist" aria-label="Account access">
-        <button type="button" id="loginTab" class="is-active" role="tab" aria-selected="true" aria-controls="loginPanel">Log in</button>
-        <button type="button" id="signupTab" role="tab" aria-selected="false" aria-controls="signupPanel">Create account</button>
-      </div>
-      <section id="loginPanel" class="dia-form-panel" role="tabpanel" aria-labelledby="loginTab">
-        <form id="userLoginForm" novalidate>
-          <label for="loginEmail">EMAIL ADDRESS</label>
-          <input class="dia-auth-input" id="loginEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" maxlength="254" required>
-          <label for="loginPassword">PASSWORD</label>
-          <div class="dia-password-field"><input class="dia-auth-input" id="loginPassword" name="password" type="password" autocomplete="current-password" maxlength="1024" required><button class="dia-password-toggle" type="button" data-toggle-password="loginPassword" aria-label="Show password">Show</button></div>
-          <div class="dia-login-options"><label class="dia-remember"><input id="rememberMe" type="checkbox"><span>Remember me</span></label><button type="button" class="dia-text-button" id="forgotPassword">Forgot password?</button></div>
-          <button class="dia-submit" type="submit" id="userLoginSubmit"><span>Sign in</span><span aria-hidden="true">↗</span></button>
-        </form>
-        <div id="googleOptions">
-          <div class="dia-auth-divider" id="googleDivider"><span>OR CONTINUE WITH</span></div>
-          <div id="googleButton" class="dia-google-wrap"></div>
-          <p id="googleHint" class="dia-auth-hint" hidden>Google sign-in is not configured yet. Email and password access still works.</p>
-        </div>
-        <p class="dia-auth-switch">New to Dia+? <button type="button" id="showSignupLink" class="dia-text-button">Create an account</button></p>
-      </section>
-      <section id="signupPanel" class="dia-form-panel" role="tabpanel" aria-labelledby="signupTab" hidden>
-        <form id="userSignupForm" novalidate>
-          <label for="signupName">FULL NAME</label>
-          <input class="dia-auth-input" id="signupName" name="name" type="text" autocomplete="name" placeholder="Your full name" maxlength="120" minlength="2" required>
-          <label for="signupEmail">EMAIL ADDRESS</label>
-          <input class="dia-auth-input" id="signupEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" maxlength="254" required>
-          <label for="signupPassword">PASSWORD</label>
-          <div class="dia-password-field"><input class="dia-auth-input" id="signupPassword" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="1024" required><button class="dia-password-toggle" type="button" data-toggle-password="signupPassword" aria-label="Show password">Show</button></div>
-          <p class="dia-field-hint">Use at least 12 characters, including a letter and a number.</p>
-          <label for="signupConfirm">CONFIRM PASSWORD</label>
-          <div class="dia-password-field"><input class="dia-auth-input" id="signupConfirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="12" maxlength="1024" required><button class="dia-password-toggle" type="button" data-toggle-password="signupConfirm" aria-label="Show password">Show</button></div>
-          <button class="dia-submit" type="submit" id="userSignupSubmit"><span>Create your account</span><span aria-hidden="true">↗</span></button>
-        </form>
-        <p class="dia-auth-switch">Already have an account? <button type="button" id="showLoginLink" class="dia-text-button">Sign in</button></p>
-      </section>
-      <div class="dia-trust"><span>✦</span><p>Your account is protected with verified credentials and secure sessions.</p></div>
-      <a class="dia-admin-link" href="/admin"><span>Managing Dia+?</span><strong>Administrator sign-in ↗</strong></a>
-      <p class="dia-legal">Your password is protected with one-way hashing. Google sign-in is optional, and Dia+ never receives your Google password.</p>
-    </div><footer class="dia-auth-footer"><span>© <span id="diaAuthYear"></span> DIA+</span><span>LESS, BUT BETTER.</span></footer></section>
-  </main>
 
   <main class="app-stage">
     <div class="ambient ambient-left" aria-hidden="true"></div>
@@ -90,6 +36,7 @@
             <span>CONSIDERED ESSENTIALS</span>
             <span>DROP Nº 01</span>
           </div>
+          <a class="hero-account-link" href="/login">Sign in <span aria-hidden="true">↗</span></a>
           <button class="hero-brand" id="heroExplore" aria-label="Explore the Dia+ collection">
             <span class="hero-word">Dia</span><span class="hero-sparkle" aria-hidden="true">✦</span><span class="hero-diamond" aria-hidden="true"></span>
           </button>
@@ -109,9 +56,9 @@
               <span>Dia</span><span class="mini-sparkle" aria-hidden="true">✦</span>
             </button>
             <p class="header-note">WEAR YOUR STORY</p>
-            <button class="header-signout-button icon-button" id="userSignOut" aria-label="Sign out" title="Sign out">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/></svg>
-            </button>
+            <a class="header-signout-button icon-button" href="/dashboard" aria-label="Open account dashboard" title="Account">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
+            </a>
             <button class="header-bag-button icon-button" data-action="navigate" data-page="bag" aria-label="Open shopping bag">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 12H4L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
               <span class="bag-count" id="headerBagCount">0</span>

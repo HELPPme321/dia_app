@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#23372a">
+  <meta name="description" content="Secure administrator sign-in for the Dia+ studio workspace.">
+  <title>Dia+ · Administrator Sign-in</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/admin.css">
+  <script src="/admin-login.js" defer></script>
+</head>
+<body class="admin-body">
+<main class="admin-wrap">
+  <section class="admin-login" aria-labelledby="adminLoginTitle">
+    <div class="admin-login-visual">
+      <a class="admin-brand" href="/" aria-label="Dia+ storefront">dia<span>+</span><small>STUDIO CONSOLE</small></a>
+      <div class="admin-login-copy">
+        <p class="admin-kicker">THE BUSINESS OF GOOD DESIGN</p>
+        <h1>Make room<br>for <em>what matters.</em></h1>
+        <p>Your collections, customers, and orders — brought together in one considered workspace for Dia+.</p>
+      </div>
+      <div class="admin-login-stamp">DIA+ STUDIO <span>·</span> PRIVATE WORKSPACE <span>·</span> CEBU, PH</div>
+    </div>
+    <div class="admin-login-panel">
+      <div class="admin-login-card">
+        <a class="admin-brand admin-login-mobile-brand" href="/">dia<span>+</span><small>ADMIN ACCESS</small></a>
+        <p class="admin-kicker">SECURE ADMINISTRATION</p>
+        <h2 id="adminLoginTitle">Welcome<br><em>back.</em></h2>
+        <p class="admin-lede">Use the administrator username or email assigned to your account.</p>
+        <div id="adminNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
+        <form id="adminLoginForm" novalidate>
+          <label for="adminIdentifier">Email or Username</label>
+          <input id="adminIdentifier" name="identifier" type="text" inputmode="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Email or Username" required maxlength="254" aria-describedby="adminIdentifierHint">
+          <p class="admin-field-hint" id="adminIdentifierHint">You can sign in with a username such as milesadmin or your account email.</p>
+          <label for="adminPassword">PASSWORD</label>
+          <div class="admin-password">
+            <input id="adminPassword" name="password" type="password" autocomplete="current-password" placeholder="Your admin password" required maxlength="1024">
+            <button type="button" id="togglePassword" aria-label="Show password" aria-controls="adminPassword">Show</button>
+          </div>
+          <button id="adminSubmit" class="admin-primary" type="submit"><span>Enter the studio</span><span aria-hidden="true">↗</span></button>
+        </form>
+        <p class="admin-login-help">Access is granted only when this account is active and its saved role is Administrator. A username by itself never grants administrator privileges.</p>
+        <a class="admin-back" href="/">← Back to the storefront</a>
+        <a class="admin-back" href="/login">Customer sign-in →</a>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

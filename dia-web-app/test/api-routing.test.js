@@ -57,13 +57,14 @@ test('frontend API calls use methods and paths registered by Express', () => {
   }
 
   const frontendCalls = [
-    ['auth.js', "fetch('/api/auth/csrf'"],
-    ['auth.js', "api('/api/auth/login'"],
-    ['auth.js', "api('/api/auth/register'"],
-    ['auth.js', "api('/api/auth/google'"],
-    ['auth.js', "api('/api/auth/logout'"],
-    ['auth.js', "api('/api/config'"],
-    ['auth.js', "fetch('/api/auth/me'"],
+    ['login.js', "fetch('/api/auth/csrf'"],
+    ['login.js', "api('/api/auth/login'"],
+    ['login.js', "api('/api/auth/register'"],
+    ['login.js', "api('/api/auth/google'"],
+    ['login.js', "fetch('/api/config'"],
+    ['login.js', "fetch('/api/auth/me'"],
+    ['dashboard.js', "api('/api/auth/logout'"],
+    ['dashboard.js', "api('/api/orders'"],
     ['script.js', "fetch('/api/products?'"],
     ['script.js', "storeApi('/api/cart'"],
     ['script.js', "storeApi('/api/cart/items'"],
@@ -76,10 +77,13 @@ test('frontend API calls use methods and paths registered by Express', () => {
     ['admin.js', "api('/api/admin/orders?'"],
     ['admin.js', "api('/api/admin/orders/'"],
     ['admin.js', "api('/api/admin/analytics?days='"],
-    ['admin.js', "api('/api/auth/admin-login'"],
+    ['admin-login.js', "api('/api/auth/admin-login'"],
     ['admin.js', "api('/api/auth/logout'"],
     ['admin.js', "fetch('/api/auth/me'"]
   ];
+  for (const file of ['login.html', 'admin-login.html', 'dashboard.html', 'forgot-password.html']) {
+    assert.ok(fs.existsSync(path.join(root, file)), 'Expected dedicated page file: ' + file);
+  }
   for (const [file, expression] of frontendCalls) {
     const source = fs.readFileSync(path.join(root, file), 'utf8');
     assert.ok(source.includes(expression), `Expected API call not found in ${file}: ${expression}`);
