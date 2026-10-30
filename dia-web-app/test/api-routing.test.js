@@ -217,8 +217,8 @@ test('frontend asset URLs deliver Dia design rules and shared scripts', async ()
 
     const login = await request(app).get('/login').expect(200);
     assert.ok(login.text.includes('href="/css/style.css?v=dia-desktop-20261030"'));
-    assert.ok(login.text.includes('src="/js/auth.js?v=dia-desktop-20261030"'));
-    assert.ok(login.text.includes('src="/js/fashion.js?v=dia-desktop-20261030"'));
+    assert.ok(login.text.includes('src="/js/auth.js?v=dia-cinematic-login-20261031"'));
+    assert.ok(login.text.includes('src="/js/fashion.js?v=dia-cinematic-login-20261031"'));
 
     const css = await request(app).get('/css/style.css?v=dia-editorial-storefront-20261031').expect(200);
     assert.ok(css.headers['content-type'].includes('text/css'));
@@ -226,7 +226,7 @@ test('frontend asset URLs deliver Dia design rules and shared scripts', async ()
       assert.ok(css.text.includes(selector), 'Dia stylesheet must include ' + selector);
     }
 
-    const auth = await request(app).get('/js/auth.js?v=dia-desktop-20261030').expect(200);
+    const auth = await request(app).get('/js/auth.js?v=dia-cinematic-login-20261031').expect(200);
     assert.ok(auth.headers['content-type'].includes('javascript'));
     assert.ok(auth.text.includes('function getCsrf()'));
     const fashion = await request(app).get('/js/fashion.js?v=dia-cinematic-login-20261031').expect(200);
