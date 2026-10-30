@@ -33,8 +33,9 @@ button:disabled { cursor: wait; opacity: .7; }
 /* Shared Dia wordmark and finish */
 .brand { display: inline-flex; align-items: center; gap: 7px; color: var(--champagne); font-size: 2.6rem; line-height: .9; }
 .brand-mark { color: var(--gold); font-family: var(--sans); font-size: .75rem; }
-.shim { background: linear-gradient(105deg,var(--champagne) 36%,#fff8e8 49%,var(--gold) 60%) 190%/250% no-repeat; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: wordShimmer 6.5s var(--ease) infinite; }
-@keyframes wordShimmer { 0%,58% { background-position: 190%; } 83%,100% { background-position: -60%; } }
+.shim { position: relative; display: inline-block; color: var(--champagne); }
+.shim:after { content: "Dia"; position: absolute; inset: 0; pointer-events: none; color: transparent; background: linear-gradient(105deg,transparent 37%,#fff9e8 49%,rgba(212,175,55,.08) 61%,transparent 72%); -webkit-background-clip: text; background-clip: text; opacity: 0; transform: translateX(-125%); animation: wordShimmer 6.5s var(--ease) infinite; }
+@keyframes wordShimmer { 0%,58% { opacity: 0; transform: translateX(-125%); } 67% { opacity: .9; transform: translateX(0); } 78%,100% { opacity: 0; transform: translateX(125%); } }
 .eyebrow { color: var(--champagne); font-size: .67rem; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; }
 .gold-rule { width: 54px; height: 1px; background: linear-gradient(90deg,var(--gold),transparent); }
 
@@ -209,7 +210,7 @@ button:disabled { cursor: wait; opacity: .7; }
 #intro.is-running .intro-glow { animation: introGlow 4.5s both var(--ease); }
 #intro svg { width: min(330px,38vw); overflow: visible; color: var(--champagne); }
 #intro .intro-drawing { fill: none; stroke: currentColor; stroke-width: 1.1; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: introDraw 4.5s both var(--ease); }
-#intro .intro-petal { fill: rgba(212,175,55,0); stroke: currentColor; stroke-width: 1.1; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; transform-box: fill-box; transform-origin: center; animation: introBloom 2.8s both var(--ease); animation-delay: calc(1.15s + var(--petal-delay,0ms)); }
+#intro .intro-petal { fill: rgba(212,175,55,.055); stroke: currentColor; stroke-width: 1.1; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; transform-box: fill-box; transform-origin: center; animation: introBloom 2.8s both var(--ease); animation-delay: calc(1.15s + var(--petal-delay,0ms)); }
 #intro .intro-center { opacity: 0; animation: introCenter 4.5s both var(--ease); }
 #intro .intro-word { position: absolute; margin-top: 240px; color: var(--ivory); font: 500 clamp(6rem,14vw,10rem)/.8 var(--serif); letter-spacing: .45em; opacity: 0; transform: translateY(16px) scaleX(.93); animation: introWord 4.5s both var(--ease); }
 #intro .intro-word:after { content: ""; position: absolute; inset: -8% -12%; pointer-events: none; opacity: 0; transform: translateX(-130%); background: linear-gradient(105deg,transparent 40%,rgba(255,246,218,.88) 50%,transparent 60%); mix-blend-mode: screen; animation: introShimmer 4.5s both var(--ease); }
@@ -223,7 +224,7 @@ button:disabled { cursor: wait; opacity: .7; }
 @keyframes introMaster { 0% { opacity: 0; transform: scale(.985); } 9% { opacity: 1; transform: scale(1); } 80% { opacity: 1; transform: scale(1); } 87% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.025); } }
 @keyframes introGlow { 0% { opacity: 0; transform: scale(.82); } 13% { opacity: 1; transform: scale(1); } 80% { opacity: .8; transform: scale(1.02); } 100% { opacity: 0; transform: scale(1.08); } }
 @keyframes introDraw { 0%,8% { stroke-dashoffset: 1; opacity: 0; } 13% { opacity: 1; } 36% { stroke-dashoffset: 0; opacity: 1; } 83% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
-@keyframes introBloom { 0% { opacity: 0; transform: scale(.2) rotate(-18deg); } 40% { opacity: .4; transform: scale(.55) rotate(-7deg); } 85%,100% { opacity: 1; transform: scale(1) rotate(0); fill: rgba(212,175,55,.1); } }
+@keyframes introBloom { 0% { opacity: 0; transform: scale(.2) rotate(-18deg); } 40% { opacity: .4; transform: scale(.55) rotate(-7deg); } 85%,100% { opacity: 1; transform: scale(1) rotate(0); } }
 @keyframes introCenter { 0%,34% { opacity: 0; transform: scale(.35); } 50%,83% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.08); } }
 @keyframes introWord { 0%,47% { opacity: 0; transform: translateY(16px) scaleX(.93); letter-spacing: .45em; } 64%,83% { opacity: 1; transform: translateY(0) scaleX(1); letter-spacing: .12em; } 100% { opacity: 0; transform: translateY(-3px) scaleX(1.02); letter-spacing: .12em; } }
 @keyframes introShimmer { 0%,60% { opacity: 0; transform: translateX(-130%); } 67% { opacity: .95; transform: translateX(0); } 75%,100% { opacity: 0; transform: translateX(130%); } }
