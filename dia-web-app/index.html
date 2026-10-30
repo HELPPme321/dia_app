@@ -1,115 +1,103 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#354435" />
-  <meta name="description" content="Dia — wear your story. Considered everyday essentials in deep olive and warm neutral tones." />
-  <title>Dia — Wear Your Story</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="premium.css" />
-  <script src="script.js" defer></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#06261C">
+  <meta name="description" content="Dia — dresses, shoes, bags and eyewear, made to be worn for years.">
+  <title>Dia · Fashion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/fashion.js" defer></script>
 </head>
-<body>
+<body class="home-page">
+  <div id="intro" aria-hidden="true" hidden>
+    <div class="intro-glow" aria-hidden="true"></div>
+    <svg viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+      <g class="intro-drawing">
+        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z"/>
+        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(45 100 100)"/>
+        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(90 100 100)"/>
+        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(135 100 100)"/>
+        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(180 100 100)"/>
+        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(225 100 100)"/>
+        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(270 100 100)"/>
+        <path pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(315 100 100)"/>
+        <circle pathLength="1" cx="100" cy="100" r="13"/>
+        <path pathLength="1" d="M100 113 C98 134 102 151 100 181"/>
+        <path pathLength="1" d="M100 146 C80 133 64 141 56 157 C74 160 91 158 100 146Z"/>
+        <path pathLength="1" d="M100 157 C119 145 136 150 145 166 C127 168 111 166 100 157Z"/>
+      </g>
+      <g class="intro-petals">
+        <path class="intro-petal" style="--petal-delay:0ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z"/>
+        <path class="intro-petal" style="--petal-delay:70ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(45 100 100)"/>
+        <path class="intro-petal" style="--petal-delay:140ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(90 100 100)"/>
+        <path class="intro-petal" style="--petal-delay:210ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(135 100 100)"/>
+        <path class="intro-petal" style="--petal-delay:280ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(180 100 100)"/>
+        <path class="intro-petal" style="--petal-delay:350ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(225 100 100)"/>
+        <path class="intro-petal" style="--petal-delay:420ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(270 100 100)"/>
+        <path class="intro-petal" style="--petal-delay:490ms" pathLength="1" d="M100 92 C81 75 76 45 100 13 C124 45 119 75 100 92Z" transform="rotate(315 100 100)"/>
+      </g>
+      <circle class="intro-center" cx="100" cy="100" r="4" fill="currentColor"/>
+    </svg>
+    <div class="intro-word shim">Dia</div>
+    <button class="skip" type="button" tabindex="-1">Skip intro <span aria-hidden="true">↗</span></button>
+  </div>
 
-  <main class="app-stage">
-    <div class="ambient ambient-left" aria-hidden="true"></div>
-    <div class="ambient ambient-right" aria-hidden="true"></div>
+  <nav class="site-nav" aria-label="Main navigation">
+    <a class="brand shim" href="/" aria-label="Dia home">Dia<span class="brand-mark">✳</span></a>
+    <ul class="nav-links">
+      <li><a href="#collections">Collections</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a class="gold-button" href="/login">Sign in <span aria-hidden="true">↗</span></a></li>
+    </ul>
+  </nav>
 
-    <!-- Physical-device frame, inspired by the supplied mobile UI reference. -->
-    <div class="phone-frame">
-      <span class="side-button side-button-left side-button-one" aria-hidden="true"></span>
-      <span class="side-button side-button-left side-button-two" aria-hidden="true"></span>
-      <span class="side-button side-button-right" aria-hidden="true"></span>
-
-      <div class="phone-screen" id="appScreen">
-        <div class="camera-island" aria-hidden="true"><span class="camera-lens"></span></div>
-
-        <!-- Welcome / splash screen -->
-        <section class="screen-view home-view is-active" id="homeView" aria-label="Dia welcome screen">
-          <div class="hero-photo" role="img" aria-label="Forest green hoodie, ivory T-shirt, and black cap on a clothing rack"></div>
-          <div class="hero-shade" aria-hidden="true"></div>
-          <div class="hero-topline" aria-hidden="true">
-            <span>CONSIDERED ESSENTIALS</span>
-            <span>DROP Nº 01</span>
-          </div>
-          <a class="hero-account-link" href="/login">Sign in <span aria-hidden="true">↗</span></a>
-          <button class="hero-brand" id="heroExplore" aria-label="Explore the Dia collection">
-            <span class="hero-word">Dia</span><span class="hero-sparkle" aria-hidden="true">✦</span><span class="hero-diamond" aria-hidden="true"></span>
-          </button>
-          <p class="hero-tagline">WEAR YOUR STORY</p>
-          <p class="hero-edition">A quieter kind of statement.</p>
-          <button class="skip-intro" id="skipIntro" type="button">Skip intro <span aria-hidden="true">↗</span></button>
-          <button class="enter-button" id="enterButton" aria-label="Enter the Dia store" title="Explore collection">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
-          </button>
-          <p class="hero-scroll-label" aria-hidden="true">DISCOVER THE COLLECTION</p>
-        </section>
-
-        <!-- Store pages are rendered into this view by vanilla JavaScript. -->
-        <section class="screen-view store-view" id="storeView" aria-label="Dia store" hidden>
-          <header class="store-header">
-            <button class="mini-brand" data-action="navigate" data-page="home" aria-label="Back to welcome screen">
-              <span>Dia</span><span class="mini-sparkle" aria-hidden="true">✦</span>
-            </button>
-            <p class="header-note">WEAR YOUR STORY</p>
-            <a class="header-signout-button icon-button" href="/dashboard" aria-label="Open account dashboard" title="Account">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
-            </a>
-            <button class="header-bag-button icon-button" data-action="navigate" data-page="bag" aria-label="Open shopping bag">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 12H4L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
-              <span class="bag-count" id="headerBagCount">0</span>
-            </button>
-          </header>
-          <div class="page-content" id="pageContent" tabindex="-1"></div>
-          <nav class="bottom-nav" aria-label="Main navigation">
-            <button class="nav-item" data-action="navigate" data-page="home" aria-label="Home">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H5V10"/><path d="M9 20v-6h6v6"/></svg><span>Home</span>
-            </button>
-            <button class="nav-item is-current" data-action="navigate" data-page="shop" aria-label="Shop">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 12H4L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg><span>Shop</span>
-            </button>
-            <button class="nav-item" data-action="navigate" data-page="saved" aria-label="Saved items">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5-8.8 11-8.8 11s-8.8-6-8.8-11A4.7 4.7 0 0 1 12 6.3a4.7 4.7 0 0 1 8.8 2.5Z"/></svg><span>Saved</span>
-            </button>
-            <button class="nav-item" data-action="navigate" data-page="orders" aria-label="Order history">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Orders</span>
-            </button>
-            <button class="nav-item" data-action="navigate" data-page="bag" aria-label="Shopping bag">
-              <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 12H4L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg><span class="nav-count" id="navBagCount">0</span></span><span>Bag</span>
-            </button>
-          </nav>
-        </section>
-
-        <!-- Product details overlay -->
-        <div class="modal-backdrop" id="productModal" hidden>
-          <section class="product-modal modal-panel" role="dialog" aria-modal="true" aria-labelledby="detailName">
-            <button class="modal-close icon-button" data-action="close-product" aria-label="Close product details">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
-            </button>
-            <div id="productModalContent"></div>
-          </section>
-        </div>
-
-        <!-- Checkout overlay. This demo validates locally; it does not process payments. -->
-        <div class="modal-backdrop checkout-backdrop" id="checkoutModal" hidden>
-          <section class="checkout-modal modal-panel" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
-            <button class="modal-close icon-button" data-action="close-checkout" aria-label="Close checkout">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
-            </button>
-            <div id="checkoutContent"></div>
-          </section>
-        </div>
-
-        <div class="toast" id="toast" role="status" aria-live="polite"></div>
-        <div class="home-indicator" aria-hidden="true"><span></span></div>
+  <main>
+    <section class="home-hero">
+      <div class="home-copy">
+        <p class="eyebrow">THE DIA COLLECTION · CEBU</p>
+        <h1>Dressed in<br><em>quiet gold.</em></h1>
+        <p>Clothes, shoes, bags and eyewear with a little more thought in every detail. Personal style, designed to stay with you.</p>
+        <a class="gold-button" href="#collections">Explore collections <span aria-hidden="true">↗</span></a>
+        <div class="home-meta">CLOTHES · SHOES · BAGS · EYEWEAR</div>
       </div>
-    </div>
+      <div class="fashion-stage" data-fashion-stage aria-label="Animated Dia fashion line-art showcase">
+        <span class="stage-caption">OBJECTS OF EVERYDAY ELEGANCE · Nº 01</span>
+      </div>
+    </section>
 
-    <p class="stage-caption" aria-hidden="true">DIA <span>·</span> EVERYDAY, INTENTIONALLY.</p>
+    <section class="section" id="collections">
+      <div class="section-heading">
+        <div><p class="eyebrow">CURATED FOR YOUR EVERY DAY</p><h2>Collections</h2></div>
+        <p>Four considered edits. A wardrobe that feels effortless, distinctive and entirely your own.</p>
+      </div>
+      <div class="collection-grid">
+        <article class="collection-card" data-fashion-tile="dress"><div class="collection-card__art"></div><h3>Dresses</h3><p>Form, flow and feeling</p></article>
+        <article class="collection-card" data-fashion-tile="sneaker"><div class="collection-card__art"></div><h3>Shoes</h3><p>Every step, considered</p></article>
+        <article class="collection-card" data-fashion-tile="bag"><div class="collection-card__art"></div><h3>Bags</h3><p>Carry your point of view</p></article>
+        <article class="collection-card" data-fashion-tile="shades"><div class="collection-card__art"></div><h3>Eyewear</h3><p>The finishing detail</p></article>
+      </div>
+    </section>
+
+    <section class="section about-section" id="about">
+      <div><p class="eyebrow">A LITTLE ABOUT US</p><h2>Made to be<br>remembered.</h2></div>
+      <div class="about-copy">
+        <p>Dia is a fashion house built around clean lines, expressive details and the pleasure of choosing well. We believe the best pieces earn their place in your wardrobe — not just for a season, but for the stories you make in them.</p>
+        <div class="gold-rule"></div>
+        <p>Explore dresses, shoes, bags and eyewear selected to work beautifully together. Sign in to manage your account and keep track of your orders.</p>
+        <a class="gold-button" href="/login">Enter Dia <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
   </main>
+
+  <footer class="site-footer">
+    <a class="brand" href="/">Dia<span class="brand-mark">✳</span></a>
+    <span>© <span id="year">2026</span> DIA · CLOTHES · SHOES · BAGS · EYEWEAR</span>
+    <nav aria-label="Footer navigation"><a href="#about">About</a><a href="/login">Sign in</a></nav>
+  </footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 </html>
