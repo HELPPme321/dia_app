@@ -24,7 +24,8 @@ const emailNorm = (v) => typeof v === 'string' ? v.trim().toLowerCase() : '';
 const identifierNorm = (v) => typeof v === 'string' ? v.trim().toLowerCase() : '';
 const validIdentifier = (v) => typeof v === 'string' && v.length > 0 && v.length <= 254 && !/[\s\u0000-\u001f\u007f]/.test(v);
 const validUsername = (v) => typeof v === 'string' && /^[a-z0-9][a-z0-9._-]{2,31}$/.test(v);
-const validEmail = (v) => typeof v === 'string' && v.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);const validPassword = (v) => typeof v === 'string' && v.length >= PASSWORD_MIN_LENGTH && v.length <= 1024 && /[A-Za-z]/.test(v) && /[0-9]/.test(v);
+const validEmail = (v) => typeof v === 'string' && v.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+const validPassword = (v) => typeof v === 'string' && v.length >= PASSWORD_MIN_LENGTH && v.length <= 1024 && /[A-Za-z]/.test(v) && /[0-9]/.test(v);
 const safeUser = (u) => u && ({ id:u.id,email:u.email,username:u.username||null,name:u.name,picture:u.picture_url||null,role:u.role,status:u.status,createdAt:u.created_at,lastLoginAt:u.last_login_at||null });
 function error(res,status,code,message){ return res.status(status).json({error:{code,message}}); }
 function readCookie(req,name){const c=req.headers.cookie||'';for(const p of c.split(';')){const i=p.indexOf('=');if(i>0&&p.slice(0,i).trim()===name)return p.slice(i+1).trim();}return null;}
@@ -93,8 +94,8 @@ function createApp(options = {}) {
     if(username&&!validUsername(username))return error(res,400,'INVALID_USERNAME','Use 3–32 characters for the username: letters, numbers, dots, underscores, or hyphens.');
     if(!validPassword(password))return error(res,400,'WEAK_PASSWORD','Use at least 12 characters, including a letter and a number.');
     if(password!==confirmPassword)return error(res,400,'PASSWORD_MISMATCH','The passwords do not match.');
-    if(db.prepare('SELECT id FROM users WHERE email=?').get(email))return error(res,409,'EMAIL_ALREADY_REGISTERED','An account already uses this email. Sign in or use a different address.');
-    if(username&&db.prepare('SELECT id FROM users WHERE username=?').get(username))return error(res,409,'USERNAME_ALREADY_TAKEN','That username is already in use. Choose another one.');
+    if(db.prepare('SELECT id FROM users WHERE email=? OR username=?').get(email,email))return error(res,409,'EMAIL_ALREADY_REGISTERED','An account already uses this email or sign-in identifier.');
+    if(username&&db.prepare('SELECT id FROM users WHERE username=? OR email=?').get(username,username))return error(res,409,'USERNAME_ALREADY_TAKEN','That username is already in use as an account identifier. Choose another one.');
     const now=new Date().toISOString(),id=crypto.randomUUID();
     try{
       const passwordHash=await bcrypt.hash(password,12);
