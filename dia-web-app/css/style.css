@@ -159,6 +159,7 @@ button:disabled { cursor: wait; opacity: .7; }
 .login-card__foot a { color: rgba(233,211,166,.82); }
 .login-card__foot a:hover { color: white; }
 .login-card__legal { margin-top: 19px; color: rgba(169,194,180,.51); font-size: .59rem; line-height: 1.7; }
+.login-footer { width: min(100%,475px); margin-top: 22px; color: rgba(233,211,166,.46); text-align: center; font-size: .55rem; font-weight: 700; letter-spacing: .14em; }
 #googleArea { margin-top: 20px; }
 .auth-divider { display: flex; align-items: center; gap: 13px; margin-bottom: 14px; color: rgba(169,194,180,.55); font-size: .56rem; font-weight: 800; letter-spacing: .17em; }
 .auth-divider:before,.auth-divider:after { content: ""; height: 1px; flex: 1; background: var(--line-soft); }
