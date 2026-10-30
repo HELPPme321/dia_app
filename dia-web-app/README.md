@@ -1,6 +1,6 @@
-# Dia+ — storefront with standard accounts and optional Google sign-in
+# Dia — storefront with standard accounts and optional Google sign-in
 
-The application uses separate server-served pages for the storefront, customer sign-in and registration, customer dashboard, administrator sign-in, administrator dashboard, and password recovery. Authentication is handled by Express and SQLite; the storefront remains independently browsable.
+The application serves separate HTML pages for customer sign-in and registration, customer dashboard, administrator sign-in, administrator dashboard, and password recovery. Shared CSS and JavaScript keep the authentication experience consistent while Express and SQLite enforce identity, sessions, and account roles. The existing store catalog remains available on the storefront.
 
 ## Important: run the backend server
 
@@ -113,3 +113,11 @@ From this directory, run npm.cmd run products:seed. It inserts the four product 
 ## Tests and build verification
 
 Run npm.cmd run check and npm.cmd test. The test suite exercises auth, CSRF, server-side role separation, sample catalog seeding, live catalog queries, DB-backed carts, checkout totals/stock/idempotency, order history, admin product and order management, analytics, logout, and database restart persistence. Real Google sign-in still needs your client ID and browser testing. Email password recovery needs an email delivery provider. Payment collection is not configured; collected revenue intentionally remains zero for demonstration orders.
+
+## Dia visual identity and sign-in flow
+
+The customer and administrator sign-in pages share the Dia midnight-plum, champagne, and rose design system with Cormorant Garamond headings and Manrope interface text. The line-art flower and Dia wordmark intro plays once per browser tab session, can be skipped, and uses a reduced-motion fallback. The intro is decorative; the login form remains present and available underneath it.
+
+The shared `auth.js` helper manages CSRF-aware requests, inline notices, loading states, password visibility toggles, role-based redirects, and the one-time intro. The customer login is role-aware: it validates a customer session first, then tries the administrator endpoint only when the customer endpoint returns invalid credentials. The backend still checks the account's saved active role before issuing an admin session.
+
+Routes: `/login`, `/admin/login`, `/forgot-password`, `/dashboard` (customer), and `/admin` (administrator).
