@@ -21,9 +21,11 @@ const DUMMY_HASH = bcrypt.hashSync('timing-only-not-a-real-password', 10);
 const hash = (s) => crypto.createHash('sha256').update(s).digest('hex');
 const token = () => crypto.randomBytes(32).toString('base64url');
 const emailNorm = (v) => typeof v === 'string' ? v.trim().toLowerCase() : '';
-const validEmail = (v) => v.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-const validPassword = (v) => typeof v === 'string' && v.length >= PASSWORD_MIN_LENGTH && v.length <= 1024 && /[A-Za-z]/.test(v) && /[0-9]/.test(v);
-const safeUser = (u) => u && ({ id:u.id,email:u.email,name:u.name,picture:u.picture_url||null,role:u.role,status:u.status,createdAt:u.created_at,lastLoginAt:u.last_login_at||null });
+const identifierNorm = (v) => typeof v === 'string' ? v.trim().toLowerCase() : '';
+const validIdentifier = (v) => typeof v === 'string' && v.length > 0 && v.length <= 254 && !/[\s\u0000-\u001f\u007f]/.test(v);
+const validUsername = (v) => typeof v === 'string' && /^[a-z0-9][a-z0-9._-]{2,31}$/.test(v);
+const validEmail = (v) => typeof v === 'string' && v.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);const validPassword = (v) => typeof v === 'string' && v.length >= PASSWORD_MIN_LENGTH && v.length <= 1024 && /[A-Za-z]/.test(v) && /[0-9]/.test(v);
+const safeUser = (u) => u && ({ id:u.id,email:u.email,username:u.username||null,name:u.name,picture:u.picture_url||null,role:u.role,status:u.status,createdAt:u.created_at,lastLoginAt:u.last_login_at||null });
 function error(res,status,code,message){ return res.status(status).json({error:{code,message}}); }
 function readCookie(req,name){const c=req.headers.cookie||'';for(const p of c.split(';')){const i=p.indexOf('=');if(i>0&&p.slice(0,i).trim()===name)return p.slice(i+1).trim();}return null;}
 function safeEqual(a,b){if(typeof a!=='string'||typeof b!=='string')return false;const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&crypto.timingSafeEqual(x,y);}
@@ -59,11 +61,11 @@ function createApp(options = {}) {
   });
   app.use((req,res,next)=>{
     const raw=readCookie(req,cookieName), tokenHash=raw?hash(raw):null;
-    let s=tokenHash?db.prepare("SELECT s.*,u.email,u.name,u.picture_url,u.role,u.status,u.created_at,u.last_login_at FROM sessions s LEFT JOIN users u ON u.id=s.user_id WHERE s.token_hash=?").get(tokenHash):null;
+    let s=tokenHash?db.prepare("SELECT s.*,u.email,u.username,u.name,u.picture_url,u.role,u.status,u.created_at,u.last_login_at FROM sessions s LEFT JOIN users u ON u.id=s.user_id WHERE s.token_hash=?").get(tokenHash):null;
     if(s && s.expires_at<=Date.now()){db.prepare('DELETE FROM sessions WHERE token_hash=?').run(tokenHash);s=null;}
     if(s && s.user_id && s.status!=='active'){db.prepare('DELETE FROM sessions WHERE token_hash=?').run(tokenHash);s=null;res.clearCookie(cookieName,{httpOnly:true,secure:prod,sameSite:'lax',path:'/'});}
     req.session=s||null; req.tokenHash=s?tokenHash:null;
-    req.user=s&&s.user_id?{id:s.user_id,email:s.email,name:s.name,picture_url:s.picture_url,role:s.role,status:s.status,created_at:s.created_at,last_login_at:s.last_login_at}:null;
+    req.user=s&&s.user_id?{id:s.user_id,email:s.email,username:s.username,name:s.name,picture_url:s.picture_url,role:s.role,status:s.status,created_at:s.created_at,last_login_at:s.last_login_at}:null;
     next();
   });
   function setCookie(res,t,age){res.cookie(cookieName,t,{httpOnly:true,secure:prod,sameSite:'lax',path:'/',maxAge:age,priority:'high'});}
@@ -85,19 +87,21 @@ function createApp(options = {}) {
   app.get('/api/profile',auth,(req,res)=>res.json({user:safeUser(req.user)}));
   app.post('/api/auth/register',registrationLimiter,csrf,async(req,res)=>{
     const name=typeof req.body?.name==='string'?req.body.name.trim().replace(/\s+/g,' '):'';
-    const email=emailNorm(req.body?.email),password=req.body?.password,confirmPassword=req.body?.confirmPassword;
+    const email=emailNorm(req.body?.email),username=identifierNorm(req.body?.username)||null,password=req.body?.password,confirmPassword=req.body?.confirmPassword;
     if(name.length<2||name.length>120||/[\u0000-\u001f\u007f]/.test(name))return error(res,400,'INVALID_NAME','Enter your full name.');
     if(!validEmail(email))return error(res,400,'INVALID_EMAIL','Enter a valid email address.');
+    if(username&&!validUsername(username))return error(res,400,'INVALID_USERNAME','Use 3–32 characters for the username: letters, numbers, dots, underscores, or hyphens.');
     if(!validPassword(password))return error(res,400,'WEAK_PASSWORD','Use at least 12 characters, including a letter and a number.');
     if(password!==confirmPassword)return error(res,400,'PASSWORD_MISMATCH','The passwords do not match.');
     if(db.prepare('SELECT id FROM users WHERE email=?').get(email))return error(res,409,'EMAIL_ALREADY_REGISTERED','An account already uses this email. Sign in or use a different address.');
+    if(username&&db.prepare('SELECT id FROM users WHERE username=?').get(username))return error(res,409,'USERNAME_ALREADY_TAKEN','That username is already in use. Choose another one.');
     const now=new Date().toISOString(),id=crypto.randomUUID();
     try{
       const passwordHash=await bcrypt.hash(password,12);
       // The user row and authenticated session are one SQLite transaction. A failed
       // registration cannot leave behind an account that the UI reports as failed.
       const created=db.transaction(()=>{
-        db.prepare("INSERT INTO users(id,email,password_hash,name,role,status,created_at,updated_at,last_login_at) VALUES(?,?,?,?,'user','active',?,?,?)").run(id,email,passwordHash,name,now,now,now);
+        db.prepare("INSERT INTO users(id,email,username,password_hash,name,role,status,created_at,updated_at,last_login_at) VALUES(?,?,?,?,?,'user','active',?,?,?)").run(id,email,username,passwordHash,name,now,now,now);
         const user=db.prepare('SELECT * FROM users WHERE id=?').get(id);
         const csrfToken=startSession(req,res,id,DAY,'password');
         return {user,csrfToken};
@@ -106,16 +110,17 @@ function createApp(options = {}) {
     }catch(e){
       res.clearCookie(cookieName,{httpOnly:true,secure:prod,sameSite:'lax',path:'/'});
       if(e&&e.code==='SQLITE_CONSTRAINT_UNIQUE'&&/users\.email/i.test(e.message||''))return error(res,409,'EMAIL_ALREADY_REGISTERED','An account already uses this email. Sign in or use a different address.');
+      if(e&&e.code==='SQLITE_CONSTRAINT_UNIQUE'&&String(e.message||'').includes('users.username'))return error(res,409,'USERNAME_ALREADY_TAKEN','That username is already in use. Choose another one.');
       console.error('Registration persistence failed:',e?.code||'UNKNOWN_ERROR');
       return error(res,500,'REGISTRATION_FAILED','We could not create your account. Please try again.');
     }
   });
   app.post('/api/auth/login',limiter,csrf,async(req,res)=>{
-    const email=emailNorm(req.body?.email),password=req.body?.password;
-    if(!validEmail(email)||typeof password!=='string'||password.length>1024)return error(res,400,'INVALID_INPUT','Enter your email address and password.');
-    const u=db.prepare('SELECT * FROM users WHERE email=?').get(email);
+    const identifier=identifierNorm(req.body?.identifier??req.body?.email),password=req.body?.password;
+    if(!validIdentifier(identifier)||typeof password!=='string'||password.length===0||password.length>1024)return error(res,400,'INVALID_INPUT','Enter your email or username and password.');
+    const u=db.prepare('SELECT * FROM users WHERE email=? OR username=?').get(identifier,identifier);
     let ok=false;try{ok=await bcrypt.compare(password,u?.password_hash||DUMMY_HASH);}catch{}
-    if(!u||u.role!=='user'||u.status!=='active'||!u.password_hash||!ok)return error(res,401,'INVALID_CREDENTIALS','Email or password is incorrect.');
+    if(!u||u.role!=='user'||u.status!=='active'||!u.password_hash||!ok)return error(res,401,'INVALID_CREDENTIALS','Email or username or password is incorrect.');
     const now=new Date().toISOString();db.prepare('UPDATE users SET last_login_at=?,updated_at=? WHERE id=?').run(now,now,u.id);
     const remember=req.body?.rememberMe===true,csrfToken=startSession(req,res,u.id,remember?30*DAY:DAY,'password');
     return res.json({authenticated:true,user:safeUser(db.prepare('SELECT * FROM users WHERE id=?').get(u.id)),csrfToken});
@@ -149,11 +154,11 @@ function createApp(options = {}) {
     }catch{return error(res,401,'GOOGLE_SIGN_IN_FAILED','Google sign-in failed. Please try again.');}
   });
   app.post('/api/auth/admin-login',limiter,csrf,async(req,res)=>{
-    const email=emailNorm(req.body?.email), password=req.body?.password;
-    if(!validEmail(email)||typeof password!=='string'||password.length>1024)return error(res,400,'INVALID_INPUT','Enter a valid email and password.');
-    const u=db.prepare('SELECT * FROM users WHERE email=?').get(email);
+    const identifier=identifierNorm(req.body?.identifier??req.body?.email), password=req.body?.password;
+    if(!validIdentifier(identifier)||typeof password!=='string'||password.length===0||password.length>1024)return error(res,400,'INVALID_INPUT','Enter your email or username and password.');
+    const u=db.prepare('SELECT * FROM users WHERE email=? OR username=?').get(identifier,identifier);
     let ok=false;try{ok=await bcrypt.compare(password,u?.password_hash||DUMMY_HASH);}catch{}
-    if(!u||u.role!=='admin'||u.status!=='active'||!u.password_hash||!ok)return error(res,401,'INVALID_ADMIN_CREDENTIALS','The email or password is incorrect.');
+    if(!u||u.role!=='admin'||u.status!=='active'||!u.password_hash||!ok)return error(res,401,'INVALID_ADMIN_CREDENTIALS','The email or username or password is incorrect.');
     const now=new Date().toISOString();db.prepare('UPDATE users SET last_login_at=?,updated_at=? WHERE id=?').run(now,now,u.id);
     const csrfToken=startSession(req,res,u.id,ADMIN_TTL,'admin');
     return res.json({authenticated:true,user:safeUser(db.prepare('SELECT * FROM users WHERE id=?').get(u.id)),csrfToken});
@@ -208,7 +213,7 @@ function createApp(options = {}) {
     if(role){clauses.push('role=?');params.push(role);}if(status){clauses.push('status=?');params.push(status);}
     const where=clauses.length?' WHERE '+clauses.join(' AND '):'';
     const total=db.prepare('SELECT COUNT(*) count FROM users'+where).get(...params).count;
-    const users=db.prepare('SELECT id,email,name,picture_url,role,status,created_at,last_login_at FROM users'+where+' ORDER BY created_at DESC LIMIT ? OFFSET ?').all(...params,limit,(page-1)*limit);
+    const users=db.prepare('SELECT id,email,username,name,picture_url,role,status,created_at,last_login_at FROM users'+where+' ORDER BY created_at DESC LIMIT ? OFFSET ?').all(...params,limit,(page-1)*limit);
     res.json({users:users.map(safeUser),pagination:{page,limit,total,pages:Math.ceil(total/limit)}});
   });
   app.patch('/api/admin/users/:id',csrf,auth,admin,async(req,res)=>{
@@ -235,18 +240,35 @@ function createApp(options = {}) {
   });
   registerStoreRoutes(app,{db,auth,admin,csrf});
 
-  function serveAdminPage(req,res) {
-    // Keep the sign-in form available anonymously, but never render it to a signed-in
-    // customer or to an admin session created through the wrong authentication method.
-    if (req.user && (req.user.role !== 'admin' || req.session?.auth_method !== 'admin')) {
-      return res.status(403).type('text/plain').send('Administrator password sign-in is required.');
-    }
+  function customerHome(req,res) {
+    if(req.user?.role==='admin'&&req.session?.auth_method==='admin') return res.redirect(302,'/admin');
+    if(req.user?.role==='user'&&req.user.status==='active') return res.redirect(302,'/dashboard');
+    return res.sendFile(path.join(ROOT,'login.html'));
+  }
+  function adminLoginPage(req,res) {
+    if(req.user?.role==='admin'&&req.session?.auth_method==='admin') return res.redirect(302,'/admin');
+    return res.sendFile(path.join(ROOT,'admin-login.html'));
+  }
+  function adminDashboardPage(req,res) {
+    if(!req.user) return res.redirect(302,'/admin/login');
+    if(req.user.role!=='admin') return res.status(403).type('text/plain').send('Administrator access is restricted.');
+    if(req.session?.auth_method!=='admin') return res.redirect(302,'/admin/login');
     return res.sendFile(path.join(ROOT,'admin.html'));
   }
-  app.get('/admin',serveAdminPage);
-  app.get('/admin.html',serveAdminPage);
+  function customerDashboardPage(req,res) {
+    if(req.user?.role==='admin'&&req.session?.auth_method==='admin') return res.redirect(302,'/admin');
+    if(!req.user||req.user.role!=='user'||req.user.status!=='active') return res.redirect(302,'/login');
+    return res.sendFile(path.join(ROOT,'dashboard.html'));
+  }
+  app.get('/login',customerHome);
+  app.get('/register',(req,res)=>res.redirect(302,'/login?mode=signup'));
+  app.get('/admin/login',adminLoginPage);
+  app.get('/admin',adminDashboardPage);
+  app.get('/admin.html',adminDashboardPage);
+  app.get('/dashboard',customerDashboardPage);
+  app.get('/forgot-password',(_req,res)=>res.sendFile(path.join(ROOT,'forgot-password.html')));
   app.get('/',(_req,res)=>res.sendFile(path.join(ROOT,'index.html')));
-  for(const file of ['index.html','style.css','script.js','auth.js','admin.css','admin.js']){
+  for(const file of ['index.html','style.css','premium.css','script.js','admin.css','admin.js','auth-pages.css','login.js','admin-login.js','dashboard.js','forgot-password.js']){
     app.get('/'+file,(_req,res)=>res.sendFile(path.join(ROOT,file)));
   }
   app.use('/assets',express.static(path.join(ROOT,'assets'),{dotfiles:'deny',index:false}));
