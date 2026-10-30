@@ -20,6 +20,7 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || DEFAULT_DATA
     "CREATE TABLE IF NOT EXISTS users (" +
     "id TEXT PRIMARY KEY," +
     "email TEXT NOT NULL COLLATE NOCASE UNIQUE," +
+    "username TEXT COLLATE NOCASE," +
     "google_sub TEXT UNIQUE," +
     "password_hash TEXT," +
     "name TEXT NOT NULL," +
@@ -51,6 +52,12 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || DEFAULT_DATA
   if (!userColumns.includes('is_demo')) {
     db.exec("ALTER TABLE users ADD COLUMN is_demo INTEGER NOT NULL DEFAULT 0 CHECK (is_demo IN (0, 1))");
   }
+  if (!userColumns.includes('username')) {
+    db.exec('ALTER TABLE users ADD COLUMN username TEXT COLLATE NOCASE');
+  }
+  // Older installations stored identifiers such as milesadmin in the email column.
+  db.exec("UPDATE users SET username=lower(trim(email)) WHERE username IS NULL AND instr(email,'@')=0 AND trim(email)<>'';");
+  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username) WHERE username IS NOT NULL AND username<>'';");
 
   const sessionColumns = db.prepare('PRAGMA table_info(sessions)').all().map((column) => column.name);
   if (!sessionColumns.includes('auth_method')) {
