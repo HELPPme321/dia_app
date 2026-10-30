@@ -194,3 +194,17 @@ test('API 404 reports the exact method and path without exposing query parameter
     db.close();
   }
 });
+
+test('new website asset routes serve shared CSS and JavaScript modules', async () => {
+  const db = createDatabase(':memory:');
+  try {
+    const { app } = createApp({ db, env: { NODE_ENV: 'test', APP_ORIGIN: 'http://localhost:3000' } });
+    await request(app).get('/css/style.css').expect(200).expect('Content-Type', /text\\/css/);
+    await request(app).get('/js/auth.js').expect(200).expect('Content-Type', /javascript/);
+    await request(app).get('/js/fashion.js').expect(200).expect('Content-Type', /javascript/);
+    await request(app).get('/forgot.html').expect(200);
+    await request(app).get('/forgot-password').expect(200);
+  } finally {
+    db.close();
+  }
+});
