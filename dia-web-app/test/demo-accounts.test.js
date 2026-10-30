@@ -173,8 +173,10 @@ test('unauthenticated visitors can still load the separate administrator sign-in
   const db = createDatabase(':memory:');
   try {
     const { app } = createApp({ db, env: { NODE_ENV: 'test', APP_ORIGIN: 'http://localhost:3000' } });
-    await request(app).get('/admin').expect(200);
-    await request(app).get('/admin.html').expect(200);
+    const signIn = await request(app).get('/admin/login').expect(200);
+    assert.match(signIn.text, /id="adminLoginForm"/);
+    await request(app).get('/admin').expect(302).expect('Location', '/admin/login');
+    await request(app).get('/admin.html').expect(302).expect('Location', '/admin/login');
   } finally {
     db.close();
   }
