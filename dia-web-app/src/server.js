@@ -269,7 +269,7 @@ function createApp(options = {}) {
   app.get('/dashboard',customerDashboardPage);
   app.get('/forgot-password',(_req,res)=>res.sendFile(path.join(ROOT,'forgot-password.html')));
   app.get('/',(_req,res)=>res.sendFile(path.join(ROOT,'index.html')));
-  for(const file of ['index.html','style.css','premium.css','script.js','admin.css','admin.js','auth-pages.css','login.js','admin-login.js','dashboard.js','forgot-password.js']){
+  for(const file of ['index.html','style.css','premium.css','script.js','admin.css','admin.js','auth-pages.css','login.js','admin-login.js' ,'dashboard.js']){
     app.get('/'+file,(_req,res)=>res.sendFile(path.join(ROOT,file)));
   }
   app.use('/assets',express.static(path.join(ROOT,'assets'),{dotfiles:'deny',index:false}));
