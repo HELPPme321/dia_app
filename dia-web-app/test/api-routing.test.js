@@ -88,6 +88,7 @@ test('frontend API calls use methods and paths registered by Express', () => {
     const page = fs.readFileSync(path.join(root, file), 'utf8');
     assert.ok(page.includes('<script src="/auth.js" defer></script>'), file + ' must load shared authentication helpers');
     assert.ok(page.includes('id="diaIntro"'), file + ' must include the skippable Dia brand intro');
+    assert.ok(page.includes('class="fashion-art"'), file + ' must include the inline SVG fashion showcase');
   }
   const sharedAuth = fs.readFileSync(path.join(root, 'auth.js'), 'utf8');
   assert.ok(sharedAuth.includes('function playBrandIntro()'), 'Shared auth must control the once-per-session intro');
@@ -98,6 +99,9 @@ test('frontend API calls use methods and paths registered by Express', () => {
   const introCss = fs.readFileSync(path.join(root, 'auth-pages.css'), 'utf8');
   assert.ok(introCss.includes('diaIntroMaster var(--dia-intro-duration)'), 'Intro must use its shared 4.5-second master timeline');
   assert.ok(introCss.includes('prefers-reduced-motion:reduce'), 'Intro must respect reduced-motion preferences');
+  assert.ok(introCss.includes('#0B3D2E'), 'Dia login should use the requested emerald brand color');
+  assert.ok(introCss.includes('#D4AF37'), 'Dia login should use the requested champagne-gold accent');
+  assert.ok(introCss.includes('fashion-piece'), 'Fashion illustrations should have individually animated fashion pieces');
   for (const [file, expression] of frontendCalls) {
     const source = fs.readFileSync(path.join(root, file), 'utf8');
     assert.ok(source.includes(expression), `Expected API call not found in ${file}: ${expression}`);
