@@ -82,8 +82,8 @@
     const password = $('registerPassword').value;
     const confirmPassword = $('registerConfirm').value;
     if (name.length < 2) { showMessage('Enter your full name.'); $('registerName').focus(); return; }
-    if (username && !/^[a-z0-9][a-z0-9._-]{2,31}$/.test(username)) {
-      showMessage('Use 3–32 characters for the username: letters, numbers, dots, underscores, or hyphens.');
+    if (!username) {
+      showMessage('Enter a username.');
       $('registerUsername').focus(); return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
@@ -101,7 +101,7 @@
     try {
       const data = await DiaAuth.request('/api/auth/register', {
         method: 'POST',
-        body: { name, username: username || undefined, email, password, confirmPassword }
+        body: { name, username, email, password, confirmPassword }
       });
       if (data.user?.role !== 'user' || data.user.status !== 'active') {
         throw new Error('This account cannot be registered as a customer.');
