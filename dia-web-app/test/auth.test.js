@@ -14,7 +14,7 @@ beforeEach(()=>{db=createDatabase(':memory:');({app}=createApp({db,env:{NODE_ENV
 afterEach(()=>db.close());
 async function csrf(a=agent){return(await a.get('/api/auth/csrf').expect(200)).body.csrfToken;}
 function admin(){const now=new Date().toISOString(),password='a-unique-test-password-at-least-14';db.prepare("INSERT INTO users(id,email,password_hash,name,role,status,created_at,updated_at) VALUES('admin-1','admin@example.com',?,'Admin','admin','active',?,?)").run(bcrypt.hashSync(password,4),now,now);return password;}
-async function register(a,email='member@example.net',password='A-strong-password-123'){const c=await csrf(a);return a.post('/api/auth/register').set('x-csrf-token',c).send({name:'Dia Customer',email,password,confirmPassword:password});}
+async function register(a,email='member@example.net',password='A-strong-password-123',username){const c=await csrf(a);return a.post('/api/auth/register').set('x-csrf-token',c).send({name:'Dia Customer',email,password,confirmPassword:password,username});}
 async function login(a,email='member@example.net',password='A-strong-password-123',rememberMe=false){const c=await csrf(a);return a.post('/api/auth/login').set('x-csrf-token',c).send({email,password,rememberMe});}
 
 test('standard registration creates a hashed customer account without Google',async()=>{
@@ -141,8 +141,9 @@ test('promoting a customer to admin revokes their existing customer session',asy
     .send({role:'admin',adminPassword:password}).expect(200);
 
   await customerBrowser.get('/api/profile').expect(401);
-  const adminPage=await customerBrowser.get('/admin').expect(200);
-  assert.match(adminPage.text,/id="adminLogin"/);
+  await customerBrowser.get('/admin').expect(302).expect('Location','/admin/login');
+  const adminPage=await customerBrowser.get('/admin/login').expect(200);
+  assert.match(adminPage.text,/id="adminLoginForm"/);
   const nextCsrf=await csrf(customerBrowser);
   const adminLogin=await customerBrowser.post('/api/auth/admin-login').set('x-csrf-token',nextCsrf)
     .send({email:'promoted@example.com',password}).expect(200);
@@ -164,6 +165,76 @@ test('admin user list returns pagination metadata without password hashes',async
   const r=await agent.get('/api/admin/users?page=1&limit=10').expect(200);
   assert.equal(r.body.pagination.total,2);assert.ok(r.body.users.every(u=>!Object.hasOwn(u,'password_hash')));
 });
+test('customer can sign in using a case-insensitive username',async()=>{
+  await register(agent,'customer-username@example.net','A-strong-password-123','Miles.Shop');
+  const browser=request.agent(app);
+  const c=await csrf(browser);
+  const response=await browser.post('/api/auth/login').set('x-csrf-token',c)
+    .send({identifier:'MILES.SHOP',password:'A-strong-password-123'}).expect(200);
+  assert.equal(response.body.user.role,'user');
+  assert.equal(response.body.user.username,'miles.shop');
+  await browser.get('/api/profile').expect(200);
+});
+
+test('administrator can sign in using the milesadmin username and reaches the dashboard',async()=>{
+  const password='milesadmin-secret-2026';
+  const now=new Date().toISOString();
+  db.prepare("INSERT INTO users(id,email,username,password_hash,name,role,status,created_at,updated_at) VALUES('miles-admin','milesadmin@example.net','milesadmin',?,'Administrator','admin','active',?,?)")
+    .run(bcrypt.hashSync(password,4),now,now);
+  const browser=request.agent(app);
+  const c=await csrf(browser);
+  const response=await browser.post('/api/auth/admin-login').set('x-csrf-token',c)
+    .send({identifier:'MilesAdmin',password}).expect(200);
+  assert.equal(response.body.user.role,'admin');
+  assert.equal(response.body.user.username,'milesadmin');
+  const me=await browser.get('/api/auth/me').expect(200);
+  assert.equal(me.body.authMethod,'admin');
+  await browser.get('/admin').expect(200);
+  await browser.get('/api/admin/stats').expect(200);
+});
+
+test('legacy non-email admin identifier remains usable through email-column fallback',async()=>{
+  const password='legacy-admin-secret-2026';
+  const now=new Date().toISOString();
+  db.prepare("INSERT INTO users(id,email,password_hash,name,role,status,created_at,updated_at) VALUES('legacy-admin','milesadmin',?,'Administrator','admin','active',?,?)")
+    .run(bcrypt.hashSync(password,4),now,now);
+  const browser=request.agent(app);
+  const c=await csrf(browser);
+  const response=await browser.post('/api/auth/admin-login').set('x-csrf-token',c)
+    .send({identifier:'MILESADMIN',password}).expect(200);
+  assert.equal(response.body.user.role,'admin');
+  assert.equal(response.body.user.username,'milesadmin');
+  await browser.get('/admin').expect(200);
+});
+
+test('empty identifiers and wrong username passwords are handled safely',async()=>{
+  const c=await csrf();
+  const empty=await agent.post('/api/auth/admin-login').set('x-csrf-token',c)
+    .send({identifier:'',password:'anything'}).expect(400);
+  assert.equal(empty.body.error.code,'INVALID_INPUT');
+  const password='admin-account-password-2026';
+  const now=new Date().toISOString();
+  db.prepare("INSERT INTO users(id,email,username,password_hash,name,role,status,created_at,updated_at) VALUES('wrong-password-admin','wrong-admin@example.net','wrongadmin',?,'Administrator','admin','active',?,?)")
+    .run(bcrypt.hashSync(password,4),now,now);
+  const browser=request.agent(app);
+  const token=await csrf(browser);
+  const wrong=await browser.post('/api/auth/admin-login').set('x-csrf-token',token)
+    .send({identifier:'wrongadmin',password:'incorrect-password'}).expect(401);
+  assert.equal(wrong.body.error.code,'INVALID_ADMIN_CREDENTIALS');
+  assert.match(wrong.body.error.message,/username or password/i);
+});
+
+test('dedicated sign-in, forgot-password, and dashboard pages have separate route guards',async()=>{
+  await agent.get('/login').expect(200).expect((r)=>assert.match(r.text,/id="loginForm"/));
+  await agent.get('/admin/login').expect(200).expect((r)=>assert.match(r.text,/id="adminLoginForm"/));
+  await agent.get('/forgot-password').expect(200).expect((r)=>assert.match(r.text,/Password reset emails are not configured/));
+  await agent.get('/dashboard').expect(302).expect('Location','/login');
+  const password=admin();
+  const c=await csrf();
+  await agent.post('/api/auth/admin-login').set('x-csrf-token',c).send({email:'admin@example.com',password}).expect(200);
+  await agent.get('/dashboard').expect(302).expect('Location','/admin');
+});
+
 test('normal password login cannot be used for administrator accounts',async()=>{
   const password=admin(),c=await csrf();
   const r=await agent.post('/api/auth/login').set('x-csrf-token',c).send({email:'admin@example.com',password}).expect(401);
