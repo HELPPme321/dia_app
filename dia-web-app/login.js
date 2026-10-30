@@ -121,7 +121,6 @@
   $('showRegister').addEventListener('click', () => mode('signup'));
   $('showLogin').addEventListener('click', () => mode('login'));
   DiaAuth.bindPasswordToggles();
-  DiaAuth.playBrandIntro();
 
   (async () => {
     $('authYear').textContent = String(new Date().getFullYear());
