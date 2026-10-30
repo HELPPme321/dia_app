@@ -199,8 +199,8 @@ test('new website asset routes serve shared CSS and JavaScript modules', async (
   const db = createDatabase(':memory:');
   try {
     const { app } = createApp({ db, env: { NODE_ENV: 'test', APP_ORIGIN: 'http://localhost:3000' } });
-    await request(app).get('/css/style.css').expect(200).expect('Content-Type', /text\\/css/);
-    await request(app).get('/js/auth.js').expect(200).expect('Content-Type', /javascript/);
+    await request(app).get('/css/style.css').expect(200).expect((response)=>assert.ok(response.headers['content-type'].includes('text/css')));
+    await request(app).get('/js/auth.js').expect(200).expect((response)=>assert.ok(response.headers['content-type'].includes('javascript')));
     await request(app).get('/js/fashion.js').expect(200).expect('Content-Type', /javascript/);
     await request(app).get('/forgot.html').expect(200);
     await request(app).get('/forgot-password').expect(200);
