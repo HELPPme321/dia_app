@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#21372a">
+  <meta name="description" content="Your Dia+ account dashboard and order history.">
+  <title>Dia+ · My Account</title>
+  <link rel="stylesheet" href="/auth-pages.css">
+  <script src="/dashboard.js" defer></script>
+</head>
+<body>
+<main class="dashboard-shell">
+  <header class="dashboard-header">
+    <a class="auth-brand" href="/"><span class="auth-brand-mark">D✦</span><span>dia<span>+</span></span><small>MY ACCOUNT</small></a>
+    <div class="dashboard-actions">
+      <a class="dashboard-button" href="/">Continue shopping</a>
+      <button id="dashboardSignOut" class="dashboard-button primary" type="button">Sign out ↗</button>
+    </div>
+  </header>
+  <section class="dashboard-content">
+    <div class="dashboard-hero">
+      <div><p class="auth-kicker">YOUR DIA+ ACCOUNT</p><h1>Good to see you,<br><em id="customerName">there.</em></h1></div>
+      <p>One place for your account details and your Dia+ order history. Your account is protected by your private sign-in session.</p>
+    </div>
+    <div id="dashboardNotice" class="auth-notice" role="status" aria-live="polite" hidden></div>
+    <div class="dashboard-stats">
+      <article class="dashboard-stat"><span>Account status</span><strong id="accountStatus">—</strong></article>
+      <article class="dashboard-stat"><span>Your role</span><strong id="accountRole">—</strong></article>
+      <article class="dashboard-stat"><span>Total orders</span><strong id="orderCount">—</strong></article>
+    </div>
+    <section class="dashboard-panel" aria-labelledby="ordersHeading">
+      <div class="dashboard-panel-head"><h2 id="ordersHeading">Your orders</h2><a class="dashboard-button" href="/">Explore the store</a></div>
+      <div id="orderList" aria-live="polite"><p class="dashboard-empty">Loading your order history…</p></div>
+    </section>
+  </section>
+</main>
+</body>
+</html>
