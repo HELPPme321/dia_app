@@ -291,3 +291,5 @@ body{background:var(--premium-paper);color:var(--premium-ink)}
   html{scroll-behavior:auto}
   *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
 }
+.hero-account-link{position:absolute;z-index:5;top:clamp(22px,4vh,42px);right:clamp(18px,4vw,52px);display:inline-flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid rgba(255,255,255,.35);border-radius:999px;color:#fffdf7;background:rgba(25,40,29,.2);backdrop-filter:blur(10px);font-size:.68rem;font-weight:700;letter-spacing:.08em;text-decoration:none;transition:background .2s,border-color .2s,transform .2s}
+.hero-account-link:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.7);background:rgba(25,40,29,.5)}
