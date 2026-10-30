@@ -49,7 +49,7 @@ test('invalid customer credentials produce a generic error',async()=>{
   assert.equal((await register(agent)).status,201);
   const browser=request.agent(app);
   const r=await login(browser,'member@example.net','wrong-password-123');assert.equal(r.status,401);
-  assert.equal(r.body.error.code,'INVALID_CREDENTIALS');assert.equal(r.body.error.message,'Email or password is incorrect.');
+  assert.equal(r.body.error.code,'INVALID_CREDENTIALS');assert.equal(r.body.error.message,'Email, username, or password is incorrect.');
 });
 test('logout invalidates the customer session',async()=>{
   assert.equal((await register(agent)).status,201);
@@ -221,7 +221,7 @@ test('empty identifiers and wrong username passwords are handled safely',async()
   const wrong=await browser.post('/api/auth/admin-login').set('x-csrf-token',token)
     .send({identifier:'wrongadmin',password:'incorrect-password'}).expect(401);
   assert.equal(wrong.body.error.code,'INVALID_ADMIN_CREDENTIALS');
-  assert.match(wrong.body.error.message,/username or password/i);
+  assert.match(wrong.body.error.message,/username.*password/i);
 });
 
 test('dedicated sign-in, forgot-password, and dashboard pages have separate route guards',async()=>{
