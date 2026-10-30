@@ -73,6 +73,7 @@
   }
 
   function showDashboard(user) {
+    // Account names and usernames are user-controlled; textContent keeps them as text, never markup.
     $('#adminIdentity').textContent = (user.name || 'Administrator') + ' · ' + (user.username || user.email || '');
     loadAll();
   }
