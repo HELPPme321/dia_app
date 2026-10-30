@@ -1,4 +1,4 @@
-/* Dia+ storefront demo — vanilla JavaScript only. Cart and saved items persist in localStorage. */
+/* Dia storefront demo — vanilla JavaScript only. Cart and saved items persist in localStorage. */
 (() => {
   "use strict";
 
@@ -65,13 +65,13 @@
       const apiError = data?.error;
       if (apiError?.code === 'ENDPOINT_NOT_FOUND') {
         const build = apiError.version
-          ? `; ${apiError.service || 'Dia+'} v${apiError.version}${apiError.buildCommit ? ' (' + String(apiError.buildCommit).slice(0, 7) + ')' : ''}`
+          ? `; ${apiError.service || 'Dia'} v${apiError.version}${apiError.buildCommit ? ' (' + String(apiError.buildCommit).slice(0, 7) + ')' : ''}`
           : '; server build unknown';
         return `${apiError.message || 'API endpoint not found.'} [${apiError.method || method} ${apiError.path || requestPath}${build}]`;
       }
       const serverMessage = apiError?.message || data?.message;
       if (serverMessage) return `${serverMessage} [${method} ${requestPath}; HTTP 404; ${contentType}]`;
-      return `API endpoint request failed: ${method} ${requestPath} returned HTTP 404 (${contentType}). Verify this page is served by the current Dia+ Express app, not a static host or stale deployment.`;
+      return `API endpoint request failed: ${method} ${requestPath} returned HTTP 404 (${contentType}). Verify this page is served by the current Dia Express app, not a static host or stale deployment.`;
     }
     return data?.error?.message || data?.message || fallback;
   }
@@ -288,7 +288,7 @@
       return `<div class="page-heading"><p class="page-kicker">A GOOD CHOICE</p><h1 class="page-title">Your bag.</h1><p class="page-subtitle">A few considered essentials, picked just for you.</p></div>`;
     }
     if (currentPage === "orders") {
-      return `<div class="page-heading"><p class="page-kicker">YOUR DIA+ ACCOUNT</p><h1 class="page-title">Your orders.</h1><p class="page-subtitle">A record of orders placed through this account. Demo orders do not collect payment.</p></div>`;
+      return `<div class="page-heading"><p class="page-kicker">YOUR DIA ACCOUNT</p><h1 class="page-title">Your orders.</h1><p class="page-subtitle">A record of orders placed through this account. Demo orders do not collect payment.</p></div>`;
     }
     return `<div class="page-heading"><p class="page-kicker">THE DIA EDIT · DROP Nº 01</p><h1 class="page-title">Find your form.</h1><p class="page-subtitle">Everyday essentials. Quietly different, made to be worn your way.</p></div>`;
   }
@@ -335,7 +335,7 @@
   }
 
     function renderGrid() {
-    if (!productsLoaded) return `<div class="empty-state"><h3>Loading the collection…</h3><p>Getting the current catalog from Dia+.</p></div>`;
+    if (!productsLoaded) return `<div class="empty-state"><h3>Loading the collection…</h3><p>Getting the current catalog from Dia.</p></div>`;
     if (productsError && PRODUCTS.length === 0) return `<div class="empty-state"><h3>The collection could not be loaded.</h3><p>${escapeHtml(productsError)}</p><button class="secondary-button" data-action="retry-products">Try again</button></div>`;
     const products = getVisibleProducts();
     const title = currentPage === "saved" ? "Your favorites" : "The collection";
@@ -648,7 +648,7 @@
       case "finish-order":
         checkoutModal.hidden = true;
         navigate("shop");
-        showToast("Thanks for shopping Dia+");
+        showToast("Thanks for shopping Dia");
         break;
       case "view-orders":
         checkoutModal.hidden = true;

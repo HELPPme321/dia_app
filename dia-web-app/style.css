@@ -540,3 +540,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .order-history-card ul{margin:12px 0;padding-left:18px;color:#5b6757;font-size:.78rem;line-height:1.8}
 .order-history-total{display:block;text-align:right;font-size:1rem;color:#253b2b}
 .bottom-nav .nav-item{min-width:0}
+
+/* Shared Dia brand tokens */
+:root{--dia-plum:#1a1320;--dia-plum-deep:#151019;--dia-champagne:#d9c397;--dia-rose:#c48f9e;--dia-serif:'Cormorant Garamond',Georgia,serif;--dia-sans:'Manrope',Arial,sans-serif}
