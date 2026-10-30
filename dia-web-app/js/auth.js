@@ -82,14 +82,17 @@
     });
   }
 
-  function redirectByRole(user,authMethod) {
+  function redirectByRole(user,authMethod,options = {}) {
     if (!user || user.status !== 'active') return false;
     if (user.role === 'admin' && authMethod === 'admin') {
       window.location.replace('/admin');
       return true;
     }
     if (user.role === 'user') {
-      window.location.replace('/dashboard');
+      if (options.cinematic === true) {
+        try { window.sessionStorage.setItem('dia_intro_pending','1'); } catch { /* Continue without the optional introduction if storage is disabled. */ }
+      }
+      window.location.replace('/');
       return true;
     }
     return false;

@@ -298,7 +298,7 @@ function createApp(options = {}) {
     });
   });
   app.use((_req,res)=>res.status(404).type('text/plain').send('Not found'));
-  app.use((err,_req,res,_next)=>{if(res.headersSent)return;res.status(500).json({error:{code:'INTERNAL_ERROR',message:'Something went wrong. Please try again.'}});});
+  app.use((err,req,res,next)=>{if(res.headersSent)return next(err);console.error('[server-error]',req.method,req.path,err?.code||err?.name||'UNKNOWN_ERROR');return res.status(500).json({error:{code:'INTERNAL_ERROR',message:'Something went wrong. Please try again.'}});});
   return {app,db};
 }
 if(require.main===module){const {app}=createApp();const port=Number.parseInt(process.env.PORT,10)||3000;app.listen(port,()=>{console.log('Dia+ running on http://localhost:'+port);console.log('Dia+ API version '+APP_VERSION+' commit='+(process.env.RENDER_GIT_COMMIT||process.env.GITHUB_SHA||'local'));if(!process.env.GOOGLE_CLIENT_ID)console.warn('Configure GOOGLE_CLIENT_ID in .env to enable Google sign-in.');});}

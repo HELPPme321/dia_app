@@ -62,7 +62,7 @@
     try {
       const result = await roleAwareLogin(identifier, password, $('rememberMe').checked);
       $('loginPassword').value = '';
-      if (DiaAuth.redirectByRole(result.user, result.authMethod)) return;
+      if (DiaAuth.redirectByRole(result.user, result.authMethod, { cinematic: true })) return;
       throw new Error('This account is not authorized to open that area.');
     } catch (error) {
       showMessage(error.message || 'Email, username, or password is incorrect.');
@@ -107,7 +107,7 @@
         throw new Error('This account cannot be registered as a customer.');
       }
       $('registerForm').reset();
-      window.location.replace('/dashboard');
+      DiaAuth.redirectByRole(data.user, 'password', { cinematic: true });
     } catch (error) {
       showMessage(error.message || 'We could not create your account. Please try again.');
     } finally {
@@ -149,7 +149,7 @@
                   method: 'POST', body: { credential: response.credential }
                 });
                 if (data.user?.role !== 'user') throw new Error('Use administrator sign-in for this account.');
-                window.location.replace('/dashboard');
+                DiaAuth.redirectByRole(data.user, 'google', { cinematic: true });
               } catch (error) {
                 showMessage(error.message || 'Google sign-in failed. Please try again.');
               } finally { busy = false; }

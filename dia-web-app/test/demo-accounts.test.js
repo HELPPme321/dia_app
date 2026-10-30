@@ -11,12 +11,17 @@ const { createDatabase } = require('../src/db');
 const { createApp } = require('../src/server');
 const { seedDemoAccounts } = require('../scripts/seed-demo-accounts');
 const { disableDemoAccounts } = require('../scripts/disable-demo-accounts');
+const { setupDemoEnvironment } = require('../scripts/setup-demo-environment');
 
 const credentials = {
-  user: { email: 'demo@example.com', password: 'DemoUser2026!' },
-  admin: { email: 'admin@example.com', password: 'AdminDemo2026!' }
+  user: { email: 'demo@example.test', password: 'Test-DemoUser-2026!' },
+  admin: { email: 'admin.demo@example.test', password: 'Test-Admin-Demo-2026!' }
 };
-const enabledEnv = { ENABLE_DEMO_ACCOUNTS: 'true' };
+const enabledEnv = {
+  NODE_ENV: 'development', ENABLE_DEMO_ACCOUNTS: 'true',
+  DEMO_USER_EMAIL: credentials.user.email, DEMO_USER_PASSWORD: credentials.user.password,
+  DEMO_ADMIN_EMAIL: credentials.admin.email, DEMO_ADMIN_PASSWORD: credentials.admin.password
+};
 const quiet = { log() {}, warn() {} };
 
 function temporaryDatabase() {
@@ -47,6 +52,41 @@ test('demo seeding is disabled by default and does not create database accounts'
   } finally {
     db.close();
   }
+});
+
+
+test('demo seeding refuses production and never uses published fallback passwords', async () => {
+  const db = createDatabase(':memory:');
+  try {
+    await assert.rejects(seedDemoAccounts({ env: { ...enabledEnv, NODE_ENV: 'production' }, db, logger: quiet }), /only when NODE_ENV=development/);
+    await assert.rejects(seedDemoAccounts({ env: { NODE_ENV: 'development', ENABLE_DEMO_ACCOUNTS: 'true' }, db, logger: quiet }), /DEMO_USER_PASSWORD/);
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM users').get().count, 0);
+  } finally { db.close(); }
+});
+
+test('demo setup generates private local credentials and stores only password hashes', async () => {
+  const temp = temporaryDatabase();
+  const envPath = path.join(temp.dir, '.env');
+  const db = createDatabase(':memory:');
+  const messages = [];
+  try {
+    const result = await setupDemoEnvironment({ envPath, db, runtimeEnv: { NODE_ENV: 'development' }, logger: { log(message) { messages.push(message); }, warn() {} } });
+    assert.equal(result.created.length, 2);
+    const parsed = require('dotenv').parse(fs.readFileSync(envPath, 'utf8'));
+    assert.equal(parsed.ENABLE_DEMO_ACCOUNTS, 'true');
+    assert.ok(parsed.DEMO_USER_PASSWORD.length >= 32);
+    assert.ok(parsed.DEMO_ADMIN_PASSWORD.length >= 32);
+    assert.notEqual(parsed.DEMO_USER_PASSWORD, parsed.DEMO_ADMIN_PASSWORD);
+    assert.ok(!messages.join(' ').includes(parsed.DEMO_USER_PASSWORD));
+    assert.ok(!messages.join(' ').includes(parsed.DEMO_ADMIN_PASSWORD));
+    const user = db.prepare('SELECT password_hash FROM users WHERE email=?').get(credentials.user.email);
+    const admin = db.prepare('SELECT password_hash FROM users WHERE email=?').get(credentials.admin.email);
+    assert.ok(user.password_hash.startsWith('$2'));
+    assert.ok(admin.password_hash.startsWith('$2'));
+    assert.equal(await bcrypt.compare(parsed.DEMO_USER_PASSWORD, user.password_hash), true);
+    assert.equal(await bcrypt.compare(parsed.DEMO_ADMIN_PASSWORD, admin.password_hash), true);
+    if (process.platform !== 'win32') assert.equal(fs.statSync(envPath).mode & 0o777, 0o600);
+  } finally { db.close(); removeTemp(temp.dir); }
 });
 
 test('opt-in seed creates correctly hashed roles and is repeatable without overwriting accounts', async () => {

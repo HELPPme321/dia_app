@@ -9,7 +9,7 @@ const PRODUCTS = [
     tag: 'Bestseller',
     color: 'Forest',
     sizes: ['S', 'M', 'L', 'XL'],
-    image: '/assets/dia-editorial.webp',
+    image: 'https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&fit=crop&w=1200&q=82',
     description: 'A relaxed, heavyweight layer designed for repeat wear. Soft brushed fleece, an easy dropped shoulder, and a small signature sparkle.'
   },
   {
@@ -20,7 +20,7 @@ const PRODUCTS = [
     tag: 'New arrival',
     color: 'Oat',
     sizes: ['S', 'M', 'L', 'XL'],
-    image: '/assets/dia-editorial.webp',
+    image: 'https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&fit=crop&w=1200&q=82',
     description: 'A clean-cut cotton tee in a warm oat shade. Made to sit comfortably on its own or layer under a hoodie.'
   },
   {
@@ -31,7 +31,7 @@ const PRODUCTS = [
     tag: 'Everyday staple',
     color: 'Washed black',
     sizes: ['One size'],
-    image: '/assets/dia-editorial.webp',
+    image: 'https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&fit=crop&w=1200&q=82',
     description: 'An understated six-panel cap with a curved brim and an embroidered sparkle.'
   },
   {

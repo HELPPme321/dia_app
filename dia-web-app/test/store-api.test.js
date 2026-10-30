@@ -197,6 +197,24 @@ test('customer signup, DB cart, stock-safe demo order, order history, and admin 
   }
 });
 
+
+test('sample product seeding refreshes only untouched placeholder images', () => {
+  const db = createDatabase(':memory:');
+  try {
+    seedSampleProducts({ db, logger: quiet });
+    const hoodie = db.prepare('SELECT image_url,is_sample FROM products WHERE id=?').get('essential-hoodie');
+    assert.equal(hoodie.is_sample, 1);
+    assert.match(hoodie.image_url, /^https:\/\/images\.unsplash\.com\//);
+    db.prepare('UPDATE products SET image_url=? WHERE id=?').run('/assets/dia-editorial.webp', 'essential-hoodie');
+    db.prepare('UPDATE products SET image_url=? WHERE id=?').run('https://example.com/curated-product.webp', 'weekend-layer');
+    seedSampleProducts({ db, logger: quiet });
+    assert.match(db.prepare('SELECT image_url FROM products WHERE id=?').get('essential-hoodie').image_url, /^https:\/\/images\.unsplash\.com\//);
+    assert.equal(db.prepare('SELECT image_url FROM products WHERE id=?').get('weekend-layer').image_url, 'https://example.com/curated-product.webp');
+  } finally {
+    db.close();
+  }
+});
+
 test('order checkout rejects invalid quantities, sizes, empty carts and unauthorized access', async () => {
   const db = createDatabase(':memory:');
   try {
