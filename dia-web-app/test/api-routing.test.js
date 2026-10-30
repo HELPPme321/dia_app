@@ -195,13 +195,31 @@ test('API 404 reports the exact method and path without exposing query parameter
   }
 });
 
-test('new website asset routes serve shared CSS and JavaScript modules', async () => {
+test('frontend asset URLs deliver Dia design rules and shared scripts', async () => {
   const db = createDatabase(':memory:');
   try {
     const { app } = createApp({ db, env: { NODE_ENV: 'test', APP_ORIGIN: 'http://localhost:3000' } });
-    await request(app).get('/css/style.css').expect(200).expect((response)=>assert.ok(response.headers['content-type'].includes('text/css')));
-    await request(app).get('/js/auth.js').expect(200).expect((response)=>assert.ok(response.headers['content-type'].includes('javascript')));
-    await request(app).get('/js/fashion.js').expect(200).expect('Content-Type', /javascript/);
+    const home = await request(app).get('/').expect(200);
+    assert.ok(home.text.includes('href="/css/style.css?v=dia-desktop-20261030"'));
+    assert.ok(home.text.includes('src="/js/fashion.js?v=dia-desktop-20261030"'));
+
+    const login = await request(app).get('/login').expect(200);
+    assert.ok(login.text.includes('href="/css/style.css?v=dia-desktop-20261030"'));
+    assert.ok(login.text.includes('src="/js/auth.js?v=dia-desktop-20261030"'));
+    assert.ok(login.text.includes('src="/js/fashion.js?v=dia-desktop-20261030"'));
+
+    const css = await request(app).get('/css/style.css?v=dia-desktop-20261030').expect(200);
+    assert.ok(css.headers['content-type'].includes('text/css'));
+    for (const selector of ['.site-nav', '.home-hero', '.fashion-stage', '.login-layout', '.login-card', '.gold-button']) {
+      assert.ok(css.text.includes(selector), 'Dia stylesheet must include ' + selector);
+    }
+
+    const auth = await request(app).get('/js/auth.js?v=dia-desktop-20261030').expect(200);
+    assert.ok(auth.headers['content-type'].includes('javascript'));
+    assert.ok(auth.text.includes('function getCsrf()'));
+    const fashion = await request(app).get('/js/fashion.js?v=dia-desktop-20261030').expect(200);
+    assert.ok(fashion.headers['content-type'].includes('javascript'));
+    assert.ok(fashion.text.includes('function playHomeIntro()'));
     await request(app).get('/forgot.html').expect(200);
     await request(app).get('/forgot-password').expect(200);
   } finally {
