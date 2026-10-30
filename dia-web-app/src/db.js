@@ -57,7 +57,7 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || DEFAULT_DATA
   }
   // Older installations stored identifiers such as milesadmin in the email column.
   db.exec("UPDATE users SET username=lower(trim(email)) WHERE username IS NULL AND instr(email,'@')=0 AND trim(email)<>'' AND NOT EXISTS (SELECT 1 FROM users AS conflict WHERE conflict.username=lower(trim(users.email)) AND conflict.id<>users.id);");
-  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username) WHERE username IS NOT NULL AND username<>'';");
+  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username_ci ON users(username COLLATE NOCASE) WHERE username IS NOT NULL AND username<>'';");
 
   const sessionColumns = db.prepare('PRAGMA table_info(sessions)').all().map((column) => column.name);
   if (!sessionColumns.includes('auth_method')) {
