@@ -43,7 +43,7 @@
         <section id="loginPanel" role="tabpanel" aria-labelledby="loginTab">
           <form id="loginForm" class="auth-form" novalidate>
             <label for="loginIdentifier">Email or Username</label>
-            <input class="auth-input" id="loginIdentifier" name="identifier" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Email or Username" maxlength="254" required>
+            <input class="auth-input" id="loginIdentifier" name="identifier" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Email or Username" required>
             <label for="loginPassword">Password</label>
             <span class="auth-password"><input class="auth-input" id="loginPassword" name="password" type="password" autocomplete="current-password" maxlength="1024" required><button class="auth-toggle" type="button" data-password-toggle="loginPassword" aria-label="Show password" aria-pressed="false">Show</button></span>
             <div class="auth-options"><label class="auth-remember"><input id="rememberMe" type="checkbox"> Remember me</label><a class="auth-link" href="/forgot.html">Forgot password?</a></div>
@@ -57,9 +57,8 @@
           <form id="registerForm" class="auth-form" novalidate>
             <label for="registerName">Full name</label>
             <input class="auth-input" id="registerName" name="name" type="text" autocomplete="name" placeholder="Your full name" minlength="2" maxlength="120" required>
-            <label for="registerUsername">Username <span class="auth-field-hint">(optional)</span></label>
-            <input class="auth-input" id="registerUsername" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Choose a username" maxlength="32">
-            <p class="auth-field-hint">3–32 characters: letters, numbers, dots, underscores, or hyphens.</p>
+            <label for="registerUsername">Username</label>
+            <input class="auth-input" id="registerUsername" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Choose a username" required>
             <label for="registerEmail">Email address</label>
             <input class="auth-input" id="registerEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" maxlength="254" required>
             <label for="registerPassword">Password</label>
