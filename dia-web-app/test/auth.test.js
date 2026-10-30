@@ -259,6 +259,9 @@ test('desktop Dia pages are separate, role-aware, and protected',async()=>{
     assert.match(r.text,/id="bagDrawer"/);
     assert.match(r.text,/id="introSound"/);
     assert.match(r.text,/id="skipIntro"/);
+    assert.ok(r.text.includes('<script src="/js/fashion.js?v=dia-cinematic-login-20261031" defer></script>'));
+    assert.ok(r.text.includes('<script src="/js/storefront.js?v=dia-live-storefront-20261031" defer></script>'));
+    assert.ok(r.text.includes("images.unsplash.com"));
     assert.match(r.text,/id="collections"/);
     assert.match(r.text,/id="story"/);
     assert.doesNotMatch(r.text,/phone-frame|appScreen|bottom-nav/);
@@ -273,9 +276,6 @@ test('desktop Dia pages are separate, role-aware, and protected',async()=>{
     assert.doesNotMatch(r.text,/3–32 characters|Use 3–32 characters|\(optional\)/i);
     assert.ok(r.text.includes('href="/forgot.html"'));
     assert.doesNotMatch(r.text,/id="intro"|id="diaIntro"/);
-    assert.ok(r.text.includes('<script src="/js/fashion.js?v=dia-cinematic-login-20261031" defer></script>'));
-    assert.ok(r.text.includes('<script src="/js/storefront.js?v=dia-live-storefront-20261031" defer></script>'));
-    assert.ok(r.text.includes("images.unsplash.com"));
     assert.ok(r.text.includes('<script src="/js/auth.js?v=dia-cinematic-login-20261031" defer></script>'));
     assert.ok(r.text.includes('<script src="/login.js?v=dia-post-login-cinematic-20261031" defer></script>'));
   });
