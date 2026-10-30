@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root{
-  --dia-ink:#291e2e;--dia-forest:#211627;--dia-forest-2:#3b2940;--dia-moss:#936e83;
-  --dia-paper:#f5eef2;--dia-card:#fffafd;--dia-line:rgba(62,39,65,.14);
-  --dia-muted:#7f7181;--dia-rust:#c28c9c;--dia-gold:#d9c397;--dia-font:'Manrope',sans-serif;
+  --dia-ink:#173a2d;--dia-forest:#0B3D2E;--dia-forest-2:#0F5132;--dia-moss:#56866b;
+  --dia-paper:#F6F1E4;--dia-card:#fffdf6;--dia-line:rgba(11,61,46,.14);
+  --dia-muted:#687b70;--dia-rust:#D4AF37;--dia-gold:#D4AF37;--dia-font:'Manrope',sans-serif;
   --dia-display:'Cormorant Garamond',serif;
 }
 *{box-sizing:border-box}
@@ -137,7 +137,7 @@ body.admin-body{min-height:100vh;background:
 .sales-bar-column{display:flex;flex:1;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;min-width:58px}
 .sales-bar-value{color:var(--dia-muted);font-size:.58rem;white-space:nowrap}
 .sales-bar-track{display:flex;align-items:flex-end;overflow:hidden;width:100%;max-width:45px;height:112px;border-radius:7px 7px 3px 3px;background:#ecefe6}
-.sales-bar-fill{display:block;width:100%;min-height:0;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,#c09e66,var(--dia-forest-2));transition:height .6s cubic-bezier(.2,.7,.2,1)}
+.sales-bar-fill{display:block;width:100%;min-height:0;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,#E9D3A6,#0F5132);transition:height .6s cubic-bezier(.2,.7,.2,1)}
 .sales-bar-column small{color:#879182;font-size:.58rem;white-space:nowrap}
 .admin-footer{padding:32px 0 4px;color:#9aa192;font-size:.59rem;letter-spacing:.16em}
 #adminConfirm{width:min(480px,calc(100% - 28px));padding:28px;border:1px solid var(--dia-line);border-radius:18px;background:var(--dia-card);color:var(--dia-ink);box-shadow:0 30px 110px rgba(11,24,15,.28)}
@@ -156,8 +156,8 @@ body.admin-body{min-height:100vh;background:
 
 .admin-field-hint{margin:-3px 0 5px;color:#879183;font-size:.66rem;line-height:1.55}
 
-.admin-sidebar{background:#211627}
-.admin-sidebar .admin-brand>span{color:#d9c397}
+.admin-sidebar{background:#0B3D2E}
+.admin-sidebar .admin-brand>span{color:#D4AF37}
 .admin-hero h1 em{color:#b9889d}
 .admin-stats article:after{border-color:rgba(191,145,165,.2)}
 .admin-role,.admin-status{background:#f2e8ed;color:#6c4a60}
@@ -165,5 +165,15 @@ body.admin-body{min-height:100vh;background:
 .admin-primary{background:#2c1d32;color:#f8eef1}
 .admin-primary:hover{background:#48304d}
 .admin-secondary{color:#493249}
-.sales-bar-fill{background:linear-gradient(180deg,#d9c397,#9f6f85)}
+.sales-bar-fill{background:linear-gradient(180deg,#D4AF37,#9f6f85)}
 @media(prefers-reduced-motion:reduce){.admin-stats article,.admin-panel{animation:none!important}}
+
+/* Dia fashion-brand dashboard refinements */
+.admin-sidebar{background:linear-gradient(160deg,#0F5132,#06271f)}
+.admin-sidebar .admin-brand>span{color:#E9D3A6}
+.admin-primary{background:linear-gradient(110deg,#E9D3A6,#D4AF37,#F3E2B6);color:#153c2d}
+.admin-primary:hover{background:linear-gradient(110deg,#f1dfb8,#e0bb46,#f6e9c8)}
+.admin-role,.admin-status{background:#e9f1e9;color:#1c6749}
+.admin-status.disabled{background:#faeae4;color:#9b4e3b}
+.admin-hero h1 em{color:#0F5132}
+.sales-bar-fill{background:linear-gradient(180deg,#E9D3A6,#0F5132)}
