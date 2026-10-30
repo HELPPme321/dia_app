@@ -3,139 +3,53 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0B3D2E">
-  <meta name="description" content="Secure administrator sign-in for the Dia fashion studio.">
-  <title>Dia · Administrator Sign-in</title>
+  <meta name="theme-color" content="#06261C">
+  <meta name="description" content="Secure administrator sign-in for Dia.">
+  <title>Dia · Administrator sign in</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="/auth-pages.css">
-  <script src="/auth.js" defer></script>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth.js" defer></script>
+  <script src="/js/fashion.js" defer></script>
   <script src="/admin-login.js" defer></script>
 </head>
-<body class="auth-body">
+<body class="login-page">
+  <main class="login-layout">
+    <section class="login-showcase" aria-label="Dia atelier fashion showcase">
+      <div class="login-showcase__top">
+        <a class="brand" href="/" aria-label="Dia home">Dia<span class="brand-mark">✳</span></a>
+        <span class="login-showcase__edition">THE DIA ATELIER</span>
+      </div>
+      <div class="fashion-stage" data-fashion-stage aria-hidden="true"></div>
+      <div class="login-showcase__bottom">
+        <div><span class="login-showcase__wordmark shim">Dia</span><p class="login-showcase__tag">THE DIA ATELIER.</p></div>
+        <span class="login-showcase__number">01 / 04</span>
+      </div>
+    </section>
 
-<div class="dia-intro" id="diaIntro" aria-hidden="true" hidden>
-  <div class="dia-intro__glow"></div>
-  <svg class="dia-intro__flower" viewBox="0 0 320 320" aria-hidden="true" focusable="false">
-    <g class="dia-intro__drawing" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-      <path pathLength="100" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z"/>
-      <path pathLength="100" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z" transform="rotate(45 160 160)"/>
-      <path pathLength="100" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z" transform="rotate(90 160 160)"/>
-      <path pathLength="100" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z" transform="rotate(135 160 160)"/>
-      <path pathLength="100" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z" transform="rotate(180 160 160)"/>
-      <path pathLength="100" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z" transform="rotate(225 160 160)"/>
-      <path pathLength="100" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z" transform="rotate(270 160 160)"/>
-      <path pathLength="100" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z" transform="rotate(315 160 160)"/>
-      <circle pathLength="100" cx="160" cy="160" r="14"/>
-      <path pathLength="100" d="M160 175 C159 202 162 225 160 254"/>
-      <path pathLength="100" d="M160 220 C134 206 116 218 105 240 C128 243 147 237 160 220Z"/>
-      <path pathLength="100" d="M160 234 C185 220 205 225 216 246 C193 250 174 247 160 234Z"/>
-    </g>
-    <g class="dia-intro__petals" fill="none" stroke="currentColor" stroke-width="1.2">
-      <path class="dia-intro__petal" style="--petal-stagger:0ms" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z"/>
-      <g transform="rotate(45 160 160)"><path class="dia-intro__petal" style="--petal-stagger:70ms" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z"/></g>
-      <g transform="rotate(90 160 160)"><path class="dia-intro__petal" style="--petal-stagger:140ms" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z"/></g>
-      <g transform="rotate(135 160 160)"><path class="dia-intro__petal" style="--petal-stagger:210ms" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z"/></g>
-      <g transform="rotate(180 160 160)"><path class="dia-intro__petal" style="--petal-stagger:280ms" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z"/></g>
-      <g transform="rotate(225 160 160)"><path class="dia-intro__petal" style="--petal-stagger:350ms" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z"/></g>
-      <g transform="rotate(270 160 160)"><path class="dia-intro__petal" style="--petal-stagger:420ms" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z"/></g>
-      <g transform="rotate(315 160 160)"><path class="dia-intro__petal" style="--petal-stagger:490ms" d="M160 157 C132 132 122 88 160 28 C198 88 188 132 160 157Z"/></g>
-    </g>
-    <circle class="dia-intro__center" cx="160" cy="160" r="4" fill="currentColor"/>
-  </svg>
-  <div class="dia-intro__wordmark">Dia</div>
-  <button type="button" class="dia-intro__skip" id="diaIntroSkip" tabindex="-1">Skip intro <span aria-hidden="true">↗</span></button>
-</div>
-<main class="auth-shell auth-shell--admin">
-  <section class="auth-visual" aria-label="Dia fashion collection">
-    <div class="auth-visual__top">
-      <a class="auth-brand" href="/" aria-label="Dia home"><span class="auth-brand__word">Dia</span><span class="auth-brand__dot">✳</span></a>
-      <span class="auth-visual__edition">THE PRIVATE ATELIER</span>
-    </div>
-    
-<svg class="fashion-art" viewBox="0 0 760 690" role="img" aria-label="Gold line drawings of a dress, sneaker, high heel, handbag, sunglasses, hat and watch">
-  <defs>
-    <linearGradient id="diaGoldLine" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#F2DDAA"/>
-      <stop offset=".52" stop-color="#D4AF37"/>
-      <stop offset="1" stop-color="#E9D3A6"/>
-    </linearGradient>
-  </defs>
-  <g class="fashion-thread" fill="none" stroke="url(#diaGoldLine)" stroke-width="1" opacity=".36">
-    <path d="M90 315 C190 185 280 220 360 300 S520 405 680 255" stroke-dasharray="3 12"/>
-    <path d="M75 510 C210 590 330 470 420 505 S580 585 690 475" stroke-dasharray="2 10"/>
-  </g>
-  <g class="fashion-piece fashion-piece--dress" style="--piece-delay:0ms" fill="none" stroke="url(#diaGoldLine)" stroke-linecap="round" stroke-linejoin="round">
-    <path class="fashion-draw" pathLength="1" d="M140 103 C140 79 162 62 183 62 C205 62 224 79 224 103 C224 117 209 126 193 122"/>
-    <path class="fashion-draw" pathLength="1" d="M183 62 L183 43 M183 43 C165 42 161 30 166 22"/>
-    <path class="fashion-draw" pathLength="1" d="M160 125 C146 143 128 153 111 161 L126 204 L149 192 L144 233 L220 233 L215 192 L239 204 L254 161 C236 153 219 143 205 125 C191 138 174 138 160 125Z"/>
-    <path class="fashion-draw" pathLength="1" d="M160 125 C171 143 193 143 205 125 M149 192 L220 192"/>
-  </g>
-  <g class="fashion-piece fashion-piece--sneaker" style="--piece-delay:90ms" fill="none" stroke="url(#diaGoldLine)" stroke-linecap="round" stroke-linejoin="round">
-    <path class="fashion-draw" pathLength="1" d="M410 110 C428 125 445 147 464 163 C486 181 520 181 544 193 C557 200 568 211 570 227 L570 242 L391 242 C377 242 370 230 377 218 L395 187 C400 164 401 133 410 110Z"/>
-    <path class="fashion-draw" pathLength="1" d="M410 110 L429 147 L450 157 L464 139 M395 187 C427 198 455 192 478 180 M445 148 L461 170 M459 142 L474 164 M475 139 L488 161"/>
-    <path class="fashion-draw" pathLength="1" d="M379 225 C435 232 506 231 568 225 M403 242 L403 250 M553 242 L553 250"/>
-  </g>
-  <g class="fashion-piece fashion-piece--heel" style="--piece-delay:160ms" fill="none" stroke="url(#diaGoldLine)" stroke-linecap="round" stroke-linejoin="round">
-    <path class="fashion-draw" pathLength="1" d="M98 364 C130 349 149 350 171 368 C188 382 199 401 228 403 C246 404 261 395 279 398 C294 401 301 416 293 428 L278 438 L112 438 C91 438 82 425 91 407 C97 394 103 379 98 364Z"/>
-    <path class="fashion-draw" pathLength="1" d="M171 368 C163 392 151 416 148 437 M148 437 L139 485 L128 485 L130 437 M228 403 C246 413 267 416 293 428"/>
-    <path class="fashion-draw" pathLength="1" d="M92 438 C145 448 224 448 282 438"/>
-  </g>
-  <g class="fashion-piece fashion-piece--bag" style="--piece-delay:230ms" fill="none" stroke="url(#diaGoldLine)" stroke-linecap="round" stroke-linejoin="round">
-    <path class="fashion-draw" pathLength="1" d="M430 342 L562 342 L575 477 L416 477Z"/>
-    <path class="fashion-draw" pathLength="1" d="M454 342 C454 286 538 286 538 342"/>
-    <path class="fashion-draw" pathLength="1" d="M472 342 C472 315 520 315 520 342"/>
-    <path class="fashion-draw" pathLength="1" d="M416 386 C457 401 532 401 570 386 M493 342 L493 477"/>
-    <path class="fashion-draw" pathLength="1" d="M483 413 L502 413 L502 432 L483 432Z"/>
-  </g>
-  <g class="fashion-piece fashion-piece--glasses" style="--piece-delay:300ms" fill="none" stroke="url(#diaGoldLine)" stroke-linecap="round" stroke-linejoin="round">
-    <path class="fashion-draw" pathLength="1" d="M107 548 C114 526 145 523 171 530 C195 537 195 574 171 583 C144 593 116 582 107 548Z"/>
-    <path class="fashion-draw" pathLength="1" d="M205 548 C212 526 243 523 269 530 C293 537 293 574 269 583 C242 593 214 582 205 548Z"/>
-    <path class="fashion-draw" pathLength="1" d="M190 547 C195 538 201 538 207 547 M107 545 L83 534 M293 545 L316 534"/>
-  </g>
-  <g class="fashion-piece fashion-piece--hat" style="--piece-delay:370ms" fill="none" stroke="url(#diaGoldLine)" stroke-linecap="round" stroke-linejoin="round">
-    <path class="fashion-draw" pathLength="1" d="M430 95 C440 53 476 33 518 42 C551 49 572 78 573 111 C528 126 476 126 430 111Z"/>
-    <path class="fashion-draw" pathLength="1" d="M430 111 C397 119 389 138 407 151 C450 171 548 169 592 149 C608 141 598 122 573 111"/>
-    <path class="fashion-draw" pathLength="1" d="M438 102 C479 114 530 114 566 101"/>
-  </g>
-  <g class="fashion-piece fashion-piece--watch" style="--piece-delay:440ms" fill="none" stroke="url(#diaGoldLine)" stroke-linecap="round" stroke-linejoin="round">
-    <path class="fashion-draw" pathLength="1" d="M346 422 L346 389 C346 376 359 366 374 366 L402 366 C417 366 430 376 430 389 L430 422 M346 466 L346 500 C346 513 359 523 374 523 L402 523 C417 523 430 513 430 500 L430 466"/>
-    <path class="fashion-draw" pathLength="1" d="M350 417 H426 Q443 417 443 434 V453 Q443 470 426 470 H350 Q333 470 333 453 V434 Q333 417 350 417Z"/>
-    <path class="fashion-draw" pathLength="1" d="M407 443 A19 19 0 1 1 369 443 A19 19 0 1 1 407 443Z"/>
-    <path class="fashion-draw" pathLength="1" d="M388 443 L388 429 M388 443 L402 451 M388 424 L388 419 M388 462 L388 467"/>
-  </g>
-</svg>
-    <div class="auth-visual-copy">
-      <p class="auth-kicker">THE DIA ATELIER · PRIVATE ACCESS</p>
-       <h1>Behind every<br><em>beautiful detail.</em></h1>
-       <p>Manage the collections, customers and orders that bring the Dia wardrobe to life.</p>
-    </div>
-    <div class="auth-visual-footer"><span>01</span><i></i><span>DIA ATELIER · PRIVATE WORKSPACE</span></div>
-    <div class="auth-visual-grain" aria-hidden="true"></div>
-  </section>
-  <section class="auth-panel">
-    <div class="auth-card">
-      <div class="auth-card__brand"><a class="auth-brand auth-brand--compact" href="/">Dia<span class="auth-brand__dot">✳</span></a><span>ATELIER ACCESS</span></div>
-      <p class="auth-kicker">SECURE ADMINISTRATION</p>
-       <h2 id="adminLoginTitle">Welcome<br><em>back.</em></h2>
-       <p class="auth-lede">Sign in with your administrator username or email to open the Dia studio dashboard.</p>
-       <div id="adminNotice" class="auth-notice" role="status" aria-live="polite" hidden></div>
-       <form id="adminLoginForm" class="auth-form" novalidate>
-         <label for="adminIdentifier">Email or Username</label>
-         <input class="auth-input" id="adminIdentifier" name="identifier" type="text" inputmode="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Email or Username" required maxlength="254" aria-describedby="adminIdentifierHint">
-         <p class="auth-field-hint" id="adminIdentifierHint">Use your username, such as milesadmin, or your account email.</p>
-         <label for="adminPassword">PASSWORD</label>
-         <span class="auth-password"><input class="auth-input" id="adminPassword" name="password" type="password" autocomplete="current-password" placeholder="Your admin password" required maxlength="1024"><button class="auth-toggle" type="button" data-password-toggle="adminPassword" aria-label="Show password">Show</button></span>
-         <div class="auth-options auth-options--single"><a class="auth-link-button" href="/forgot-password">Forgot password?</a></div>
-         <button id="adminSubmit" class="auth-submit" type="submit"><span>Enter the atelier</span><span aria-hidden="true">↗</span></button>
-       </form>
-       <p class="auth-help">Access is granted only to an active account whose saved role is Administrator. The username itself never grants privileges.</p>
-       <a class="auth-admin-link" href="/login"><span>Not an administrator?</span><strong>Customer sign-in ↗</strong></a>
-    </div>
-    <footer class="auth-footer"><span>© <span id="adminYear"></span> DIA</span><span>MADE TO BE YOURS.</span></footer>
-  </section>
-</main>
+    <section class="login-main">
+      <div class="login-card" id="adminCard">
+        <div class="login-card__top"><a class="brand" href="/">Dia<span class="brand-mark">✳</span></a><span>PRIVATE STUDIO ACCESS</span></div>
+        <h1 id="adminLoginTitle">Administrator sign in</h1>
+        <p class="login-subtitle">Use your administrator email or username to enter the Dia atelier.</p>
+        <div class="auth-notice" id="adminNotice" role="status" aria-live="polite" hidden></div>
+
+        <form id="adminLoginForm" class="auth-form" novalidate>
+          <label for="adminIdentifier">Email or Username</label>
+          <input class="auth-input" id="adminIdentifier" name="identifier" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Email or Username" maxlength="254" required aria-describedby="adminIdentifierHint">
+          <p class="auth-field-hint" id="adminIdentifierHint">A username such as milesadmin is accepted; an @ symbol is not required.</p>
+          <label for="adminPassword">Password</label>
+          <span class="auth-password"><input class="auth-input" id="adminPassword" name="password" type="password" autocomplete="current-password" maxlength="1024" required><button class="auth-toggle" type="button" data-password-toggle="adminPassword" aria-label="Show password" aria-pressed="false">Show</button></span>
+          <div class="auth-options"><span></span><a class="auth-link" href="/forgot.html">Forgot password?</a></div>
+          <button class="auth-submit" type="submit" id="adminSubmit"><span>Enter atelier</span><span aria-hidden="true">↗</span></button>
+        </form>
+        <p class="auth-switch">Only active Administrator accounts can enter the private studio.</p>
+
+        <div class="login-card__foot"><a href="/forgot.html">Forgot password?</a><a href="/">← Back to site</a><a href="/login">Customer sign in ↗</a></div>
+        <p class="login-card__legal">Your account is protected by Dia's secure sign-in service. Administrator access is granted only when the stored role and account status are valid.</p>
+      <footer class="login-footer">© <span id="adminYear"></span> DIA ATELIER · PRIVATE ACCESS</footer>
+    </section>
+  </main>
 </body>
 </html>

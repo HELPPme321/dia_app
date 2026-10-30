@@ -41,7 +41,6 @@
   });
 
   DiaAuth.bindPasswordToggles();
-  DiaAuth.playBrandIntro();
 
   (async () => {
     $('adminYear').textContent = String(new Date().getFullYear());

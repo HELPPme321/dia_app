@@ -267,7 +267,11 @@ function createApp(options = {}) {
   app.get('/admin',adminDashboardPage);
   app.get('/admin.html',adminDashboardPage);
   app.get('/dashboard',customerDashboardPage);
-  app.get('/forgot-password',(_req,res)=>res.sendFile(path.join(ROOT,'forgot-password.html')));
+  app.get('/forgot.html',(_req,res)=>res.sendFile(path.join(ROOT,'forgot.html')));
+  app.get('/forgot-password',(_req,res)=>res.sendFile(path.join(ROOT,'forgot.html')));
+  app.get('/css/style.css',(_req,res)=>res.sendFile(path.join(ROOT,'css','style.css')));
+  app.get('/js/auth.js',(_req,res)=>res.sendFile(path.join(ROOT,'js','auth.js')));
+  app.get('/js/fashion.js',(_req,res)=>res.sendFile(path.join(ROOT,'js','fashion.js')));
   app.get('/',(_req,res)=>res.sendFile(path.join(ROOT,'index.html')));
   for(const file of ['index.html','style.css','premium.css','script.js','admin.css','admin.js','auth-pages.css','auth.js','login.js','admin-login.js','dashboard.js']){
     app.get('/'+file,(_req,res)=>res.sendFile(path.join(ROOT,file)));
