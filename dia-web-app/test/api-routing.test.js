@@ -58,9 +58,9 @@ test('frontend API calls use methods and paths registered by Express', () => {
 
   const frontendCalls = [
     ['login.js', "fetch('/api/auth/csrf'"],
-    ['login.js', "api('/api/auth/login'"],
-    ['login.js', "api('/api/auth/register'"],
-    ['login.js', "api('/api/auth/google'"],
+    ['login.js', "DiaAuth.request('/api/auth/login'"],
+    ['login.js', "DiaAuth.request('/api/auth/register'"],
+    ['login.js', "DiaAuth.request('/api/auth/google'"],
     ['login.js', "fetch('/api/config'"],
     ['login.js', "fetch('/api/auth/me'"],
     ['dashboard.js', "api('/api/auth/logout'"],
@@ -77,13 +77,27 @@ test('frontend API calls use methods and paths registered by Express', () => {
     ['admin.js', "api('/api/admin/orders?'"],
     ['admin.js', "api('/api/admin/orders/'"],
     ['admin.js', "api('/api/admin/analytics?days='"],
-    ['admin-login.js', "api('/api/auth/admin-login'"],
+    ['admin-login.js', "DiaAuth.request('/api/auth/admin-login'"],
     ['admin.js', "api('/api/auth/logout'"],
     ['admin.js', "fetch('/api/auth/me'"]
   ];
   for (const file of ['login.html', 'admin-login.html', 'dashboard.html', 'forgot-password.html']) {
     assert.ok(fs.existsSync(path.join(root, file)), 'Expected dedicated page file: ' + file);
   }
+  for (const file of ['login.html', 'admin-login.html']) {
+    const page = fs.readFileSync(path.join(root, file), 'utf8');
+    assert.ok(page.includes('<script src="/auth.js" defer></script>'), file + ' must load shared authentication helpers');
+    assert.ok(page.includes('id="diaIntro"'), file + ' must include the skippable Dia brand intro');
+  }
+  const sharedAuth = fs.readFileSync(path.join(root, 'auth.js'), 'utf8');
+  assert.ok(sharedAuth.includes('function playBrandIntro()'), 'Shared auth must control the once-per-session intro');
+  assert.ok(sharedAuth.includes('sessionStorage'), 'Intro display must be tracked per session');
+  const loginSource = fs.readFileSync(path.join(root, 'login.js'), 'utf8');
+  assert.ok(loginSource.includes("DiaAuth.request('/api/auth/admin-login'"), 'Role-aware login must support administrator sign-in');
+  assert.ok(loginSource.includes("error.code !== 'INVALID_CREDENTIALS'"), 'Admin fallback must only run after normal invalid credentials');
+  const introCss = fs.readFileSync(path.join(root, 'auth-pages.css'), 'utf8');
+  assert.ok(introCss.includes('diaIntroMaster var(--dia-intro-duration)'), 'Intro must use its shared 4.5-second master timeline');
+  assert.ok(introCss.includes('prefers-reduced-motion:reduce'), 'Intro must respect reduced-motion preferences');
   for (const [file, expression] of frontendCalls) {
     const source = fs.readFileSync(path.join(root, file), 'utf8');
     assert.ok(source.includes(expression), `Expected API call not found in ${file}: ${expression}`);
