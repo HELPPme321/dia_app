@@ -1,192 +1,368 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#06261C">
-  <meta name="description" content="Dia — considered fashion, expressive essentials and a wardrobe made to stay.">
-  <title>Dia — Wear the Moment</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://images.unsplash.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=dia-zip-integration-20261031">
-  <script src="/js/fashion.js?v=dia-cinematic-login-20261031" defer></script>
-  <script src="/js/storefront.js?v=dia-live-storefront-20261031" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a1f16">
+<meta name="description" content="Dia — Wear your story. Considered streetwear and everyday essentials with a point of view.">
+<title>Dia — Wear your story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+ color-scheme:dark;
+ --forest:#0a1f16;--panel:#12301f;--panel-2:#183b29;--gold:#d4af5a;--gold-hi:#f0d58a;
+ --cream:#f2ead7;--sage:#a3b8aa;--muted:#71877a;--line:rgba(212,175,90,.26);
+ --shadow:0 24px 65px rgba(0,0,0,.28);--display:'Cormorant Garamond',serif;--sans:'Manrope',sans-serif;
+ --surface:rgba(18,48,31,.88);--button-ink:#19291d;--soft:rgba(242,234,215,.05)
+}
+@media(prefers-color-scheme:light){
+ :root{color-scheme:light;--forest:#f3eee2;--panel:#fffaf0;--panel-2:#eee5d2;--gold:#94702b;--gold-hi:#c29b48;--cream:#1d3024;--sage:#617568;--muted:#7e887e;--line:rgba(148,112,43,.28);--shadow:0 24px 65px rgba(45,54,38,.12);--surface:rgba(255,250,240,.92);--button-ink:#17271d;--soft:rgba(18,48,31,.045)}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:92px;background:var(--forest)}
+body{margin:0;background:var(--forest);color:var(--cream);font-family:var(--sans);font-size:14px;line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit}
+button,a{-webkit-tap-highlight-color:transparent}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--gold-hi);outline-offset:4px}
+::selection{background:var(--gold);color:#112319}
+.wrap{width:min(1240px,calc(100% - 56px));margin-inline:auto}
+.eyebrow{margin:0 0 16px;color:var(--gold);font-size:10px;font-weight:800;letter-spacing:.23em;text-transform:uppercase}
+.display{font-family:var(--display);font-weight:500;letter-spacing:-.045em;line-height:.93}
+.site-header{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--forest) 90%,transparent);backdrop-filter:blur(18px)}
+.nav{width:min(1320px,calc(100% - 56px));min-height:82px;margin:auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px}
+.brand{display:inline-flex;align-items:center;gap:9px;width:max-content;font-family:var(--display);font-size:35px;font-weight:700;letter-spacing:-.09em;line-height:1}
+.brand-mark{color:var(--gold);font-family:var(--sans);font-size:17px;transform:translateY(-4px)}
+.nav-links,.nav-actions{display:flex;align-items:center;gap:30px}
+.nav-links a,.nav-login{color:var(--sage);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:color .25s ease}
+.nav-links a:hover,.nav-login:hover{color:var(--gold-hi)}
+.nav-actions{justify-content:flex-end;gap:18px}
+.nav-link-account{color:var(--gold-hi);font-size:11px;font-weight:800}
+.bag-trigger{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--cream);padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:background .25s,border-color .25s}
+.bag-trigger:hover{background:var(--soft);border-color:var(--gold)}
+.bag-count{display:grid;place-items:center;min-width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--gold-hi),var(--gold));color:#17251a;font-size:10px}
+.hero{position:relative;isolation:isolate;min-height:650px;height:min(730px,calc(100svh - 82px));overflow:hidden;border-bottom:1px solid var(--line);background:var(--forest)}
+.hero-track{display:flex;width:100%;height:100%;transition:transform .9s cubic-bezier(.22,.72,.22,1);will-change:transform}
+.hero-slide{position:relative;isolation:isolate;flex:0 0 100%;min-width:0;min-height:650px;display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,.88fr);align-items:center;gap:50px;padding:58px max(6vw,calc((100vw - 1240px)/2));overflow:hidden}
+.hero-slide:before{content:"";position:absolute;z-index:-2;inset:-35px;background-image:var(--hero-image);background-position:center 36%;background-size:cover;filter:blur(21px) brightness(.36) saturate(.72);transform:scale(1.12)}
+.hero-slide:after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,rgba(6,22,15,.88) 0%,rgba(6,22,15,.67) 42%,rgba(6,22,15,.28) 100%),linear-gradient(0deg,rgba(6,22,15,.35),transparent 56%)}
+.hero-copy{max-width:590px;padding:16px 0 50px}
+.hero-copy .eyebrow{color:var(--gold-hi)}
+.hero-copy h1{max-width:650px;margin:0;color:#f4ead6;font-family:var(--display);font-size:clamp(76px,9vw,132px);font-weight:500;letter-spacing:-.055em;line-height:.78}
+.hero-copy h1 em{color:var(--gold-hi);font-weight:400}
+.hero-copy p.hero-desc{max-width:460px;margin:28px 0 30px;color:rgba(242,234,215,.78);font-size:13px;line-height:1.9}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px}
+.gold-button,.outline-button{display:inline-flex;align-items:center;justify-content:center;gap:16px;min-height:48px;padding:0 22px;border:1px solid transparent;border-radius:5px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;transition:transform .25s,box-shadow .25s,background .25s,border-color .25s}
+.gold-button{background:linear-gradient(115deg,var(--gold-hi),var(--gold) 78%);color:#17261b;box-shadow:0 8px 26px rgba(212,175,90,.16)}
+.gold-button:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(212,175,90,.25)}
+.outline-button{border-color:rgba(240,213,138,.55);background:rgba(10,31,22,.28);color:#f2ead7}
+.outline-button:hover{border-color:var(--gold-hi);background:rgba(240,213,138,.1);transform:translateY(-3px)}
+.hero-note{display:flex;align-items:center;gap:18px;margin-top:58px;color:rgba(242,234,215,.55);font-size:9px;font-weight:800;letter-spacing:.17em;text-transform:uppercase}
+.hero-note span:first-child{color:var(--gold-hi)}
+.hero-photo-wrap{position:relative;justify-self:center;width:min(100%,450px);height:min(560px,70vh);min-height:440px;padding:10px;border:1px solid rgba(240,213,138,.75);background:rgba(240,213,138,.06);box-shadow:0 26px 80px rgba(0,0,0,.36);transform:rotate(1.3deg)}
+.hero-photo-wrap:before{content:"DIA / EDITORIAL";position:absolute;z-index:2;top:20px;left:22px;color:#f4ead6;font-size:8px;font-weight:800;letter-spacing:.2em;text-shadow:0 2px 12px #000}
+.hero-photo-wrap img{width:100%;height:100%;object-fit:cover;object-position:center 35%;filter:saturate(.8)}
+.hero-photo-wrap figcaption{position:absolute;right:18px;bottom:18px;color:#f5ead2;font-size:8px;letter-spacing:.18em;text-transform:uppercase;text-shadow:0 2px 12px #000}
+.hero-controls{position:absolute;z-index:5;bottom:28px;left:50%;display:flex;align-items:center;gap:12px;transform:translateX(-50%)}
+.hero-dot{width:7px;height:7px;border:1px solid var(--gold-hi);border-radius:50%;background:transparent;padding:0;transition:width .25s,background .25s}
+.hero-dot[aria-current="true"]{width:27px;border-radius:9px;background:var(--gold-hi)}
+.hero-progress{position:absolute;z-index:6;bottom:0;left:0;width:100%;height:3px;background:rgba(240,213,138,.15)}
+.hero-progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-hi))}
+.hero-progress span.run{animation:progress 4s linear forwards}
+@keyframes progress{to{width:100%}}
+.hero-index{position:absolute;right:28px;bottom:25px;color:rgba(242,234,215,.55);font-size:9px;letter-spacing:.16em}
+.promise-strip{border-bottom:1px solid var(--line);background:var(--panel)}
+.promise-inner{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.promise{display:flex;align-items:center;justify-content:center;gap:14px;padding:25px 12px;border-right:1px solid var(--line);color:var(--sage);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.promise:last-child{border-right:0}
+.promise-symbol{color:var(--gold);font-size:20px}
+.section{padding:104px 0}
+.section-heading{display:flex;justify-content:space-between;align-items:end;gap:32px;margin-bottom:38px}
+.section-heading h2{margin:0;color:var(--cream);font-family:var(--display);font-size:clamp(48px,6vw,76px);font-weight:500;letter-spacing:-.045em;line-height:.88}
+.section-heading h2 em{color:var(--gold);font-weight:400}
+.section-heading>p{max-width:390px;margin:0 0 5px;color:var(--sage);font-size:12px;line-height:1.9}
+.section-topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.section-topline span{color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:19px}
+.product-card{min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s}
+.product-card:hover{transform:translateY(-8px);border-color:rgba(240,213,138,.68);box-shadow:var(--shadow)}
+.product-image{position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--panel-2)}
+.product-image img{width:100%;height:100%;object-fit:cover;transition:transform .75s cubic-bezier(.2,.7,.2,1),filter .45s}
+.product-card:hover .product-image img{transform:scale(1.055);filter:saturate(1.08)}
+.product-badge{position:absolute;top:14px;left:14px;padding:6px 9px;border:1px solid rgba(240,213,138,.45);border-radius:3px;background:rgba(10,31,22,.78);color:var(--gold-hi);font-size:8px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.product-info{padding:17px 17px 19px}
+.product-meta{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.product-info h3{margin:9px 0 5px;color:var(--cream);font-family:var(--display);font-size:25px;font-weight:600;line-height:1.05}
+.product-info p{min-height:42px;margin:0 0 15px;color:var(--sage);font-size:10px;line-height:1.7}
+.product-bottom{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.product-price{color:var(--gold-hi);font-size:13px;font-weight:800}
+.add-button{min-height:37px;padding:0 12px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--cream);font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:background .2s,border-color .2s,color .2s}
+.add-button:hover:not(:disabled){border-color:var(--gold);background:var(--gold);color:#17251a}
+.add-button:disabled{cursor:not-allowed;opacity:.48}
+.catalog-message{margin:14px 0 0;color:var(--sage);font-size:11px}
+.looks-section{padding-top:74px;background:var(--panel)}
+.looks-grid{display:grid;grid-template-columns:1.05fr .9fr 1fr;grid-template-rows:260px 260px;gap:16px}
+.look-card{position:relative;min-height:210px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
+.look-card:first-child{grid-row:span 2}
+.look-card:nth-child(4){grid-column:2/4}
+.look-card img{width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.2,.7,.2,1),filter .4s}
+.look-card:hover img{transform:scale(1.06);filter:saturate(1.1)}
+.look-card:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(0deg,rgba(5,19,13,.83),transparent)}
+.look-caption{position:absolute;z-index:2;right:19px;bottom:17px;left:19px;display:flex;justify-content:space-between;align-items:end;color:#f4ead6}
+.look-caption span:first-child{font-family:var(--display);font-size:29px;line-height:1}
+.look-caption span:last-child{color:var(--gold-hi);font-size:8px;font-weight:800;letter-spacing:.16em}
+.story-band{position:relative;isolation:isolate;overflow:hidden;margin:96px auto;padding:65px 58px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(110deg,rgba(10,31,22,.96),rgba(18,48,31,.94)),var(--panel);box-shadow:var(--shadow)}
+.story-band:after{content:"✳";position:absolute;z-index:-1;right:7%;top:50%;transform:translateY(-58%);color:rgba(212,175,90,.08);font-size:250px;line-height:1}
+.story-band h2{max-width:700px;margin:0;color:var(--cream);font-family:var(--display);font-size:clamp(46px,6vw,78px);font-weight:500;line-height:.9;letter-spacing:-.05em}
+.story-band h2 em{color:var(--gold-hi);font-weight:400}
+.story-band p{max-width:500px;margin:18px 0 26px;color:var(--sage);font-size:12px;line-height:1.9}
+.newsletter-form{position:relative;z-index:1;display:flex;gap:10px;max-width:510px}
+.newsletter-form input{flex:1;min-width:0;min-height:48px;padding:0 15px;border:1px solid var(--line);border-radius:4px;background:rgba(255,255,255,.04);color:var(--cream);font-size:11px}
+.newsletter-form input::placeholder{color:var(--muted)}
+.newsletter-status{min-height:20px;margin:10px 0 0;color:var(--gold-hi);font-size:10px}
+.footer{padding:35px 0 44px;border-top:1px solid var(--line);background:var(--panel)}
+.footer-inner{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:25px}
+.footer-tagline{margin:5px 0 0;color:var(--sage);font-size:10px;letter-spacing:.1em}
+.footer-copy{color:var(--muted);font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.footer-links{display:flex;justify-content:flex-end;gap:20px;color:var(--sage);font-size:10px}
+.footer-links a:hover{color:var(--gold-hi)}
+.bag-backdrop{position:fixed;z-index:70;inset:0;background:rgba(0,0,0,.56);backdrop-filter:blur(4px)}
+.bag-drawer{position:fixed;z-index:71;top:0;right:0;display:flex;flex-direction:column;width:min(450px,100%);height:100dvh;padding:28px;background:var(--panel);border-left:1px solid var(--line);box-shadow:var(--shadow);transform:translateX(105%);transition:transform .38s cubic-bezier(.22,.72,.22,1)}
+.bag-drawer.open{transform:translateX(0)}
+.drawer-head{display:flex;justify-content:space-between;align-items:start;padding-bottom:21px;border-bottom:1px solid var(--line)}
+.drawer-head h2{margin:0;font-family:var(--display);font-size:42px;font-weight:500;line-height:1}
+.icon-button{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--cream);font-size:19px}
+.bag-items{flex:1;overflow:auto;padding:18px 0}
+.bag-empty{padding:42px 0;color:var(--sage);text-align:center}
+.bag-row{display:grid;grid-template-columns:76px 1fr auto;gap:13px;padding:13px 0;border-bottom:1px solid var(--line)}
+.bag-row img{width:76px;height:94px;object-fit:cover;border-radius:5px}
+.bag-row h3{margin:2px 0;font-family:var(--display);font-size:21px;font-weight:600}
+.bag-row p{margin:0;color:var(--sage);font-size:10px}
+.bag-row strong{color:var(--gold-hi);font-size:11px}
+.remove-bag{margin-top:9px;padding:0;border:0;background:transparent;color:var(--muted);font-size:9px;text-decoration:underline}
+.drawer-foot{padding-top:18px;border-top:1px solid var(--line)}
+.drawer-total{display:flex;justify-content:space-between;margin-bottom:15px;color:var(--sage);font-size:11px}
+.drawer-total strong{color:var(--gold-hi);font-size:15px}
+.drawer-foot .gold-button{width:100%}
+.drawer-note{margin:13px 0 0;color:var(--muted);font-size:9px;line-height:1.7}
+dialog{max-width:min(560px,calc(100% - 28px));max-height:90dvh;padding:30px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--cream);box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
+.dialog-close{float:right;width:36px;height:36px;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--cream);font-size:19px}
+.checkout-head h2{margin:0 0 7px;font-family:var(--display);font-size:42px;font-weight:500;line-height:1}
+.checkout-head p{color:var(--sage);font-size:11px}
+.checkout-form{display:grid;gap:9px;margin-top:22px}
+.checkout-form label{margin-top:8px;color:var(--sage);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.checkout-form input,.checkout-form textarea{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:var(--soft);color:var(--cream)}
+.checkout-error{min-height:18px;color:#dba27e;font-size:10px}
+.store-toast{position:fixed;z-index:100;right:24px;bottom:24px;max-width:min(360px,calc(100% - 48px));padding:14px 18px;border:1px solid var(--gold);border-radius:9px;background:var(--panel-2);color:var(--cream);box-shadow:var(--shadow);font-size:11px}
+@media(max-width:900px){
+ .nav{grid-template-columns:1fr auto;gap:12px}.nav-links{grid-column:1/-1;grid-row:2;justify-content:center;padding:0 0 15px}.nav{padding-top:12px}.nav-actions{gap:12px}
+ .hero{height:auto;min-height:670px}.hero-slide{grid-template-columns:1fr .82fr;gap:26px;padding:54px 34px 78px;min-height:670px}
+ .hero-copy h1{font-size:clamp(62px,9vw,100px)}.hero-photo-wrap{height:470px;min-height:0}
+ .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .looks-grid{grid-template-rows:230px 230px}
+}
+@media(max-width:620px){
+ .wrap,.nav{width:calc(100% - 32px)}
+ .nav{min-height:70px;grid-template-columns:1fr auto}.brand{font-size:31px}.nav-links{gap:20px;overflow:auto;justify-content:flex-start;white-space:nowrap}.nav-links a,.nav-login{font-size:9px}.nav-actions{gap:9px}.bag-trigger{padding:7px 10px;font-size:9px}.nav-login{display:none}
+ .hero{min-height:790px}.hero-track,.hero-slide{min-height:790px}.hero-slide{display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:18px;padding:56px 22px 75px}
+ .hero-copy{padding:0}.hero-copy h1{font-size:clamp(60px,17vw,88px)}.hero-copy p.hero-desc{max-width:360px;margin:19px 0 20px;font-size:11px}.hero-note{margin-top:27px}
+ .hero-photo-wrap{align-self:center;width:min(76%,330px);height:320px;min-height:320px;margin:0 6% 0 auto;transform:rotate(1deg)}
+ .hero-controls{bottom:26px}.hero-index{display:none}
+ .promise-inner{grid-template-columns:1fr}.promise{justify-content:flex-start;padding:15px 10px;border-right:0;border-bottom:1px solid var(--line)}.promise:last-child{border-bottom:0}
+ .section{padding:70px 0}.section-heading{display:block;margin-bottom:24px}.section-heading>p{margin-top:16px;font-size:11px}.section-heading h2{font-size:54px}
+ .product-grid{gap:11px}.product-info{padding:12px}.product-info h3{font-size:22px}.product-info p{font-size:9px;min-height:48px}.product-bottom{align-items:flex-start;flex-direction:column}.add-button{width:100%}
+ .looks-section{padding-top:58px}.looks-grid{grid-template-columns:1fr 1fr;grid-template-rows:260px 180px 180px;gap:10px}.look-card:first-child{grid-row:span 2}.look-card:nth-child(4){grid-column:1/3}.look-caption span:first-child{font-size:23px}
+ .story-band{margin:65px auto;padding:37px 23px}.story-band h2{font-size:49px}.story-band p{font-size:11px}.newsletter-form{flex-direction:column}.newsletter-form .gold-button{width:100%}
+ .footer-inner{grid-template-columns:1fr;gap:14px}.footer-links{justify-content:flex-start;flex-wrap:wrap}.footer-copy{order:3}
+ .bag-drawer{padding:22px}.store-toast{right:14px;bottom:14px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+ .hero-track{transition:none}
+}
+</style>
 </head>
-<body class="home-page">
-  <div id="intro" class="cinematic-intro" aria-hidden="true" hidden>
-    <div class="intro-scenes" aria-hidden="true">
-      <figure class="intro-scene is-active" data-intro-scene>
-        <img src="https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=1800&amp;q=82" alt="" fetchpriority="high">
-        <figcaption>01 / THE ART OF ARRIVING</figcaption>
-      </figure>
-      <figure class="intro-scene" data-intro-scene>
-        <img src="https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=1800&amp;q=82" alt="">
-        <figcaption>02 / FORM MEETS FEELING</figcaption>
-      </figure>
-      <figure class="intro-scene" data-intro-scene>
-        <img src="https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=1800&amp;q=82" alt="">
-        <figcaption>03 / MADE TO MOVE WITH YOU</figcaption>
-      </figure>
-    </div>
-    <div class="intro-grain" aria-hidden="true"></div>
-    <div class="intro-topline"><span>DIA / CEBU</span><span>THE NEW CHAPTER · 2026</span></div>
-    <div class="intro-lockup">
-      <span class="intro-overline">A PERSONAL EXPRESSION OF STYLE</span>
-      <p class="intro-wordmark">Dia<span>®</span></p>
-      <p class="intro-tagline">Wear the moment.</p>
-    </div>
-    <div class="intro-controls">
-      <button id="introSound" class="intro-control" type="button" aria-pressed="false">Sound off</button>
-      <button id="skipIntro" class="intro-control intro-skip" type="button">Skip introduction <span aria-hidden="true">↗</span></button>
-    </div>
+<body>
+<header class="site-header">
+ <nav class="nav" aria-label="Main navigation">
+  <a class="brand" href="/" aria-label="Dia home">Dia<span class="brand-mark">✦</span></a>
+  <div class="nav-links"><a href="#shop">Shop</a><a href="#looks">Looks</a><a href="#story">Our story</a></div>
+  <div class="nav-actions">
+   <a class="nav-login" id="loginLink" href="/login">Log in</a>
+   <a class="nav-link-account" id="accountLink" href="/dashboard" hidden>My account</a>
+   <button class="bag-trigger" id="bagOpen" type="button" aria-haspopup="dialog" aria-controls="bagDrawer">Bag <span class="bag-count" id="bagCount">0</span></button>
   </div>
-
-  <header class="site-header">
-    <nav class="site-nav" aria-label="Main navigation">
-      <a class="brand shim" href="/" aria-label="Dia home">Dia<span class="brand-mark">✳</span></a>
-      <div class="nav-links">
-        <a href="#collections">Collections</a>
-        <a href="#featured">New arrivals</a>
-        <a href="#story">Our story</a>
-      </div>
-      <div class="nav-actions">
-        <a id="signInLink" class="nav-signin" href="/login">Sign in</a>
-        <a id="myAccountLink" class="nav-account" href="/dashboard" hidden>My account</a>
-        <button id="signOutButton" class="nav-signout" type="button" hidden>Sign out</button>
-        <button id="bagToggle" class="bag-toggle" type="button" aria-controls="bagDrawer" aria-expanded="false">Bag <span id="bagCount">0</span></button>
-      </div>
-    </nav>
-  </header>
-
-  <main>
-    <section class="editorial-hero" aria-labelledby="heroTitle">
-      <div class="hero-copy">
-        <p class="eyebrow">THE DIA EDIT · CEBU</p>
-        <h1 id="heroTitle">Wear the<br><em>moment.</em></h1>
-        <p class="hero-description">A considered wardrobe of expressive essentials. Thoughtful shapes, enduring details, and pieces that feel unmistakably yours.</p>
-        <a class="gold-button" href="#featured">Discover the collection <span aria-hidden="true">↗</span></a>
-        <div class="hero-footnote"><span>01 — 04</span><span>STYLE, WITH INTENTION</span></div>
-      </div>
-      <div class="hero-composition">
-        <figure class="hero-main-photo">
-          <img src="https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=1800&amp;q=84" alt="Fashion editorial portrait in a sculptural cream outfit" fetchpriority="high">
-          <figcaption>THE ART OF EVERYDAY ELEGANCE</figcaption>
-        </figure>
-        <figure class="hero-detail-photo">
-          <img src="https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="Model wearing a softly tailored cream look" loading="lazy">
-        </figure>
-        <span class="hero-stamp">D<br>I<br>A</span>
-      </div>
-    </section>
-
-    <section class="brand-ribbon" aria-label="Dia collection categories">
-      <span>CLOTHING</span><i>✳</i><span>ACCESSORIES</span><i>✳</i><span>EVERYDAY OBJECTS</span><i>✳</i><span>PERSONAL STYLE</span>
-    </section>
-
-    <section id="collections" class="editorial-section collections-section">
-      <div class="section-heading editorial-heading">
-        <div><p class="eyebrow">CURATED, NOT COMPLICATED</p><h2>Find your<br><em>own rhythm.</em></h2></div>
-        <p>Each edit is built around the way you move through the day. Explore the details, discover a new favorite, and make it yours.</p>
-      </div>
-      <div class="campaign-grid">
-        <a class="campaign-card campaign-tall" href="#featured" aria-label="Explore the form collection">
-          <img src="https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=1100&amp;q=82" alt="Minimal cream fashion look" loading="lazy">
-          <span class="campaign-index">01 / THE FORM EDIT</span><span class="campaign-title">The Form Edit <b>↗</b></span>
-        </a>
-        <a class="campaign-card" href="#featured" aria-label="Explore the everyday collection">
-          <img src="https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=1100&amp;q=82" alt="Modern outdoor fashion editorial" loading="lazy">
-          <span class="campaign-index">02 / EVERYDAY, ELEVATED</span><span class="campaign-title">Everyday, elevated <b>↗</b></span>
-        </a>
-        <div class="campaign-note">
-          <span class="note-mark">D✳</span>
-          <p>“The best style is the one that feels like you.”</p>
-          <span class="note-caption">A DIA POINT OF VIEW</span>
-        </div>
-      </div>
-      <div class="collection-shortcuts">
-        <div class="collection-shortcuts__heading">
-          <div>
-            <p class="eyebrow">SHOP THE DIA WARDROBE</p>
-            <h3>Find your <em>signature.</em></h3>
-          </div>
-          <p>Explore the silhouettes and finishing touches that make a look your own.</p>
-        </div>
-        <div class="collection-grid collection-grid--editorial" aria-label="Shop by category">
-          <a class="collection-card" href="#featured" data-fashion-tile="dress" aria-label="Explore Dresses">
-            <span class="collection-card__art" aria-hidden="true"></span>
-            <div class="collection-card__foot"><div><h3>Dresses</h3><p>Considered silhouettes</p></div><span aria-hidden="true">↗</span></div>
-          </a>
-          <a class="collection-card" href="#featured" data-fashion-tile="sneaker" aria-label="Explore Shoes">
-            <span class="collection-card__art" aria-hidden="true"></span>
-            <div class="collection-card__foot"><div><h3>Shoes</h3><p>Made to move</p></div><span aria-hidden="true">↗</span></div>
-          </a>
-          <a class="collection-card" href="#featured" data-fashion-tile="bag" aria-label="Explore Bags">
-            <span class="collection-card__art" aria-hidden="true"></span>
-            <div class="collection-card__foot"><div><h3>Bags</h3><p>Everyday companions</p></div><span aria-hidden="true">↗</span></div>
-          </a>
-          <a class="collection-card" href="#featured" data-fashion-tile="shades" aria-label="Explore Eyewear">
-            <span class="collection-card__art" aria-hidden="true"></span>
-            <div class="collection-card__foot"><div><h3>Eyewear</h3><p>The finishing detail</p></div><span aria-hidden="true">↗</span></div>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <section id="featured" class="editorial-section featured-section">
-      <div class="section-heading featured-heading">
-        <div><p class="eyebrow">THE PIECES TO KNOW</p><h2>New arrivals<span class="heading-period">.</span></h2></div>
-        <p>Discover the current Dia selection, chosen for comfort, character, and repeat wear.</p>
-      </div>
-      <div id="catalogStatus" class="catalog-status" role="status" aria-live="polite">Curating the collection…</div>
-      <div id="featuredProducts" class="product-grid" aria-live="polite"></div>
-    </section>
-
-    <section id="story" class="story-section">
-      <div class="story-image">
-        <img src="https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=1500&amp;q=82" alt="Fashion editorial in a calm green outdoor setting" loading="lazy">
-        <span>THE DIA POINT OF VIEW / 2026</span>
-      </div>
-      <div class="story-copy">
-        <p class="eyebrow">LESS, BUT MORE MEANINGFUL</p>
-        <h2>Made to be<br><em>remembered.</em></h2>
-        <p>Dia is built around clean lines, expressive details, and the pleasure of choosing well. We believe the best pieces earn their place in your wardrobe — not just for a season, but for the stories you make in them.</p>
-        <a class="text-link" href="#featured">Explore the edit <span aria-hidden="true">↗</span></a>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer editorial-footer">
-    <a class="brand" href="/">Dia<span class="brand-mark">✳</span></a>
-    <span>© <span id="year">2026</span> DIA · CLOTHES WITH INTENTION</span>
-    <nav aria-label="Footer navigation"><a href="#collections">Collections</a><a href="#story">Our story</a><a href="/login">Sign in</a></nav>
-  </footer>
-
-  <dialog id="productDialog" class="product-dialog" aria-labelledby="productDialogTitle">
-    <button class="dialog-close" type="button" data-action="close-product" aria-label="Close product details">×</button>
-    <div id="productDialogContent"></div>
-  </dialog>
-
-  <div id="bagBackdrop" class="bag-backdrop" hidden></div>
-  <aside id="bagDrawer" class="bag-drawer" aria-labelledby="bagTitle" aria-hidden="true" hidden>
-    <div class="bag-drawer-head"><div><p class="eyebrow">YOUR SELECTION</p><h2 id="bagTitle">The bag<span>.</span></h2></div><button id="bagClose" class="drawer-close" type="button" aria-label="Close bag">×</button></div>
-    <div id="bagItems" class="bag-items"><p class="bag-empty">Your bag is waiting for something lovely.</p></div>
-    <div class="bag-drawer-foot"><div><span>Subtotal</span><strong id="bagSubtotal">₱0</strong></div><button id="checkoutOpen" class="gold-button" type="button" disabled>Continue to checkout <span aria-hidden="true">↗</span></button><p>Demo checkout saves your order to your account. No payment is collected.</p></div>
-  </aside>
-  <dialog id="checkoutDialog" class="checkout-dialog" aria-labelledby="checkoutTitle">
-    <button id="checkoutClose" class="dialog-close" type="button" aria-label="Close checkout">×</button>
-    <div id="checkoutDialogContent">
-      <div class="checkout-heading"><p class="eyebrow">ONE LAST DETAIL</p><h2 id="checkoutTitle">Make it <em>yours.</em></h2><p>Your demo order will be saved to your Dia account. No payment details are requested or collected.</p></div>
-      <form id="checkoutForm" class="checkout-form">
-        <label for="checkoutName">Full name</label><input id="checkoutName" name="customerName" autocomplete="name" required minlength="2" maxlength="120">
-        <label for="checkoutEmail">Email address</label><input id="checkoutEmail" name="customerEmail" type="email" autocomplete="email" required maxlength="254">
-        <label for="checkoutAddress">Delivery address</label><textarea id="checkoutAddress" name="customerAddress" rows="3" autocomplete="street-address" required minlength="6" maxlength="500"></textarea>
-        <p id="checkoutError" class="checkout-error" role="status"></p>
-        <button id="checkoutSubmit" class="gold-button" type="submit">Place demo order <span aria-hidden="true">↗</span></button>
-      </form>
-    </div>
-  </dialog>
-  <div id="storeToast" class="store-toast" role="status" aria-live="polite" hidden></div>
+ </nav>
+</header>
+<main>
+ <section class="hero" id="home" aria-label="Dia editorial looks">
+  <div class="hero-track" id="heroTrack">
+   <article class="hero-slide" style="--hero-image:url('https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=1800&amp;q=82')">
+    <div class="hero-copy"><p class="eyebrow">Dia streetwear · Cebu · 01 / 03</p><h1>Wear your<br><em>story.</em></h1><p class="hero-desc">Everyday pieces with a point of view. Thoughtful fits, considered details, and room for your own way of wearing them.</p><div class="hero-actions"><a class="gold-button" href="#shop">Shop the collection <span aria-hidden="true">↗</span></a><a class="outline-button" href="#looks">See the looks <span aria-hidden="true">↗</span></a></div><div class="hero-note"><span>01 — THE CITY EDIT</span><span>Made to move with you</span></div></div>
+    <figure class="hero-photo-wrap"><img src="https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=1000&amp;q=84" alt="Dia editorial model in a contemporary layered look" fetchpriority="high"><figcaption>Look 01 · City uniform</figcaption></figure>
+   </article>
+   <article class="hero-slide" style="--hero-image:url('https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=1800&amp;q=82')">
+    <div class="hero-copy"><p class="eyebrow">The everyday edit · 02 / 03</p><h1>Make room<br>for <em>you.</em></h1><p class="hero-desc">Easy layers, strong silhouettes, and details that speak softly. Your wardrobe should feel like an extension of who you are.</p><div class="hero-actions"><a class="gold-button" href="#shop">Shop the collection <span aria-hidden="true">↗</span></a><a class="outline-button" href="#looks">See the looks <span aria-hidden="true">↗</span></a></div><div class="hero-note"><span>02 — THE FORM EDIT</span><span>Built for repeat wear</span></div></div>
+    <figure class="hero-photo-wrap"><img src="https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=1000&amp;q=84" alt="Model wearing a clean, relaxed streetwear silhouette" loading="lazy"><figcaption>Look 02 · Form in motion</figcaption></figure>
+   </article>
+   <article class="hero-slide" style="--hero-image:url('https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=1800&amp;q=82')">
+    <div class="hero-copy"><p class="eyebrow">Personal style · 03 / 03</p><h1>Own your<br><em>everyday.</em></h1><p class="hero-desc">A considered collection for the moments that make a day yours. Find the pieces, then make the story.</p><div class="hero-actions"><a class="gold-button" href="#shop">Shop the collection <span aria-hidden="true">↗</span></a><a class="outline-button" href="#looks">See the looks <span aria-hidden="true">↗</span></a></div><div class="hero-note"><span>03 — THE WEEKEND EDIT</span><span>Clothes with character</span></div></div>
+    <figure class="hero-photo-wrap"><img src="https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=1000&amp;q=84" alt="Fashion model in an outdoor contemporary look" loading="lazy"><figcaption>Look 03 · After hours</figcaption></figure>
+   </article>
+  </div>
+  <div class="hero-controls" id="heroDots" aria-label="Choose an editorial slide"><button class="hero-dot" type="button" data-slide="0" aria-label="Show slide 1" aria-current="true"></button><button class="hero-dot" type="button" data-slide="1" aria-label="Show slide 2" aria-current="false"></button><button class="hero-dot" type="button" data-slide="2" aria-label="Show slide 3" aria-current="false"></button></div>
+  <div class="hero-progress" aria-hidden="true"><span id="heroProgress"></span></div><span class="hero-index">DIA / 2026</span>
+ </section>
+ <section class="promise-strip" aria-label="Shopping benefits"><div class="wrap promise-inner"><div class="promise"><span class="promise-symbol">✳</span>Free delivery over ₱2,500</div><div class="promise"><span class="promise-symbol">↺</span>Easy 7-day returns</div><div class="promise"><span class="promise-symbol">◈</span>Small batches, considered well</div></div></section>
+ <section class="section wrap" id="shop">
+  <div class="section-heading"><div><p class="eyebrow">The latest from Dia</p><h2>New <em>arrivals.</em></h2></div><p>Everyday staples, with a little more intention. Find the pieces that fit your rhythm and make them your own.</p></div>
+  <div class="section-topline"><span>Current selection / 04 pieces</span><span id="catalogLabel">Collection preview</span></div>
+  <div class="product-grid" id="productGrid" aria-live="polite">
+   <article class="product-card"><div class="product-image"><img src="/assets/dia-editorial.webp" alt="Dia tee sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Essentials</span><span>01 / 04</span></div><h3>Everyday heavyweight tee</h3><p>A structured cotton staple with a relaxed finish.</p><div class="product-bottom"><span class="product-price">₱890</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
+   <article class="product-card"><div class="product-image"><img src="/assets/dia-editorial.webp" alt="Leather tote sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Accessories</span><span>02 / 04</span></div><h3>Everyday leather tote</h3><p>A roomy companion with a clean silhouette.</p><div class="product-bottom"><span class="product-price">₱1,850</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
+   <article class="product-card"><div class="product-image"><img src="/assets/dia-editorial.webp" alt="Dia cap sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Accessories</span><span>03 / 04</span></div><h3>Core six-panel cap</h3><p>A familiar shape, finished for every day.</p><div class="product-bottom"><span class="product-price">₱690</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
+   <article class="product-card"><div class="product-image"><img src="/assets/dia-editorial.webp" alt="Relaxed chinos sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Bottoms</span><span>04 / 04</span></div><h3>Relaxed everyday chinos</h3><p>Easy structure with room to move.</p><div class="product-bottom"><span class="product-price">₱1,490</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></div></article>
+  </div>
+  <p class="catalog-message" id="catalogMessage" role="status">Sample product cards are shown until the catalog is populated.</p>
+ </section>
+ <section class="section looks-section" id="looks">
+  <div class="wrap"><div class="section-heading"><div><p class="eyebrow">Styled in real life</p><h2>The <em>looks.</em></h2></div><p>One collection. Different ways to wear it. Explore a few directions, then build a look that feels like yours.</p></div>
+   <div class="looks-grid">
+    <a class="look-card" href="#shop"><img src="https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=1000&amp;q=82" alt="City uniform editorial look" loading="lazy"><span class="look-caption"><span>City uniform</span><span>LOOK 01</span></span></a>
+    <a class="look-card" href="#shop"><img src="https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=900&amp;q=82" alt="The form edit editorial look" loading="lazy"><span class="look-caption"><span>The form edit</span><span>LOOK 02</span></span></a>
+    <a class="look-card" href="#shop"><img src="https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=900&amp;q=82" alt="Weekend editorial style" loading="lazy"><span class="look-caption"><span>Weekend ease</span><span>LOOK 03</span></span></a>
+    <a class="look-card" href="#shop"><img src="/assets/dia-editorial.webp" alt="Dia studio editorial look" loading="lazy"><span class="look-caption"><span>After hours</span><span>LOOK 04</span></span></a>
+   </div>
+  </div>
+ </section>
+ <section class="story-band wrap" id="story">
+  <p class="eyebrow">Notes from the Dia studio</p><h2>Clothes that carry<br><em>your story.</em></h2><p>New pieces, styling notes, and small-batch releases. A thoughtful note from us, only when there is something worth sharing.</p>
+  <form class="newsletter-form" id="newsletterForm"><label class="visually-hidden" for="newsletterEmail">Email address</label><input id="newsletterEmail" name="email" type="email" autocomplete="email" placeholder="Your email address" maxlength="254" required><button class="gold-button" type="submit">Join the list <span aria-hidden="true">↗</span></button></form><p class="newsletter-status" id="newsletterStatus" role="status" aria-live="polite"></p>
+ </section>
+</main>
+<footer class="footer"><div class="wrap footer-inner"><div><a class="brand" href="/">Dia<span class="brand-mark">✦</span></a><p class="footer-tagline">Wear your story.</p></div><span class="footer-copy">© <span id="year"></span> Dia studio · Cebu</span><nav class="footer-links" aria-label="Footer navigation"><a href="#shop">Shop</a><a href="#looks">Looks</a><a href="#story">Our story</a><a href="/admin/login">Admin</a></nav></div></footer>
+<div class="bag-backdrop" id="bagBackdrop" hidden></div>
+<aside class="bag-drawer" id="bagDrawer" role="dialog" aria-modal="true" aria-labelledby="bagTitle" aria-hidden="true">
+ <div class="drawer-head"><div><p class="eyebrow">Your selection</p><h2 id="bagTitle" class="display">The bag.</h2></div><button class="icon-button" id="bagClose" type="button" aria-label="Close bag">×</button></div>
+ <div class="bag-items" id="bagItems"><p class="bag-empty">Your bag is waiting for something lovely.</p></div>
+ <div class="drawer-foot"><div class="drawer-total"><span>Subtotal</span><strong id="bagSubtotal">₱0</strong></div><button class="gold-button" id="checkoutOpen" type="button" disabled>Continue to checkout <span aria-hidden="true">↗</span></button><p class="drawer-note">Demo checkout saves your order to your Dia account. No payment is collected.</p></div>
+</aside>
+<dialog id="checkoutDialog" aria-labelledby="checkoutTitle"><button class="dialog-close" id="checkoutClose" type="button" aria-label="Close checkout">×</button><div class="checkout-head"><p class="eyebrow">One last detail</p><h2 id="checkoutTitle">Make it <em>yours.</em></h2><p>Your demo order will be saved to your Dia account. No payment details are requested or collected.</p></div><form class="checkout-form" id="checkoutForm"><label for="checkoutName">Full name</label><input id="checkoutName" name="customerName" autocomplete="name" required minlength="2" maxlength="120"><label for="checkoutEmail">Email address</label><input id="checkoutEmail" name="customerEmail" type="email" autocomplete="email" required maxlength="254"><label for="checkoutAddress">Delivery address</label><textarea id="checkoutAddress" name="customerAddress" rows="3" autocomplete="street-address" required minlength="6" maxlength="500"></textarea><p class="checkout-error" id="checkoutError" role="status"></p><button class="gold-button" type="submit" id="checkoutSubmit">Place demo order <span aria-hidden="true">↗</span></button></form></dialog>
+<div class="store-toast" id="storeToast" role="status" aria-live="polite" hidden></div>
+<style>.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}</style>
+<script nonce="@@DIA_NONCE@@">
+'use strict';
+(() => {
+ const $=id=>document.getElementById(id);
+ const money=v=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:0}).format(Number(v)||0);
+ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ let csrf='',user=null,products=[],cart=[],toastTimer=null,slide=0,slideTimer=null,paused=false;
+ const slides=Array.from(document.querySelectorAll('.hero-slide'));
+ const dots=Array.from(document.querySelectorAll('.hero-dot'));
+ const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ async function api(path,options={}){
+  const method=(options.method||'GET').toUpperCase(),headers={Accept:'application/json',...(options.headers||{})};
+  let body=options.body;
+  if(body!==undefined&&typeof body!=='string'){headers['Content-Type']='application/json';body=JSON.stringify(body);}
+  if(!['GET','HEAD','OPTIONS'].includes(method)){
+   if(!csrf){const t=await fetch('/api/auth/csrf',{credentials:'same-origin'});const d=await t.json().catch(()=>({}));if(!t.ok||!d.csrfToken)throw new Error('Your secure session expired. Refresh and try again.');csrf=d.csrfToken;}
+   headers['X-CSRF-Token']=csrf;
+  }
+  const response=await fetch(path,{...options,method,body,headers,credentials:'same-origin'});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok){const e=new Error(data?.error?.message||'The store could not complete that request.');e.status=response.status;e.code=data?.error?.code;if(e.code==='CSRF_VALIDATION_FAILED')csrf='';throw e;}
+  if(data.csrfToken)csrf=data.csrfToken;return data;
+ }
+ function toast(message){$('storeToast').textContent=message;$('storeToast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('storeToast').hidden=true,2800);}
+ function updateNav(){
+  $('loginLink').hidden=!!user;
+  $('accountLink').hidden=!user;
+  if(user){$('accountLink').href=user.role==='admin'?'/admin':'/dashboard';$('accountLink').textContent=user.role==='admin'?'Admin studio':'My account';}
+ }
+ function fallbackCards(){
+  return [
+   {name:'Everyday heavyweight tee',category:'Essentials',description:'A structured cotton staple with a relaxed finish.',price:890,image:'/assets/dia-editorial.webp',tag:'Sample preview'},
+   {name:'Everyday leather tote',category:'Accessories',description:'A roomy companion with a clean silhouette.',price:1850,image:'/assets/dia-editorial.webp',tag:'Sample preview'},
+   {name:'Core six-panel cap',category:'Accessories',description:'A familiar shape, finished for every day.',price:690,image:'/assets/dia-editorial.webp',tag:'Sample preview'},
+   {name:'Relaxed everyday chinos',category:'Bottoms',description:'Easy structure with room to move.',price:1490,image:'/assets/dia-editorial.webp',tag:'Sample preview'}
+  ];
+ }
+ function renderProducts(){
+  const grid=$('productGrid');const sample=!products.length;const chosen=sample?fallbackCards():products.slice(0,4);
+  $('catalogLabel').textContent=sample?'Sample preview':'Live catalog';
+  $('catalogMessage').textContent=sample?'Sample product cards are shown until the catalog is populated. Add products from the administrator dashboard to enable the bag.':'Showing products from the live Dia catalog.';
+  grid.innerHTML=chosen.map((p,i)=>{
+   const isSample=sample||p.isSample===true;
+   return '<article class="product-card"><div class="product-image"><img src="'+esc(p.image||'/assets/dia-editorial.webp')+'" alt="'+esc(p.name)+'" loading="lazy" onerror="this.onerror=null;this.src=\'/assets/dia-editorial.webp\'"><span class="product-badge">'+esc(p.tag||p.category||'Dia selection')+'</span></div><div class="product-info"><div class="product-meta"><span>'+esc(p.category||'Dia selection')+'</span><span>0'+(i+1)+' / 04</span></div><h3>'+esc(p.name)+'</h3><p>'+esc(p.description||'A considered Dia essential for everyday wear.')+'</p><div class="product-bottom"><span class="product-price">'+money(p.price)+'</span><button class="add-button" type="button" data-add="'+esc(p.id||'')+'" '+(isSample||!p.id?'disabled':'')+'>'+(isSample?'Sample only':'Add to bag')+'</button></div></div></article>';
+  }).join('');
+  grid.querySelectorAll('[data-add]').forEach(btn=>btn.addEventListener('click',()=>addToBag(btn.dataset.add)));
+ }
+ async function loadProducts(){
+  try{const data=await api('/api/products');products=Array.isArray(data.products)?data.products:[];renderProducts();}
+  catch{products=[];renderProducts();$('catalogMessage').textContent='The catalog is temporarily unavailable. Sample product cards are shown for preview.';}
+ }
+ async function loadCart(){
+  if(!user||user.role!=='user'){cart=[];renderCart();return;}
+  try{const data=await api('/api/cart');cart=data.items||[];renderCart();}
+  catch(error){if(error.status===401){user=null;updateNav();}cart=[];renderCart();}
+ }
+ function renderCart(){
+  const count=cart.reduce((sum,item)=>sum+item.quantity,0);$('bagCount').textContent=count;
+  $('bagItems').innerHTML=cart.length?cart.map(item=>'<div class="bag-row"><img src="'+esc(item.image||'/assets/dia-editorial.webp')+'" alt=""><div><h3>'+esc(item.name)+'</h3><p>'+esc(item.size)+' · Qty '+item.quantity+'</p><button class="remove-bag" type="button" data-remove="'+esc(item.productId)+'" data-size="'+esc(item.size)+'">Remove</button></div><strong>'+money(item.price*item.quantity)+'</strong></div>').join(''):'<p class="bag-empty">Your bag is waiting for something lovely.</p>';
+  $('bagSubtotal').textContent=money(cart.reduce((sum,item)=>sum+item.price*item.quantity,0));
+  $('checkoutOpen').disabled=!cart.length;
+  $('bagItems').querySelectorAll('[data-remove]').forEach(btn=>btn.addEventListener('click',()=>removeItem(btn.dataset.remove,btn.dataset.size)));
+ }
+ async function addToBag(id){
+  if(!user||user.role!=='user'){toast('Log in to add pieces to your bag.');window.location.assign('/login');return;}
+  const p=products.find(item=>String(item.id)===String(id));if(!p)return;
+  if(Number(p.stock)<=0){toast('This piece is currently out of stock.');return;}
+  const size=Array.isArray(p.sizes)&&p.sizes.length?p.sizes[0]:'One size';
+  try{await api('/api/cart/items',{method:'POST',body:{productId:p.id,size,quantity:1}});await loadCart();toast(p.name+' added to your bag.');openBag();}
+  catch(error){toast(error.message);}
+ }
+ async function removeItem(productId,size){try{await api('/api/cart/items',{method:'DELETE',body:{productId,size}});await loadCart();}catch(error){toast(error.message);}}
+ function openBag(){const bag=$('bagDrawer');bag.classList.add('open');bag.setAttribute('aria-hidden','false');$('bagBackdrop').hidden=false;document.body.style.overflow='hidden';$('bagClose').focus();}
+ function closeBag(){const bag=$('bagDrawer');bag.classList.remove('open');bag.setAttribute('aria-hidden','true');$('bagBackdrop').hidden=true;document.body.style.overflow='';$('bagOpen').focus();}
+ async function checkout(event){
+  event.preventDefault();const button=$('checkoutSubmit');button.disabled=true;$('checkoutError').textContent='';
+  try{
+   const form=new FormData(event.currentTarget);
+   const result=await api('/api/orders',{method:'POST',body:{customerName:form.get('customerName'),customerEmail:form.get('customerEmail'),customerAddress:form.get('customerAddress'),idempotencyKey:crypto.randomUUID()}});
+   $('checkoutDialog').close();$('checkoutForm').reset();await loadCart();closeBag();toast('Order '+result.order.orderNumber+' saved. No payment was collected.');
+  }catch(error){$('checkoutError').textContent=error.message;}
+  finally{button.disabled=false;}
+ }
+ function showSlide(next){
+  slide=(next+slides.length)%slides.length;$('heroTrack').style.transform='translateX(-'+(slide*100)+'%)';
+  dots.forEach((dot,i)=>dot.setAttribute('aria-current',String(i===slide)));
+  const progress=$('heroProgress');progress.classList.remove('run');void progress.offsetWidth;if(!reduced&&!paused)progress.classList.add('run');
+ }
+ function stopSlider(){clearTimeout(slideTimer);slideTimer=null;$('heroProgress').classList.remove('run');}
+ function startSlider(){stopSlider();if(reduced||paused)return;$('heroProgress').classList.remove('run');void $('heroProgress').offsetWidth;$('heroProgress').classList.add('run');slideTimer=setTimeout(()=>{showSlide(slide+1);startSlider();},4000);}
+ $('heroDots').addEventListener('click',event=>{const dot=event.target.closest('[data-slide]');if(!dot)return;showSlide(Number(dot.dataset.slide));startSlider();});
+ $('home').addEventListener('mouseenter',()=>{paused=true;stopSlider();});
+ $('home').addEventListener('mouseleave',()=>{paused=false;startSlider();});
+ $('bagOpen').addEventListener('click',openBag);$('bagClose').addEventListener('click',closeBag);$('bagBackdrop').addEventListener('click',closeBag);
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('bagDrawer').classList.contains('open'))closeBag();});
+ $('checkoutOpen').addEventListener('click',()=>{if(!user){window.location.assign('/login');return;}closeBag();$('checkoutDialog').showModal();});
+ $('checkoutClose').addEventListener('click',()=>$('checkoutDialog').close());$('checkoutForm').addEventListener('submit',checkout);
+ $('newsletterForm').addEventListener('submit',async event=>{
+  event.preventDefault();const email=$('newsletterEmail').value.trim();const button=event.currentTarget.querySelector('button');button.disabled=true;$('newsletterStatus').textContent='';
+  try{const data=await api('/api/newsletter',{method:'POST',body:{email}});$('newsletterStatus').textContent=data.message||'You are on the list. Thank you.';event.currentTarget.reset();}
+  catch(error){$('newsletterStatus').textContent=error.message||'We could not save your signup. Please try again.';}
+  finally{button.disabled=false;}
+ });
+ $('year').textContent=String(new Date().getFullYear());
+ (async()=>{try{const me=await api('/api/auth/me');user=me.user||null;}catch{user=null;}updateNav();await Promise.all([loadProducts(),loadCart()]);if(user&&user.name){$('checkoutName').value=user.name;$('checkoutEmail').value=user.email||'';}startSlider();})();
+})();
+</script>
 </body>
 </html>
