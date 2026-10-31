@@ -9,7 +9,9 @@ const POSITIONS = {
   'essential-hoodie': 'center 43%',
   'everyday-tee': '76% 39%',
   'core-cap': '36% 81%',
-  'weekend-layer': '41% 53%'
+  'weekend-layer': '41% 53%',
+  'everyday-tote': 'center center',
+  'relaxed-chinos': 'center center'
 };
 
 /**
