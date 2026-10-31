@@ -151,9 +151,9 @@ td strong{display:block;color:var(--cream);font-size:10px}
 td small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
 .status{display:inline-flex;padding:5px 8px;border:1px solid rgba(115,165,122,.28);border-radius:999px;background:rgba(115,165,122,.1);color:#9ac6a2;font-size:8px;font-weight:800}
 .status.pending{border-color:rgba(212,175,90,.3);background:rgba(212,175,90,.1);color:var(--gold-hi)}
-.status.packing{border-color:rgba(117,156,190,.3);background:rgba(117,156,190,.1);color:#9fc2de}
-.status.shipped{border-color:rgba(154,147,202,.3);background:rgba(154,147,202,.1);color:#c2b9ee}
-.status.refunded,.status.cancelled{border-color:rgba(202,130,110,.32);background:rgba(202,130,110,.1);color:#dfa58f}
+.status.packing{border-color:var(--line);background:rgba(212,175,90,.08);color:var(--gold-hi)}
+.status.shipped{border-color:rgba(163,184,170,.28);background:rgba(163,184,170,.08);color:var(--sage)}
+.status.refunded,.status.cancelled{border-color:var(--line);background:rgba(212,175,90,.08);color:var(--gold-hi)}
 .empty-state{padding:34px 18px;border:1px dashed var(--line);border-radius:9px;color:var(--sage);text-align:center;font-size:10px}
 .secondary-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
 .customer-card{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--line)}
@@ -199,7 +199,7 @@ td small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
 </aside>
 <main class="main">
  <header class="topbar">
-  <div class="top-title"><small id="pageEyebrow">Dia studio / Overview</small><h1 id="pageTitle">Good day, welcome back.</h1></div>
+  <div class="top-title"><small id="pageEyebrow">Dia studio / Overview</small><h1 id="pageTitle">Good day, welcome back.</h1><small id="currentDate">—</small></div>
   <div class="top-actions">
    <label class="searchbox"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input id="globalSearch" type="search" placeholder="Search products or orders" aria-label="Search products or orders"></label>
    <div class="admin-chip"><span class="avatar" id="adminInitial">D</span><span class="identity"><strong id="adminName">Administrator</strong><small>Administrator</small></span></div>
@@ -311,10 +311,10 @@ td small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
   const vals=labels.map(x=>Number(x.completedOrderValue||0));
   if(vals.length){setSpark('sparkRevenue',vals.slice(-8));setSpark('sparkOrders',labels.slice(-8).map(x=>Number(x.orderCount||0)));}else{sampleSpark.slice(0,2).forEach((v,i)=>setSpark(i?'sparkOrders':'sparkRevenue',v));}
   setSpark('sparkCustomers',sampleSpark[2]);setSpark('sparkRefund',sampleSpark[3]);
-  const source=liveOrders?'Live database records':'Sample data preview';
-  ['revenueChange','ordersChange','customersChange','refundChange'].forEach((id,i)=>{const el=$(id);el.textContent=liveOrders?['Live today','Live today','Last 7 days','Status-based'][i]:['+8.4%','+12.5%','+6.2%','Sample'][i];if(liveOrders)el.classList.add('neutral');});
-  $('sampleBanner').hidden=liveOrders;
-  if(!liveOrders){$('sampleBanner').innerHTML='<span class="sample-dot"></span><strong>Sample data</strong><span>Illustrative preview only. Live order and customer records replace these values when available.</span>';}
+    ['revenueChange','ordersChange','customersChange','refundChange'].forEach((id,i)=>{const el=$(id);el.textContent=liveOrders?['Live today','Live today','Last 7 days','Status-based'][i]:['+8.4%','+12.5%','+6.2%','Sample'][i];if(liveOrders)el.classList.add('neutral');});
+  const partialPreview=!liveOrders||!(analyticsData?.daily||[]).length||!(analyticsData?.byCategory||[]).length||!(analyticsData?.topProducts||[]).length;
+  $('sampleBanner').hidden=!partialPreview;
+  if(partialPreview){$('sampleBanner').innerHTML='<span class="sample-dot"></span><strong>Sample data</strong><span>Illustrative values are used only for panels without enough live records. Live database records remain separate.</span>';}
   $('financialNote').textContent=(analyticsData?.paymentNotice||'Completed order value is not the same as money collected. Demo checkout does not collect payment.')+' Refund rate is based on refunded order records; returns are not currently tracked.';
  }
  function dateKey(date){return date.toISOString().slice(0,10);}
@@ -354,7 +354,8 @@ td small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
   (sales||[]).forEach(item=>{const p=sourceProducts.find(x=>x.name===item.name);list.push({...p,...item,image:p?.image||'/assets/dia-editorial.webp',stock:Number(p?.stock??0)});});
   if(!list.length){sampleProducts.forEach(x=>list.push({...x}));$('productSource').textContent='Sample preview';}
   else $('productSource').textContent='Live catalog + order records';
-  $('topProducts').innerHTML=list.slice(0,5).map(p=>{const stock=Math.max(0,Number(p.stock||0)),width=Math.max(3,Math.min(100,stock/40*100));return '<div class="top-product"><img class="product-thumb" src="'+safe(p.image||'/assets/dia-editorial.webp')+'" alt="" onerror="this.onerror=null;this.src=\'/assets/dia-editorial.webp\'"><div class="product-name"><strong>'+safe(p.name)+'</strong><small>'+safe(p.category||'Dia selection')+(p.isSample?' · sample inventory':'')+'</small></div><div class="product-metric"><strong>'+money(p.completedOrderValue??p.revenue??0)+'</strong>'+Number(p.units||0)+' units sold</div><div class="stock-cell"><div class="stock-label"><span>Stock</span><b>'+stock+' left</b></div><div class="stock-bar"><span class="'+(stock<=5?'low':'')+'" style="width:'+width+'%"></span></div></div></div>';}).join('');
+  $('topProducts').innerHTML=list.slice(0,5).map(p=>{const stock=Math.max(0,Number(p.stock||0)),width=Math.max(3,Math.min(100,stock/40*100));return '<div class="top-product"><img class="product-thumb" src="'+safe(p.image||'/assets/dia-editorial.webp')+'" alt=""><div class="product-name"><strong>'+safe(p.name)+'</strong><small>'+safe(p.category||'Dia selection')+(p.isSample?' · sample inventory':'')+'</small></div><div class="product-metric"><strong>'+money(p.completedOrderValue??p.revenue??0)+'</strong>'+Number(p.units||0)+' units sold</div><div class="stock-cell"><div class="stock-label"><span>Stock</span><b>'+stock+' left</b></div><div class="stock-bar"><span class="'+(stock<=5?'low':'')+'" style="width:'+width+'%"></span></div></div></div>';}).join('');
+  $('topProducts').querySelectorAll('img').forEach(img=>img.addEventListener('error',()=>{if(img.dataset.fallback)return;img.dataset.fallback='1';img.src='/assets/dia-editorial.webp';}));
  }
  function renderOrders(){
   const usingSample=!orders.length,rows=(usingSample?sampleOrders:orders).filter(orderMatchesFilter);
@@ -411,7 +412,7 @@ td small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
  $('heroDots').addEventListener('click',event=>{const b=event.target.closest('[data-slide]');if(b){showSlide(Number(b.dataset.slide));startSlider();}});
  $('dashboardHero').addEventListener('mouseenter',()=>{paused=true;stopSlider();});$('dashboardHero').addEventListener('mouseleave',()=>{paused=false;startSlider();});
  $('logoutButton').addEventListener('click',async()=>{const btn=$('logoutButton');btn.disabled=true;try{await api('/api/auth/logout',{method:'POST',body:{}});}catch{}window.location.assign('/admin/login');});
- $('dashboardDate').textContent=new Date().toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+ $('dashboardDate').textContent=new Date().toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});$('currentDate').textContent=new Date().toLocaleDateString('en-PH',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
  async function boot(){
   try{
    const me=await api('/api/auth/me');
