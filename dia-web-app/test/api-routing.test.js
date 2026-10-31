@@ -118,9 +118,9 @@ test('frontend API calls use methods and paths registered by Express', () => {
   assert.ok(adminPage.includes('nonce="@@DIA_NONCE@@"'), 'Admin inline script must use a server-injected CSP nonce');
   assert.ok(!adminPage.includes('src="/admin.js"') && !adminPage.includes('href="/admin.css"'), 'Admin dashboard must be self-contained');
   for (const [label, page] of [['storefront', homePage], ['admin', adminPage]]) {
-    const inlineScripts = [...page.matchAll(/<script nonce="@@DIA_NONCE@@">([\\s\\S]*?)<\\/script>/g)];
+    const inlineScripts = [...page.matchAll(/<script nonce="@@DIA_NONCE@@">([\s\S]*?)<\/script>/g)];
     assert.equal(inlineScripts.length, 1, label + ' must have exactly one self-contained inline script');
-    assert.doesNotMatch(page, /\\son(?:error|click|load)=/i, label + ' must not rely on CSP-blocked inline event handlers');
+    assert.doesNotMatch(page, /\son(?:error|click|load)=/i, label + ' must not rely on CSP-blocked inline event handlers');
     assert.doesNotThrow(() => new vm.Script(inlineScripts[0][1], { filename: label + '.inline.js' }), label + ' inline JavaScript must parse');
   }
   for (const file of ['login.html', 'admin-login.html']) {
