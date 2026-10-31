@@ -228,7 +228,7 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
    <article class="product-card"><div class="product-image"><img src="/assets/dia-editorial.webp" alt="Dia tee sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Essentials</span><span>01 / 04</span></div><h3>Everyday heavyweight tee</h3><p>A structured cotton staple with a relaxed finish.</p><div class="product-bottom"><span class="product-price">₱890</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
    <article class="product-card"><div class="product-image"><img src="/assets/dia-editorial.webp" alt="Leather tote sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Accessories</span><span>02 / 04</span></div><h3>Everyday leather tote</h3><p>A roomy companion with a clean silhouette.</p><div class="product-bottom"><span class="product-price">₱1,850</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
    <article class="product-card"><div class="product-image"><img src="/assets/dia-editorial.webp" alt="Dia cap sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Accessories</span><span>03 / 04</span></div><h3>Core six-panel cap</h3><p>A familiar shape, finished for every day.</p><div class="product-bottom"><span class="product-price">₱690</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
-   <article class="product-card"><div class="product-image"><img src="/assets/dia-editorial.webp" alt="Relaxed chinos sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Bottoms</span><span>04 / 04</span></div><h3>Relaxed everyday chinos</h3><p>Easy structure with room to move.</p><div class="product-bottom"><span class="product-price">₱1,490</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></div></article>
+   <article class="product-card"><div class="product-image"><img src="/assets/dia-editorial.webp" alt="Relaxed chinos sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Bottoms</span><span>04 / 04</span></div><h3>Relaxed everyday chinos</h3><p>Easy structure with room to move.</p><div class="product-bottom"><span class="product-price">₱1,490</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
   </div>
   <p class="catalog-message" id="catalogMessage" role="status">Sample product cards are shown until the catalog is populated.</p>
  </section>
@@ -249,7 +249,7 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
 </main>
 <footer class="footer"><div class="wrap footer-inner"><div><a class="brand" href="/">Dia<span class="brand-mark">✦</span></a><p class="footer-tagline">Wear your story.</p></div><span class="footer-copy">© <span id="year"></span> Dia studio · Cebu</span><nav class="footer-links" aria-label="Footer navigation"><a href="#shop">Shop</a><a href="#looks">Looks</a><a href="#story">Our story</a><a href="/admin/login">Admin</a></nav></div></footer>
 <div class="bag-backdrop" id="bagBackdrop" hidden></div>
-<aside class="bag-drawer" id="bagDrawer" role="dialog" aria-modal="true" aria-labelledby="bagTitle" aria-hidden="true">
+<aside class="bag-drawer" id="bagDrawer" role="dialog" aria-modal="true" aria-labelledby="bagTitle" aria-hidden="true" inert>
  <div class="drawer-head"><div><p class="eyebrow">Your selection</p><h2 id="bagTitle" class="display">The bag.</h2></div><button class="icon-button" id="bagClose" type="button" aria-label="Close bag">×</button></div>
  <div class="bag-items" id="bagItems"><p class="bag-empty">Your bag is waiting for something lovely.</p></div>
  <div class="drawer-foot"><div class="drawer-total"><span>Subtotal</span><strong id="bagSubtotal">₱0</strong></div><button class="gold-button" id="checkoutOpen" type="button" disabled>Continue to checkout <span aria-hidden="true">↗</span></button><p class="drawer-note">Demo checkout saves your order to your Dia account. No payment is collected.</p></div>
@@ -295,13 +295,23 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
   ];
  }
  function renderProducts(){
-  const grid=$('productGrid');const sample=!products.length;const chosen=sample?fallbackCards():products.slice(0,4);
-  $('catalogLabel').textContent=sample?'Sample preview':'Live catalog';
-  $('catalogMessage').textContent=sample?'Sample product cards are shown until the catalog is populated. Add products from the administrator dashboard to enable the bag.':'Showing products from the live Dia catalog.';
+  const grid=$('productGrid');
+  const fallback=fallbackCards();
+  const matchers=[
+   p=>/tee|t-shirt/i.test(p.name||''),
+   p=>/tote|bag/i.test((p.name||'')+' '+(p.category||'')),
+   p=>/cap|hat/i.test((p.name||'')+' '+(p.category||'')),
+   p=>/chino|trouser|pant/i.test((p.name||'')+' '+(p.category||''))
+  ];
+  const chosen=fallback.map((item,i)=>products.find(matchers[i])||item);
+  const sampleCount=chosen.filter(p=>!p.id).length;
+  $('catalogLabel').textContent=products.length?(sampleCount?'Live + sample preview':'Live catalog'):'Sample preview';
+  $('catalogMessage').textContent=products.length?(sampleCount?'The catalog is live. Unmatched styles are shown as sample previews until those products are added.':'Showing products from the live Dia catalog.'):'Sample product cards are shown until the catalog is populated. Add products from the administrator dashboard to enable the bag.';
   grid.innerHTML=chosen.map((p,i)=>{
-   const isSample=sample||p.isSample===true;
+   const isSample=!p.id;
    return '<article class="product-card"><div class="product-image"><img src="'+esc(p.image||'/assets/dia-editorial.webp')+'" alt="'+esc(p.name)+'" loading="lazy" onerror="this.onerror=null;this.src=\'/assets/dia-editorial.webp\'"><span class="product-badge">'+esc(p.tag||p.category||'Dia selection')+'</span></div><div class="product-info"><div class="product-meta"><span>'+esc(p.category||'Dia selection')+'</span><span>0'+(i+1)+' / 04</span></div><h3>'+esc(p.name)+'</h3><p>'+esc(p.description||'A considered Dia essential for everyday wear.')+'</p><div class="product-bottom"><span class="product-price">'+money(p.price)+'</span><button class="add-button" type="button" data-add="'+esc(p.id||'')+'" '+(isSample||!p.id?'disabled':'')+'>'+(isSample?'Sample only':'Add to bag')+'</button></div></div></article>';
   }).join('');
+  grid.querySelectorAll('img').forEach(image=>image.addEventListener('error',()=>{if(image.dataset.fallback)return;image.dataset.fallback='1';image.src='/assets/dia-editorial.webp';}));
   grid.querySelectorAll('[data-add]').forEach(btn=>btn.addEventListener('click',()=>addToBag(btn.dataset.add)));
  }
  async function loadProducts(){
@@ -329,8 +339,8 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
   catch(error){toast(error.message);}
  }
  async function removeItem(productId,size){try{await api('/api/cart/items',{method:'DELETE',body:{productId,size}});await loadCart();}catch(error){toast(error.message);}}
- function openBag(){const bag=$('bagDrawer');bag.classList.add('open');bag.setAttribute('aria-hidden','false');$('bagBackdrop').hidden=false;document.body.style.overflow='hidden';$('bagClose').focus();}
- function closeBag(){const bag=$('bagDrawer');bag.classList.remove('open');bag.setAttribute('aria-hidden','true');$('bagBackdrop').hidden=true;document.body.style.overflow='';$('bagOpen').focus();}
+ function openBag(){const bag=$('bagDrawer');bag.inert=false;bag.classList.add('open');bag.setAttribute('aria-hidden','false');$('bagBackdrop').hidden=false;document.body.style.overflow='hidden';$('bagClose').focus();}
+ function closeBag(){const bag=$('bagDrawer');bag.inert=true;bag.classList.remove('open');bag.setAttribute('aria-hidden','true');$('bagBackdrop').hidden=true;document.body.style.overflow='';$('bagOpen').focus();}
  async function checkout(event){
   event.preventDefault();const button=$('checkoutSubmit');button.disabled=true;$('checkoutError').textContent='';
   try{
