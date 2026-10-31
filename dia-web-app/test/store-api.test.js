@@ -57,7 +57,7 @@ test('sample product seed is repeatable and never overwrites existing product ed
   const db = createDatabase(':memory:');
   try {
     const first = seedSampleProducts({ db, logger: quiet });
-    assert.equal(first.created.length, 4);
+    assert.equal(first.created.length, 6);
     assert.equal(first.skipped.length, 0);
     const product = db.prepare('SELECT name,price,stock,is_sample,cost_price FROM products WHERE id=?').get('essential-hoodie');
     assert.equal(product.name, 'Essential Hoodie');
@@ -65,11 +65,13 @@ test('sample product seed is repeatable and never overwrites existing product ed
     assert.equal(product.stock, 12);
     assert.equal(product.is_sample, 1);
     assert.equal(product.cost_price, null);
+    assert.ok(db.prepare('SELECT 1 FROM products WHERE id=?').get('everyday-tote'));
+    assert.ok(db.prepare('SELECT 1 FROM products WHERE id=?').get('relaxed-chinos'));
 
     db.prepare("UPDATE products SET price=1750,stock=4 WHERE id='essential-hoodie'").run();
     const second = seedSampleProducts({ db, logger: quiet });
     assert.equal(second.created.length, 0);
-    assert.equal(second.skipped.length, 4);
+    assert.equal(second.skipped.length, 6);
     const unchanged = db.prepare('SELECT price,stock FROM products WHERE id=?').get('essential-hoodie');
     assert.deepEqual(unchanged, { price: 1750, stock: 4 });
   } finally {
