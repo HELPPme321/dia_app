@@ -33,6 +33,26 @@ async function adminSignIn(agent, db) {
     .send({ email: 'store-admin@example.net', password: adminPassword });
 }
 
+test('newsletter signup stores a normalized unique email in SQLite', async () => {
+  const db = createDatabase(':memory:');
+  try {
+    const { app } = createApp({ db, env: { NODE_ENV: 'test', APP_ORIGIN: 'http://localhost:3000' } });
+    const browser = request.agent(app);
+    const token = await csrf(browser);
+    const first = await browser.post('/api/newsletter').set('x-csrf-token', token)
+      .send({ email: '  Dia.Reader@Example.com  ' }).expect(200);
+    assert.equal(first.body.subscribed, true);
+    assert.equal(db.prepare('SELECT email FROM newsletter_subscribers').get().email, 'dia.reader@example.com');
+    await browser.post('/api/newsletter').set('x-csrf-token', token)
+      .send({ email: 'dia.reader@example.com' }).expect(200);
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM newsletter_subscribers').get().count, 1);
+    await browser.post('/api/newsletter').set('x-csrf-token', token)
+      .send({ email: 'not-an-email' }).expect(400);
+  } finally {
+    db.close();
+  }
+});
+
 test('sample product seed is repeatable and never overwrites existing product edits', () => {
   const db = createDatabase(':memory:');
   try {
