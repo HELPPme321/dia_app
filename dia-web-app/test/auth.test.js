@@ -270,14 +270,19 @@ test('desktop Dia pages are separate, role-aware, and protected',async()=>{
     assert.match(r.text,/id="loginForm"/);
     assert.match(r.text,/id="loginIdentifier"[^>]*type="text"/);
     assert.match(r.text,/placeholder="Email or Username"/);
-    const signupUsername=r.text.match(/<input[^>]*id="registerUsername"[^>]*>/)?.[0]||'';
-    assert.ok(signupUsername.includes('required'));
-    assert.doesNotMatch(signupUsername,/maxlength|minlength|pattern/i);
+    assert.ok(r.text.includes('href="/register"'), 'Login page must link to the separate registration page.');
     assert.doesNotMatch(r.text,/3–32 characters|Use 3–32 characters|\(optional\)/i);
     assert.ok(r.text.includes('href="/forgot.html"'));
     assert.doesNotMatch(r.text,/id="intro"|id="diaIntro"/);
     assert.ok(r.text.includes('<script src="/js/auth.js?v=dia-cinematic-login-20261031" defer></script>'));
     assert.ok(r.text.includes('<script src="/login.js?v=dia-post-login-cinematic-20261031" defer></script>'));
+  });
+  await agent.get('/register').expect(200).expect((r)=>{
+    assert.match(r.text,/id="registerForm"/);
+    const signupUsername=r.text.match(/<input[^>]*id="registerUsername"[^>]*>/)?.[0]||'';
+    assert.ok(signupUsername.includes('required'));
+    assert.doesNotMatch(signupUsername,/maxlength|minlength|pattern/i);
+    assert.ok(r.text.includes('src="/js/register.js?v=dia-register-page-20261031"'));
   });
   await agent.get('/admin/login').expect(200).expect((r)=>{
     assert.match(r.text,/id="adminLoginForm"/);
