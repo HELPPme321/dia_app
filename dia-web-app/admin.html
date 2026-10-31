@@ -164,6 +164,7 @@ td small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
 .setting-row{padding:17px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
 .setting-row strong{display:block;margin-bottom:5px;font:600 21px var(--display)}
 .setting-row p{margin:0;color:var(--sage);font-size:9px;line-height:1.8}
+.manager-fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:14px 0}.manager-fields label{display:grid;gap:5px;color:var(--sage);font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.manager-fields .wide-field{grid-column:span 2}.manager-fields input,.manager-fields textarea{width:100%;min-width:0;min-height:39px;padding:9px 11px;border:1px solid var(--line);border-radius:5px;background:var(--forest);color:var(--cream);font-size:9px;letter-spacing:normal;text-transform:none}.manager-fields textarea{resize:vertical}.manager-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 19px;padding-bottom:17px;border-bottom:1px solid var(--line)}.manager-message{color:var(--gold-hi);font-size:9px}.manager-button{padding:6px 9px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--cream);font-size:8px;font-weight:800}.manager-button:hover{border-color:var(--gold);color:var(--gold-hi)}.manager-button.danger{color:#e2b08c}.customer-action{margin-left:auto;padding:6px 9px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--sage);font-size:8px}.customer-action:hover{color:var(--gold-hi);border-color:var(--gold)}.order-action{max-width:125px;padding:6px;border:1px solid var(--line);border-radius:4px;background:var(--panel2);color:var(--cream);font-size:8px}
 .notice{margin-top:16px;color:var(--muted);font-size:9px;line-height:1.8}
 .footer-line{display:flex;justify-content:space-between;gap:12px;margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:8px;letter-spacing:.1em;text-transform:uppercase}
 @media(max-width:1120px){.shell{grid-template-columns:210px minmax(0,1fr)}.sidebar{padding-inline:13px}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-main{grid-template-columns:1fr}.hero-slide{grid-template-columns:1fr 220px;padding-inline:34px}.hero-dots{left:34px}}
@@ -172,7 +173,8 @@ td small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
  .brand{font-size:32px}.side-caption{display:none}.side-nav{display:flex;gap:5px;margin-top:15px;overflow-x:auto;padding-bottom:3px}.side-link{flex:none;min-height:36px;padding:0 11px;font-size:9px}.side-link.active:before{display:none}.side-link svg{width:14px;height:14px}.side-bottom{display:none}
  .main{padding:0 18px 40px}.topbar{position:relative;min-height:72px}.searchbox{width:200px}
 }
-@media(max-width:560px){
+@media(max-width:760px){.manager-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.manager-fields{grid-template-columns:1fr}.manager-fields .wide-field{grid-column:auto}.manager-actions{align-items:flex-start;flex-direction:column}
  .topbar{align-items:flex-start;flex-direction:column;padding:14px 0;gap:12px}.top-actions{width:100%;justify-content:space-between}.searchbox{width:100%;max-width:220px}.identity strong{max-width:100px}
  .hero{height:440px;margin-top:17px}.hero-slide{display:flex;flex-direction:column;align-items:flex-start;gap:15px;padding:26px 21px 47px}.hero-copy h2{font-size:50px}.hero-copy p:last-child{margin-top:10px}.hero-photo{position:absolute;right:22px;bottom:27px;width:120px;height:150px;opacity:.92}.hero-dots{left:22px;bottom:19px}
  .stats-grid{gap:9px}.stat-card{padding:13px}.stat-value{font-size:29px}.stat-top{font-size:8px}.spark{width:54px;opacity:.5}
@@ -234,12 +236,33 @@ td small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
  <section id="products">
   <div class="section-title"><div><h2>Pieces people love.</h2><p>Top products, units sold, order value, and current stock.</p></div><span class="text-link" id="productSource">Sample preview</span></div>
   <article class="panel"><div class="products-list" id="topProducts"><div class="top-product"><img class="product-thumb" src="/assets/dia-editorial.webp" alt=""><div class="product-name"><strong>Everyday heavyweight tee</strong><small>Essentials · sample</small></div><div class="product-metric"><strong>₱24,500</strong>38 units sold</div><div class="stock-cell"><div class="stock-label"><span>Stock</span><b>22 left</b></div><div class="stock-bar"><span style="width:72%"></span></div></div></div></div></article>
+  <div class="section-title"><div><h2>Manage the catalog.</h2><p>Add a piece, edit its details, or archive a product from the live store.</p></div><button class="filter-button" id="newProductButton" type="button">+ New product</button></div>
+  <article class="panel">
+   <form id="productForm">
+    <input type="hidden" id="productId">
+    <div class="manager-fields">
+     <label>Product name<input id="productName" required minlength="2" maxlength="120"></label>
+     <label>Category<input id="productCategory" required minlength="2" maxlength="60" placeholder="Tops, Bottoms, Accessories"></label>
+     <label>Price (PHP)<input id="productPrice" type="number" min="0" max="100000000" step="1" required></label>
+     <label>Cost price (PHP)<input id="productCostPrice" type="number" min="0" max="100000000" step="1" placeholder="Leave blank if unknown"></label>
+     <label>Stock quantity<input id="productStock" type="number" min="0" max="1000000" step="1" required value="0"></label>
+     <label>Color<input id="productColor" required maxlength="80" value="Forest"></label>
+     <label>Available sizes<input id="productSizes" required placeholder="S, M, L, XL"></label>
+     <label>Product tag<input id="productTag" required maxlength="40" value="New arrival"></label>
+     <label class="wide-field">Image URL or local asset<input id="productImage" required maxlength="2048" value="/assets/dia-editorial.webp"></label>
+     <label class="wide-field">Image position<input id="productPosition" maxlength="80" value="center center"></label>
+     <label class="wide-field">Description<textarea id="productDescription" maxlength="3000" rows="2"></textarea></label>
+    </div>
+    <div class="manager-actions"><span class="manager-message" id="productMessage" role="status" aria-live="polite"></span><div><button class="filter-button" id="resetProductForm" type="button">Clear</button> <button class="gold-button" id="saveProductButton" type="submit">Save product</button></div></div>
+   </form>
+   <div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody id="inventoryRows"><tr><td colspan="6">Loading catalog…</td></tr></tbody></table></div>
+  </article>
  </section>
  <section id="orders">
   <div class="section-title"><div><h2>Recent orders.</h2><p>Find an order by number or customer. Filter by its current status.</p></div><span class="text-link" id="ordersSource">Sample preview</span></div>
   <article class="panel">
    <div class="filter-row" id="orderFilters"><button class="filter-button active" data-filter="all" type="button">All orders</button><button class="filter-button" data-filter="paid" type="button">Paid</button><button class="filter-button" data-filter="packing" type="button">Packing</button><button class="filter-button" data-filter="shipped" type="button">Shipped</button><button class="filter-button" data-filter="pending" type="button">Pending</button></div>
-   <div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th></tr></thead><tbody id="orderRows"><tr><td><strong>DIA-2048</strong></td><td><strong>Alex Morgan</strong><small>alex@example.com</small></td><td>Today</td><td>₱3,240</td><td><span class="status">Paid</span></td></tr></tbody></table></div>
+   <div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th><th>Update</th></tr></thead><tbody id="orderRows"><tr><td><strong>DIA-2048</strong></td><td><strong>Alex Morgan</strong><small>alex@example.com</small></td><td>Today</td><td>₱3,240</td><td><span class="status">Paid</span></td></tr></tbody></table></div>
    <div class="empty-state" id="ordersEmpty" hidden>No orders match this search. Clear the search or choose another status.</div>
   </article>
  </section>
