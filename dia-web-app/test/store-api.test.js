@@ -193,7 +193,7 @@ test('customer signup, DB cart, stock-safe demo order, order history, and admin 
 
     const stats = (await adminAgent.get('/api/admin/stats').expect(200)).body.stats;
     assert.equal(stats.totalUsers, 1);
-    assert.equal(stats.totalProducts, 5);
+    assert.equal(stats.totalProducts, 7);
     assert.equal(stats.totalOrders, 1);
     assert.equal(stats.completedOrders, 1);
     assert.equal(stats.completedOrderValue, 3670);
