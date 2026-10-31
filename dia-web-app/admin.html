@@ -1,132 +1,427 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#23372a">
-  <meta name="description" content="Dia secure administrator console for catalog, inventory, orders, and store analytics.">
-  <title>Dia · Studio Console</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="/admin.css">
-  <script src="/admin.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a1f16">
+<meta name="description" content="Dia administrator dashboard — orders, products, customers, and store analytics.">
+<title>Dia studio — Admin dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+ color-scheme:dark;--forest:#0a1f16;--panel:#12301f;--panel2:#183b29;--gold:#d4af5a;--gold-hi:#f0d58a;
+ --cream:#f2ead7;--sage:#a3b8aa;--muted:#71877a;--line:rgba(212,175,90,.23);
+ --surface:rgba(18,48,31,.88);--shadow:0 20px 54px rgba(0,0,0,.22);
+ --display:'Cormorant Garamond',serif;--sans:'Manrope',sans-serif;--sidebar:#07180f;--green:#315c41;--amber:#d49a42
+}
+@media(prefers-color-scheme:light){
+ :root{color-scheme:light;--forest:#f3eee2;--panel:#fffaf0;--panel2:#eee5d2;--gold:#94702b;--gold-hi:#c29b48;--cream:#1d3024;--sage:#617568;--muted:#7e887e;--line:rgba(148,112,43,.25);--surface:rgba(255,250,240,.92);--shadow:0 20px 54px rgba(45,54,38,.10);--sidebar:#10261a;--green:#416d50;--amber:#d49a42}
+}
+*{box-sizing:border-box}
+html{min-width:320px;scroll-behavior:smooth;scroll-padding-top:24px;background:var(--forest)}
+body{margin:0;background:var(--forest);color:var(--cream);font:13px/1.55 var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit}
+button,a{-webkit-tap-highlight-color:transparent}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--gold-hi);outline-offset:3px}
+::selection{background:var(--gold);color:#102319}
+.shell{display:grid;grid-template-columns:246px minmax(0,1fr);min-height:100vh}
+.sidebar{position:sticky;top:0;display:flex;flex-direction:column;gap:0;height:100vh;padding:28px 18px 20px;background:var(--sidebar);color:#f2ead7;border-right:1px solid rgba(212,175,90,.22)}
+.brand{display:flex;align-items:center;gap:8px;padding:0 12px;font:700 38px/.9 var(--display);letter-spacing:-.09em}
+.brand span{color:#d4af5a;font:700 16px var(--sans);transform:translateY(-5px)}
+.brand small{display:block;margin-left:7px;padding-left:10px;border-left:1px solid rgba(240,213,138,.45);font:800 8px var(--sans);letter-spacing:.18em}
+.side-caption{margin:45px 12px 13px;color:#7f9889;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.side-nav{display:grid;gap:6px}
+.side-link{display:flex;align-items:center;gap:13px;min-height:47px;padding:0 13px;border:1px solid transparent;border-radius:8px;color:#a7b8ac;font-size:11px;font-weight:700;transition:background .2s,color .2s,border-color .2s}
+.side-link svg{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.side-link:hover{background:rgba(240,213,138,.07);color:#f2ead7}
+.side-link.active{border-color:rgba(212,175,90,.28);background:linear-gradient(90deg,rgba(212,175,90,.16),rgba(212,175,90,.04));color:#f0d58a}
+.side-link.active:before{content:"";width:3px;height:22px;margin-left:-13px;margin-right:10px;border-radius:3px;background:#d4af5a}
+.side-bottom{margin-top:auto;padding:20px 12px 6px;border-top:1px solid rgba(212,175,90,.18);color:#799082;font-size:10px;line-height:1.8}
+.side-bottom strong{display:block;color:#ead9b6;font:500 23px var(--display)}
+.main{min-width:0;padding:0 clamp(20px,3vw,48px) 58px}
+.topbar{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:20px;min-height:82px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--forest) 90%,transparent);backdrop-filter:blur(16px)}
+.top-title small{display:block;color:var(--gold);font-size:9px;font-weight:800;letter-spacing:.17em;text-transform:uppercase}
+.top-title h1{margin:3px 0 0;font:600 28px/1 var(--display);letter-spacing:-.02em}
+.top-actions{display:flex;align-items:center;gap:14px}
+.searchbox{position:relative;width:min(250px,24vw)}
+.searchbox svg{position:absolute;top:50%;left:13px;width:15px;height:15px;transform:translateY(-50%);fill:none;stroke:var(--muted);stroke-width:1.8}
+.searchbox input{width:100%;height:40px;padding:0 12px 0 37px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--cream);font-size:10px}
+.admin-chip{display:flex;align-items:center;gap:10px;padding:5px 10px 5px 6px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+.avatar{display:grid;place-items:center;width:31px;height:31px;border-radius:50%;background:linear-gradient(145deg,var(--gold-hi),var(--gold));color:#19291e;font:700 17px var(--display)}
+.identity strong,.identity small{display:block;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.identity strong{font-size:9px}.identity small{color:var(--sage);font-size:8px}
+.icon-button{width:38px;height:38px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--cream)}
+.hero{position:relative;isolation:isolate;height:315px;margin:28px 0 25px;overflow:hidden;border:1px solid var(--line);border-radius:13px;background:#0a1f16;box-shadow:var(--shadow)}
+.hero-track{display:flex;width:100%;height:100%;transition:transform .85s cubic-bezier(.22,.72,.22,1)}
+.hero-slide{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) 250px;align-items:center;gap:35px;flex:0 0 100%;min-width:0;height:100%;padding:28px 55px 40px;overflow:hidden;color:#f2ead7}
+.hero-slide:before{content:"";position:absolute;z-index:-2;inset:-28px;background-image:var(--hero-image);background-position:center 36%;background-size:cover;filter:blur(18px) brightness(.35) saturate(.7);transform:scale(1.1)}
+.hero-slide:after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,rgba(6,22,15,.88),rgba(6,22,15,.55) 68%,rgba(6,22,15,.25))}
+.hero-copy{max-width:560px}.eyebrow{margin:0 0 12px;color:var(--gold-hi);font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}
+.hero-copy h2{margin:0;font:500 clamp(42px,5vw,68px)/.85 var(--display);letter-spacing:-.045em}.hero-copy h2 em{color:var(--gold-hi);font-weight:400}
+.hero-copy p:last-child{max-width:430px;margin:15px 0 0;color:rgba(242,234,215,.73);font-size:10px;line-height:1.75}
+.hero-photo{position:relative;width:220px;height:246px;padding:7px;border:1px solid rgba(240,213,138,.76);background:rgba(240,213,138,.06);box-shadow:0 18px 42px rgba(0,0,0,.3);transform:rotate(1deg)}
+.hero-photo img{width:100%;height:100%;object-fit:cover;object-position:center 35%}
+.hero-photo:after{content:"DIA / LOOKBOOK";position:absolute;right:14px;bottom:13px;color:#f4ead6;font-size:7px;font-weight:800;letter-spacing:.16em;text-shadow:0 2px 7px #000}
+.hero-dots{position:absolute;z-index:4;left:55px;bottom:20px;display:flex;gap:9px}
+.hero-dot{width:7px;height:7px;padding:0;border:1px solid #f0d58a;border-radius:10px;background:transparent}
+.hero-dot[aria-current=true]{width:25px;background:#f0d58a}
+.hero-progress{position:absolute;z-index:5;bottom:0;left:0;width:100%;height:3px;background:rgba(240,213,138,.18)}
+.hero-progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,#d4af5a,#f0d58a)}
+.hero-progress span.run{animation:progress 4s linear forwards}
+@keyframes progress{to{width:100%}}
+.sample-banner{display:flex;align-items:center;gap:10px;margin:0 0 18px;padding:11px 14px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--sage);font-size:9px}
+.sample-banner strong{color:var(--gold-hi);font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.sample-dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:18px}
+.stat-card,.panel{min-width:0;border:1px solid var(--line);border-radius:11px;background:var(--panel);box-shadow:var(--shadow)}
+.stat-card{position:relative;padding:18px 18px 14px;overflow:hidden}
+.stat-top{display:flex;justify-content:space-between;gap:10px;color:var(--sage);font-size:9px;font-weight:700}
+.stat-icon{display:grid;place-items:center;width:31px;height:31px;border:1px solid var(--line);border-radius:7px;color:var(--gold)}
+.stat-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.stat-value{display:block;margin:16px 0 3px;font:600 34px/.95 var(--display);letter-spacing:-.035em;color:var(--cream)}
+.stat-foot{display:flex;align-items:center;gap:8px;margin-top:8px;color:var(--muted);font-size:8px}
+.change{padding:4px 7px;border:1px solid rgba(115,165,122,.25);border-radius:4px;background:rgba(115,165,122,.09);color:#9ac6a2;font-size:8px;font-weight:800}
+.change.neutral{border-color:var(--line);background:var(--soft);color:var(--gold-hi)}
+.spark{position:absolute;right:12px;bottom:14px;width:74px;height:28px;opacity:.8}
+.spark path{fill:none;stroke:var(--gold);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.note{margin:0 0 18px;color:var(--muted);font-size:9px;line-height:1.7}
+.grid-main{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(270px,.82fr);gap:15px;margin:18px 0}
+.panel{padding:20px}
+.panel-head{display:flex;justify-content:space-between;align-items:start;gap:14px;margin-bottom:16px}
+.panel-kicker{margin:0 0 5px;color:var(--gold);font-size:8px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.panel-head h2{margin:0;font:600 29px/1 var(--display);letter-spacing:-.02em}
+.panel-head p{margin:5px 0 0;color:var(--muted);font-size:8px}
+.range-switch{display:flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:6px;background:var(--forest)}
+.range-switch button{padding:6px 8px;border:0;border-radius:4px;background:transparent;color:var(--muted);font-size:8px;font-weight:800}
+.range-switch button.active{background:var(--panel2);color:var(--gold-hi)}
+.chart-total{margin:0 0 4px;font:600 29px/1 var(--display)}
+.chart-sub{color:var(--muted);font-size:8px}
+.chart-wrap{position:relative;margin-top:14px}
+.chart-svg{display:block;width:100%;height:auto;overflow:visible}
+.chart-grid-line{stroke:var(--line);stroke-width:1;stroke-dasharray:3 6}
+.chart-area{fill:url(#chartFill)}
+.chart-line{fill:none;stroke:var(--gold);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.chart-point{fill:var(--panel);stroke:var(--gold-hi);stroke-width:2;cursor:crosshair}
+.chart-point:focus{stroke-width:4;outline:none}
+.chart-labels{display:flex;justify-content:space-between;gap:5px;color:var(--muted);font-size:8px}
+.chart-tooltip{position:absolute;z-index:5;min-width:135px;padding:8px 10px;border:1px solid var(--gold);border-radius:6px;background:var(--sidebar);color:#f2ead7;pointer-events:none;box-shadow:var(--shadow);font-size:9px}
+.chart-tooltip strong{display:block;margin-bottom:2px;color:#f0d58a;font-size:10px}
+.donut-wrap{display:grid;place-items:center;padding:10px 0 14px}
+.donut{width:166px;height:166px;border-radius:50%;position:relative;background:conic-gradient(var(--gold) 0 45%,#6d9475 45% 71%,#8b7952 71% 90%,#577262 90% 100%)}
+.donut:after{content:"";position:absolute;inset:25px;border:1px solid var(--line);border-radius:50%;background:var(--panel)}
+.donut-center{position:absolute;z-index:2;inset:0;display:grid;place-content:center;text-align:center}
+.donut-center strong{font:600 30px/.9 var(--display)}.donut-center span{margin-top:5px;color:var(--muted);font-size:8px;text-transform:uppercase;letter-spacing:.12em}
+.legend{display:grid;gap:10px}
+.legend-row{display:grid;grid-template-columns:9px minmax(0,1fr) auto;align-items:center;gap:9px;color:var(--sage);font-size:9px}
+.legend-dot{width:8px;height:8px;border-radius:50%;background:var(--gold)}
+.legend-row strong{color:var(--cream);font-size:9px}
+.section-title{display:flex;justify-content:space-between;align-items:end;gap:18px;margin:32px 0 15px}
+.section-title h2{margin:0;font:600 32px/1 var(--display)}
+.section-title p{margin:5px 0 0;color:var(--muted);font-size:9px}
+.text-link{color:var(--gold-hi);font-size:9px;font-weight:800}
+.products-list{display:grid;gap:12px}
+.top-product{display:grid;grid-template-columns:56px minmax(100px,1fr) minmax(95px,.6fr) 110px;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--line)}
+.top-product:last-child{border-bottom:0}
+.product-thumb{width:56px;height:66px;border-radius:5px;object-fit:cover;background:var(--panel2)}
+.product-name strong,.product-name small{display:block}
+.product-name strong{font:600 21px/1.1 var(--display)}
+.product-name small{margin-top:4px;color:var(--muted);font-size:8px}
+.product-metric{color:var(--sage);font-size:9px}
+.product-metric strong{display:block;color:var(--cream);font-size:10px}
+.stock-label{display:flex;justify-content:space-between;gap:5px;margin-bottom:6px;color:var(--muted);font-size:8px}
+.stock-bar{height:5px;overflow:hidden;border-radius:5px;background:var(--panel2)}
+.stock-bar span{display:block;height:100%;border-radius:5px;background:var(--green)}
+.stock-bar span.low{background:var(--amber)}
+.filter-row{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.filter-button{padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--sage);font-size:8px;font-weight:800}
+.filter-button.active,.filter-button:hover{border-color:var(--gold);background:rgba(212,175,90,.1);color:var(--gold-hi)}
+.table-wrap{width:100%;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:650px;text-align:left}
+th{padding:11px 12px;border-bottom:1px solid var(--line);color:var(--muted);font-size:8px;letter-spacing:.13em;text-transform:uppercase;white-space:nowrap}
+td{padding:13px 12px;border-bottom:1px solid var(--line);color:var(--sage);font-size:9px}
+tbody tr:last-child td{border-bottom:0}
+td strong{display:block;color:var(--cream);font-size:10px}
+td small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
+.status{display:inline-flex;padding:5px 8px;border:1px solid rgba(115,165,122,.28);border-radius:999px;background:rgba(115,165,122,.1);color:#9ac6a2;font-size:8px;font-weight:800}
+.status.pending{border-color:rgba(212,175,90,.3);background:rgba(212,175,90,.1);color:var(--gold-hi)}
+.status.packing{border-color:rgba(117,156,190,.3);background:rgba(117,156,190,.1);color:#9fc2de}
+.status.shipped{border-color:rgba(154,147,202,.3);background:rgba(154,147,202,.1);color:#c2b9ee}
+.status.refunded,.status.cancelled{border-color:rgba(202,130,110,.32);background:rgba(202,130,110,.1);color:#dfa58f}
+.empty-state{padding:34px 18px;border:1px dashed var(--line);border-radius:9px;color:var(--sage);text-align:center;font-size:10px}
+.secondary-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.customer-card{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--line)}
+.customer-avatar{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:var(--panel2);color:var(--gold-hi);font:600 18px var(--display)}
+.customer-card strong,.customer-card small{display:block}
+.customer-card strong{color:var(--cream);font-size:9px}.customer-card small{color:var(--muted);font-size:8px}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.setting-row{padding:17px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.setting-row strong{display:block;margin-bottom:5px;font:600 21px var(--display)}
+.setting-row p{margin:0;color:var(--sage);font-size:9px;line-height:1.8}
+.notice{margin-top:16px;color:var(--muted);font-size:9px;line-height:1.8}
+.footer-line{display:flex;justify-content:space-between;gap:12px;margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:8px;letter-spacing:.1em;text-transform:uppercase}
+@media(max-width:1120px){.shell{grid-template-columns:210px minmax(0,1fr)}.sidebar{padding-inline:13px}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-main{grid-template-columns:1fr}.hero-slide{grid-template-columns:1fr 220px;padding-inline:34px}.hero-dots{left:34px}}
+@media(max-width:820px){
+ .shell{display:flex;flex-direction:column}.sidebar{position:relative;top:auto;height:auto;min-height:0;padding:14px 18px 12px;border-right:0;border-bottom:1px solid rgba(212,175,90,.22)}
+ .brand{font-size:32px}.side-caption{display:none}.side-nav{display:flex;gap:5px;margin-top:15px;overflow-x:auto;padding-bottom:3px}.side-link{flex:none;min-height:36px;padding:0 11px;font-size:9px}.side-link.active:before{display:none}.side-link svg{width:14px;height:14px}.side-bottom{display:none}
+ .main{padding:0 18px 40px}.topbar{position:relative;min-height:72px}.searchbox{width:200px}
+}
+@media(max-width:560px){
+ .topbar{align-items:flex-start;flex-direction:column;padding:14px 0;gap:12px}.top-actions{width:100%;justify-content:space-between}.searchbox{width:100%;max-width:220px}.identity strong{max-width:100px}
+ .hero{height:440px;margin-top:17px}.hero-slide{display:flex;flex-direction:column;align-items:flex-start;gap:15px;padding:26px 21px 47px}.hero-copy h2{font-size:50px}.hero-copy p:last-child{margin-top:10px}.hero-photo{position:absolute;right:22px;bottom:27px;width:120px;height:150px;opacity:.92}.hero-dots{left:22px;bottom:19px}
+ .stats-grid{gap:9px}.stat-card{padding:13px}.stat-value{font-size:29px}.stat-top{font-size:8px}.spark{width:54px;opacity:.5}
+ .panel{padding:15px}.panel-head{flex-direction:column}.top-product{grid-template-columns:48px minmax(70px,1fr) 78px;gap:9px}.top-product .product-thumb{width:48px;height:58px}.top-product .stock-cell{grid-column:2/4}.secondary-grid,.settings-grid{grid-template-columns:1fr}
+ .footer-line{flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.hero-track{transition:none}}
+</style>
 </head>
-<body class="admin-body">
-<main class="admin-wrap">
-  <section id="adminDashboard" class="admin-dashboard" aria-label="Administrator dashboard">
-    <aside class="admin-sidebar">
-      <a class="admin-brand" href="/" aria-label="Dia home">Dia<span>✳</span><small>STUDIO CONSOLE</small></a>
-      <p class="admin-sidebar-label">WORKSPACE</p>
-      <nav class="admin-sidebar-nav" aria-label="Dashboard sections">
-        <a class="admin-nav-link is-active" href="#overview" data-admin-nav="overview"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</a>
-        <a class="admin-nav-link" href="#analytics" data-admin-nav="analytics"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 5-7"/></svg>Analytics</a>
-        <a class="admin-nav-link" href="#inventory" data-admin-nav="inventory"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12.1V21"/></svg>Products & inventory</a>
-        <a class="admin-nav-link" href="#orders" data-admin-nav="orders"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v17H5zM8 8h8M8 12h8M8 16h5"/></svg>Orders</a>
-        <a class="admin-nav-link" href="#users" data-admin-nav="users"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1M17 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 4v2"/></svg>Customers & access</a>
-      </nav>
-      <div class="admin-sidebar-bottom"><strong>Thoughtful by design.</strong>Private tools for the people behind the pieces.</div>
-    </aside>
-
-    <div class="admin-main">
-      <header class="admin-top">
-        <a class="admin-brand" href="/">Dia<span>✳</span><small>STUDIO</small></a>
-        <div>
-          <div class="admin-identity-wrap">
-            <div class="admin-avatar" aria-hidden="true">D</div>
-            <div class="admin-top-meta"><strong id="adminIdentity">Administrator</strong><small>Authorized administrator</small></div>
-          </div>
-          <button id="adminLogout" class="admin-secondary" type="button">Sign out ↗</button>
-        </div>
-      </header>
-
-      <section id="overview" class="admin-overview" aria-labelledby="overviewTitle">
-        <div class="admin-hero">
-          <div>
-            <p class="admin-kicker">DIA / OVERVIEW</p>
-            <h1 id="overviewTitle">The studio<br><em>at a glance.</em></h1>
-            <p>Your store's live operational picture, based on the current SQLite database.</p>
-          </div>
-          <div class="admin-hero-aside"><span>Workspace status</span><strong>Connected to store data</strong><span>Inventory · orders · customer access</span></div>
-        </div>
-        <div id="dashNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
-        <p class="admin-data-note">Financial integrity: completed order value is not proof of payment. Collected revenue counts only records marked paid; the current demo checkout does not collect payments. Gross profit appears only when the eligible paid order items have reliable cost snapshots.</p>
-        <div class="admin-stats" aria-label="Live store statistics">
-          <article><span>Customer accounts</span><strong id="statUsers">—</strong></article>
-          <article><span>Active customers</span><strong id="statActive">—</strong></article>
-          <article><span>Administrators</span><strong id="statAdmins">—</strong></article>
-          <article><span>New users · 7 days</span><strong id="statNew">—</strong></article>
-          <article><span>Active products</span><strong id="statProducts">—</strong></article>
-          <article><span>In-stock products</span><strong id="statStock">—</strong></article>
-          <article><span>Low stock · 1–5</span><strong id="statLowStock">—</strong></article>
-          <article><span>Out of stock</span><strong id="statOutStock">—</strong></article>
-          <article><span>Total orders</span><strong id="statOrders">—</strong></article>
-          <article><span>Pending orders</span><strong id="statPending">—</strong></article>
-          <article><span>Completed order value</span><strong id="statCompletedValue">—</strong></article>
-          <article><span>Collected revenue</span><strong id="statRevenue">—</strong></article>
-          <article><span>Gross profit</span><strong id="statProfit">—</strong></article>
-        </div>
-      </section>
-
-      <section id="analytics" class="admin-panel" aria-labelledby="analyticsTitle">
-        <div class="admin-panel-head">
-          <div><p class="admin-kicker">SALES ANALYTICS</p><h2 id="analyticsTitle">Order performance.</h2><p class="admin-panel-subtitle">Daily values use completed orders from the database, not proof of payment.</p></div>
-          <label class="admin-inline-filter" for="analyticsDays">Period <select id="analyticsDays"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">12 months</option></select></label>
-        </div>
-        <div id="salesChart" class="sales-chart"><p>No completed orders in this period.</p></div>
-        <div class="admin-analytics-grid">
-          <div><h3>Best-selling products</h3><div class="admin-table-scroll"><table><thead><tr><th>PRODUCT</th><th>UNITS</th><th>ORDER VALUE</th></tr></thead><tbody id="topProductRows"><tr><td colspan="3">Loading…</td></tr></tbody></table></div></div>
-          <div><h3>By category</h3><div class="admin-table-scroll"><table><thead><tr><th>CATEGORY</th><th>UNITS</th><th>ORDER VALUE</th></tr></thead><tbody id="categoryRows"><tr><td colspan="3">Loading…</td></tr></tbody></table></div></div>
-        </div>
-      </section>
-
-      <section id="inventory" class="admin-panel" aria-labelledby="inventoryTitle">
-        <div class="admin-panel-head">
-          <div><p class="admin-kicker">PRODUCT CATALOG</p><h2 id="inventoryTitle">Manage clothing.</h2><p class="admin-panel-subtitle">Create, edit, restore, or archive catalog products and stock.</p></div>
-          <div class="admin-panel-actions"><select id="productStatusFilter" aria-label="Product status"><option value="">All statuses</option><option value="active">Active</option><option value="archived">Archived</option></select><button id="refreshProducts" class="admin-secondary" type="button">Refresh ↻</button></div>
-        </div>
-        <p class="admin-data-note">Sample products are marked in the database. Cost price is private to administrators and is never returned by the public catalog API.</p>
-        <form id="productForm" class="admin-product-form">
-          <input id="productId" type="hidden">
-          <label for="productName">Product name</label><input id="productName" required minlength="2" maxlength="120">
-          <label for="productCategory">Category</label><input id="productCategory" required minlength="2" maxlength="60" placeholder="Tops, Pants, Dresses…">
-          <label for="productDescription">Description</label><textarea id="productDescription" rows="2" maxlength="3000" placeholder="Describe the fit, feel, and details…"></textarea>
-          <div class="admin-form-row">
-            <div><label for="productPrice">Selling price (₱)</label><input id="productPrice" type="number" min="0" max="100000000" step="1" required></div>
-            <div><label for="productCostPrice">Unit cost (₱, optional)</label><input id="productCostPrice" type="number" min="0" max="100000000" step="1" placeholder="Unknown"></div>
-            <div><label for="productStock">Stock quantity</label><input id="productStock" type="number" min="0" max="1000000" step="1" required></div>
-          </div>
-          <div class="admin-form-row">
-            <div><label for="productColor">Color</label><input id="productColor" maxlength="80" required></div>
-            <div><label for="productSizes">Sizes (comma-separated)</label><input id="productSizes" maxlength="200" placeholder="S, M, L, XL" required></div>
-            <div><label for="productTag">Collection tag</label><input id="productTag" maxlength="40" value="New arrival" required></div>
-          </div>
-          <label for="productImage">Image path or HTTPS URL</label><input id="productImage" maxlength="2048" value="/assets/dia-editorial.webp" required>
-          <label for="productImagePosition">Image position</label><input id="productImagePosition" maxlength="40" value="center center" required>
-          <div class="admin-form-actions"><button class="admin-primary" id="productSubmit" type="submit">Add product</button><button class="admin-secondary" id="productReset" type="button">Clear form</button></div>
-        </form>
-        <div id="productNotice" class="admin-notice" role="status" aria-live="polite" hidden></div>
-        <div class="admin-filters"><input id="productSearch" type="search" placeholder="Search catalog" aria-label="Search products"></div>
-        <div class="admin-table-scroll"><table><thead><tr><th>PRODUCT</th><th>PRICE</th><th>COST</th><th>STOCK</th><th>STATUS</th><th>ACTIONS</th></tr></thead><tbody id="productRows"><tr><td colspan="6">Loading products…</td></tr></tbody></table></div>
-      </section>
-
-      <section id="orders" class="admin-panel" aria-labelledby="ordersTitle">
-        <div class="admin-panel-head"><div><p class="admin-kicker">ORDER MANAGEMENT</p><h2 id="ordersTitle">Customer orders.</h2><p class="admin-panel-subtitle">Update fulfillment status using the permitted order lifecycle.</p></div><button id="refreshOrders" class="admin-secondary" type="button">Refresh ↻</button></div>
-        <div class="admin-filters"><input id="orderSearch" type="search" placeholder="Search order, name, or email" aria-label="Search orders"><select id="orderStatusFilter" aria-label="Filter by order status"><option value="">All statuses</option><option>pending</option><option>confirmed</option><option>processing</option><option>shipped</option><option>completed</option><option>cancelled</option><option>refunded</option></select></div>
-        <div class="admin-table-scroll"><table><thead><tr><th>ORDER</th><th>CUSTOMER</th><th>ITEMS</th><th>TOTAL</th><th>STATUS</th><th>UPDATE STATUS</th></tr></thead><tbody id="orderRows"><tr><td colspan="6">Loading orders…</td></tr></tbody></table></div>
-      </section>
-
-      <section id="users" class="admin-panel" aria-labelledby="usersTitle">
-        <div class="admin-panel-head"><div><p class="admin-kicker">ACCOUNT DIRECTORY</p><h2 id="usersTitle">People in Dia.</h2><p class="admin-panel-subtitle">Manage customer access, status, and verified administrator roles.</p></div><button id="refreshUsers" class="admin-secondary" type="button">Refresh ↻</button></div>
-        <div class="admin-filters"><input id="userSearch" type="search" placeholder="Search name or email" aria-label="Search users"><select id="roleFilter" aria-label="Filter by role"><option value="">All roles</option><option value="user">Customer</option><option value="admin">Admin</option></select><select id="statusFilter" aria-label="Filter by status"><option value="">All statuses</option><option value="active">Active</option><option value="disabled">Disabled</option></select></div>
-        <div class="admin-table-scroll"><table><thead><tr><th>ACCOUNT</th><th>ROLE</th><th>STATUS</th><th>JOINED</th><th>ACTIONS</th></tr></thead><tbody id="userRows"><tr><td colspan="5">Sign in to load accounts.</td></tr></tbody></table></div>
-        <div class="admin-pagination"><span id="pageLabel">—</span><div><button id="prevPage" class="admin-secondary" type="button">Previous</button><button id="nextPage" class="admin-secondary" type="button">Next</button></div></div>
-      </section>
-      <footer class="admin-footer">DIA STUDIO <span>·</span> LESS, BUT BETTER.</footer>
-    </div>
-  </section>
+<body>
+<div class="shell">
+<aside class="sidebar">
+ <a class="brand" href="/" aria-label="Dia storefront">Dia<span>✦</span><small>STUDIO</small></a>
+ <p class="side-caption">Workspace</p>
+ <nav class="side-nav" aria-label="Administrator navigation">
+  <a class="side-link active" href="#overview" data-nav="overview"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</a>
+  <a class="side-link" href="#orders" data-nav="orders"><svg viewBox="0 0 24 24"><path d="M5 4h14v17H5zM8 8h8M8 12h8M8 16h5"/></svg>Orders</a>
+  <a class="side-link" href="#products" data-nav="products"><svg viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12.1V21"/></svg>Products</a>
+  <a class="side-link" href="#customers" data-nav="customers"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1M17 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 4v2"/></svg>Customers</a>
+  <a class="side-link" href="#analytics" data-nav="analytics"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 5-7"/></svg>Analytics</a>
+  <a class="side-link" href="#settings" data-nav="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 13.5a7.5 7.5 0 0 0 0-3l2-1.5-2-3.4-2.4 1a7.5 7.5 0 0 0-2.6-1.5L13.6 2h-3.2L10 5.1a7.5 7.5 0 0 0-2.6 1.5l-2.4-1L3 9l2 1.5a7.5 7.5 0 0 0 0 3L3 15l2 3.4 2.4-1a7.5 7.5 0 0 0 2.6 1.5l.4 3.1h3.2l.4-3.1a7.5 7.5 0 0 0 2.6-1.5l2.4 1 2-3.4z"/></svg>Settings</a>
+ </nav>
+ <div class="side-bottom"><strong>Thoughtful by design.</strong>Private tools for the people behind the pieces.<br><br>Dia · Cebu studio</div>
+</aside>
+<main class="main">
+ <header class="topbar">
+  <div class="top-title"><small id="pageEyebrow">Dia studio / Overview</small><h1 id="pageTitle">Good day, welcome back.</h1></div>
+  <div class="top-actions">
+   <label class="searchbox"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input id="globalSearch" type="search" placeholder="Search products or orders" aria-label="Search products or orders"></label>
+   <div class="admin-chip"><span class="avatar" id="adminInitial">D</span><span class="identity"><strong id="adminName">Administrator</strong><small>Administrator</small></span></div>
+   <button class="icon-button" id="logoutButton" type="button" aria-label="Sign out" title="Sign out">↗</button>
+  </div>
+ </header>
+ <section id="overview" aria-labelledby="overviewTitle">
+  <div class="hero" id="dashboardHero">
+   <div class="hero-track" id="heroTrack">
+    <article class="hero-slide" style="--hero-image:url('https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=1600&amp;q=82')"><div class="hero-copy"><p class="eyebrow">Dia / Store pulse · 01 / 03</p><h2>Good things<br><em>take shape.</em></h2><p>A clear view of the people, products, and stories moving through the Dia studio.</p></div><figure class="hero-photo"><img src="https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=700&amp;q=82" alt="Dia editorial model look"></figure></article>
+    <article class="hero-slide" style="--hero-image:url('https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=1600&amp;q=82')"><div class="hero-copy"><p class="eyebrow">The collection · 02 / 03</p><h2>Details make<br><em>the difference.</em></h2><p>Keep the small things in focus. Every piece, order, and customer belongs to the bigger picture.</p></div><figure class="hero-photo"><img src="https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=700&amp;q=82" alt="Dia relaxed streetwear look" loading="lazy"></figure></article>
+    <article class="hero-slide" style="--hero-image:url('https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=1600&amp;q=82')"><div class="hero-copy"><p class="eyebrow">Your studio · 03 / 03</p><h2>Wear your<br><em>story.</em></h2><p>Build a store that feels personal, thoughtful, and ready for whatever comes next.</p></div><figure class="hero-photo"><img src="https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=700&amp;q=82" alt="Dia weekend editorial look" loading="lazy"></figure></article>
+   </div>
+   <div class="hero-dots" id="heroDots"><button class="hero-dot" data-slide="0" aria-label="Show slide 1" aria-current="true"></button><button class="hero-dot" data-slide="1" aria-label="Show slide 2" aria-current="false"></button><button class="hero-dot" data-slide="2" aria-label="Show slide 3" aria-current="false"></button></div><div class="hero-progress"><span id="heroProgress"></span></div>
+  </div>
+  <div class="sample-banner" id="sampleBanner"><span class="sample-dot"></span><strong>Sample data</strong><span>Illustrative preview values appear where the store has no recorded activity. Live records replace these values automatically.</span></div>
+  <div class="stats-grid" aria-label="Store summary">
+   <article class="stat-card"><div class="stat-top"><span>Revenue today</span><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M7 15l3-4 3 2 5-7"/></svg></span></div><strong class="stat-value" id="revenueToday">₱28,450</strong><div class="stat-foot"><span class="change" id="revenueChange">+8.4%</span><span>completed order value</span></div><svg class="spark" viewBox="0 0 80 30" aria-hidden="true"><path id="sparkRevenue" d="M2 23 L12 18 L22 21 L32 12 L42 16 L53 8 L64 11 L77 3"/></svg></article>
+   <article class="stat-card"><div class="stat-top"><span>Orders today</span><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M5 4h14v17H5zM8 8h8M8 12h8M8 16h5"/></svg></span></div><strong class="stat-value" id="ordersToday">24</strong><div class="stat-foot"><span class="change neutral" id="ordersChange">+12.5%</span><span>new orders</span></div><svg class="spark" viewBox="0 0 80 30" aria-hidden="true"><path id="sparkOrders" d="M2 22 L12 19 L22 22 L32 10 L42 17 L53 9 L64 12 L77 4"/></svg></article>
+   <article class="stat-card"><div class="stat-top"><span>New customers</span><span class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1M18 8v6m-3-3h6"/></svg></span></div><strong class="stat-value" id="newCustomers">18</strong><div class="stat-foot"><span class="change" id="customersChange">+6.2%</span><span>last 7 days</span></div><svg class="spark" viewBox="0 0 80 30" aria-hidden="true"><path id="sparkCustomers" d="M2 23 L12 18 L22 19 L32 16 L42 11 L53 15 L64 8 L77 3"/></svg></article>
+   <article class="stat-card"><div class="stat-top"><span>Refund rate</span><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M4 9a8 8 0 1 1-1 5M4 4v5h5"/></svg></span></div><strong class="stat-value" id="refundRate">1.8%</strong><div class="stat-foot"><span class="change neutral" id="refundChange">Within sample</span><span>of recorded orders</span></div><svg class="spark" viewBox="0 0 80 30" aria-hidden="true"><path id="sparkRefund" d="M2 8 L12 10 L22 12 L32 9 L42 15 L53 14 L64 18 L77 20"/></svg></article>
+  </div>
+  <p class="note" id="financialNote">Completed order value is not the same as money collected. Dia currently records demonstration orders and does not process payments. Refund rate is based on order status; return tracking is not yet available.</p>
+ </section>
+ <section id="analytics" aria-labelledby="analyticsTitle">
+  <div class="section-title"><div><h2 id="analyticsTitle">Sales at a glance.</h2><p>Track completed order value and the shape of your collection.</p></div><a class="text-link" href="#orders">View orders ↗</a></div>
+  <div class="grid-main">
+   <article class="panel"><div class="panel-head"><div><p class="panel-kicker">Store performance</p><h2>Revenue overview</h2><p>Completed order value · not cash received</p></div><div class="range-switch" role="group" aria-label="Revenue chart period"><button class="active" data-range="7" type="button">7 days</button><button data-range="30" type="button">30 days</button><button data-range="365" type="button">12 months</button></div></div><div class="chart-total" id="chartTotal">₱108,240</div><div class="chart-sub" id="chartCaption">Last 7 days · sample preview</div><div class="chart-wrap"><svg id="revenueChart" class="chart-svg" viewBox="0 0 800 250" role="img" aria-label="Revenue area chart"><defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#d4af5a" stop-opacity=".34"/><stop offset="100%" stop-color="#d4af5a" stop-opacity="0"/></linearGradient></defs><path class="chart-area" d="M20 180 L140 148 L260 160 L380 90 L500 110 L620 65 L780 35 L780 220 L20 220 Z"/><path class="chart-line" d="M20 180 L140 148 L260 160 L380 90 L500 110 L620 65 L780 35"/></svg><div class="chart-tooltip" id="chartTooltip" hidden></div></div><div class="chart-labels" id="chartLabels"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div></article>
+   <article class="panel"><div class="panel-head"><div><p class="panel-kicker">Category performance</p><h2>Sales mix</h2><p>Share of completed order value</p></div></div><div class="donut-wrap"><div class="donut" id="salesDonut"><div class="donut-center"><strong id="donutTotal">100%</strong><span>Sales mix</span></div></div></div><div class="legend" id="salesLegend"><div class="legend-row"><span class="legend-dot"></span><span>Essentials</span><strong>45%</strong></div><div class="legend-row"><span class="legend-dot"></span><span>Bottoms</span><strong>26%</strong></div><div class="legend-row"><span class="legend-dot"></span><span>Accessories</span><strong>19%</strong></div><div class="legend-row"><span class="legend-dot"></span><span>Outerwear</span><strong>10%</strong></div></div></article>
+  </div>
+ </section>
+ <section id="products">
+  <div class="section-title"><div><h2>Pieces people love.</h2><p>Top products, units sold, order value, and current stock.</p></div><span class="text-link" id="productSource">Sample preview</span></div>
+  <article class="panel"><div class="products-list" id="topProducts"><div class="top-product"><img class="product-thumb" src="/assets/dia-editorial.webp" alt=""><div class="product-name"><strong>Everyday heavyweight tee</strong><small>Essentials · sample</small></div><div class="product-metric"><strong>₱24,500</strong>38 units sold</div><div class="stock-cell"><div class="stock-label"><span>Stock</span><b>22 left</b></div><div class="stock-bar"><span style="width:72%"></span></div></div></div></div></article>
+ </section>
+ <section id="orders">
+  <div class="section-title"><div><h2>Recent orders.</h2><p>Find an order by number or customer. Filter by its current status.</p></div><span class="text-link" id="ordersSource">Sample preview</span></div>
+  <article class="panel">
+   <div class="filter-row" id="orderFilters"><button class="filter-button active" data-filter="all" type="button">All orders</button><button class="filter-button" data-filter="paid" type="button">Paid</button><button class="filter-button" data-filter="packing" type="button">Packing</button><button class="filter-button" data-filter="shipped" type="button">Shipped</button><button class="filter-button" data-filter="pending" type="button">Pending</button></div>
+   <div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th></tr></thead><tbody id="orderRows"><tr><td><strong>DIA-2048</strong></td><td><strong>Alex Morgan</strong><small>alex@example.com</small></td><td>Today</td><td>₱3,240</td><td><span class="status">Paid</span></td></tr></tbody></table></div>
+   <div class="empty-state" id="ordersEmpty" hidden>No orders match this search. Clear the search or choose another status.</div>
+  </article>
+ </section>
+ <div class="secondary-grid">
+  <section id="customers"><div class="section-title"><div><h2>New faces.</h2><p>Recently registered customers.</p></div></div><article class="panel" id="customerList"><div class="customer-card"><span class="customer-avatar">A</span><span><strong>Alex Morgan</strong><small>Sample customer</small></span></div></article></section>
+  <section id="settings"><div class="section-title"><div><h2>Studio settings.</h2><p>A quick note on your workspace.</p></div></div><article class="panel settings-grid"><div class="setting-row"><strong>Appearance</strong><p>Follows your device light or dark setting automatically.</p></div><div class="setting-row"><strong>Security</strong><p>Administrator access uses a protected, server-side session.</p></div><div class="setting-row"><strong>Data source</strong><p>Live records are read from the Dia SQLite store.</p></div><div class="setting-row"><strong>Payments</strong><p>Demo checkout does not collect or process payments.</p></div></article></section>
+ </div>
+ <div class="footer-line"><span>Dia · Studio console</span><span id="dashboardDate">—</span><span>Private administrator workspace</span></div>
 </main>
-<dialog id="adminConfirm"><form method="dialog"><p class="admin-kicker">CONFIRM ACCOUNT CHANGE</p><h2 id="confirmTitle">Review this change.</h2><p id="confirmText"></p><label id="promoteLabel" for="promotePassword" hidden>NEW ADMIN PASSWORD (14+ CHARACTERS)</label><input id="promotePassword" type="password" minlength="14" autocomplete="new-password" hidden><div class="admin-dialog-actions"><button id="cancelConfirm" class="admin-secondary" value="cancel">Cancel</button><button id="applyConfirm" class="admin-primary" value="confirm">Confirm change</button></div></form></dialog>
+</div>
+<script nonce="@@DIA_NONCE@@">
+'use strict';
+(() => {
+ const $=id=>document.getElementById(id),money=v=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:0}).format(Number(v)||0);
+ const dateLabel=v=>new Date(v).toLocaleDateString('en-PH',{day:'numeric',month:'short',year:'numeric'});
+ const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ let csrf='',adminUser=null,orders=[],products=[],users=[],analytics=null,days=7,orderFilter='all',searchTimer=null,slide=0,slideTimer=null,paused=false;
+ const slides=Array.from(document.querySelectorAll('.hero-slide')),dots=Array.from(document.querySelectorAll('.hero-dot')),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const sampleOrders=[
+  {orderNumber:'DIA-2048',customerName:'Alex Morgan',customerEmail:'alex@example.com',createdAt:new Date().toISOString(),total:3240,status:'completed',paymentStatus:'paid'},
+  {orderNumber:'DIA-2047',customerName:'Sam Rivera',customerEmail:'sam@example.com',createdAt:new Date(Date.now()-3600000).toISOString(),total:2180,status:'processing',paymentStatus:'not_collected'},
+  {orderNumber:'DIA-2046',customerName:'Jamie Lee',customerEmail:'jamie@example.com',createdAt:new Date(Date.now()-86400000).toISOString(),total:4590,status:'shipped',paymentStatus:'not_collected'},
+  {orderNumber:'DIA-2045',customerName:'Taylor Cruz',customerEmail:'taylor@example.com',createdAt:new Date(Date.now()-2*86400000).toISOString(),total:1690,status:'pending',paymentStatus:'not_collected'}
+ ];
+ const sampleMix=[{category:'Essentials',value:45},{category:'Bottoms',value:26},{category:'Accessories',value:19},{category:'Outerwear',value:10}];
+ const sampleRevenue=[12400,16800,14200,21600,19400,24200,29640];
+ const sampleProducts=[
+  {name:'Everyday heavyweight tee',category:'Essentials',price:890,stock:22,image:'/assets/dia-editorial.webp',units:38,revenue:24500},
+  {name:'Relaxed everyday chinos',category:'Bottoms',price:1490,stock:14,image:'/assets/dia-editorial.webp',units:26,revenue:38740},
+  {name:'Core six-panel cap',category:'Accessories',price:690,stock:4,image:'/assets/dia-editorial.webp',units:19,revenue:13110},
+  {name:'Everyday leather tote',category:'Accessories',price:1850,stock:31,image:'/assets/dia-editorial.webp',units:14,revenue:25900}
+ ];
+ const sampleSpark=[[2,12,8,17,14,22,25,30],[5,9,7,18,14,25,22,31],[3,10,9,12,17,14,25,31],[30,28,26,28,20,17,13,10]];
+ async function api(path,options={}){
+  const method=(options.method||'GET').toUpperCase(),headers={Accept:'application/json',...(options.headers||{})};
+  let body=options.body;if(body!==undefined&&typeof body!=='string'){headers['Content-Type']='application/json';body=JSON.stringify(body);}
+  if(!['GET','HEAD','OPTIONS'].includes(method)){if(!csrf){const t=await fetch('/api/auth/csrf',{credentials:'same-origin'}),d=await t.json().catch(()=>({}));if(!t.ok||!d.csrfToken)throw new Error('Secure session expired. Refresh and sign in again.');csrf=d.csrfToken;}headers['X-CSRF-Token']=csrf;}
+  const r=await fetch(path,{...options,method,body,headers,credentials:'same-origin'}),d=await r.json().catch(()=>({}));
+  if(!r.ok){const e=new Error(d?.error?.message||'The request could not be completed.');e.status=r.status;e.code=d?.error?.code;if(e.code==='CSRF_VALIDATION_FAILED')csrf='';throw e;}
+  if(d.csrfToken)csrf=d.csrfToken;return d;
+ }
+ function showError(message){const node=document.createElement('div');node.className='sample-banner';node.textContent=message;document.querySelector('.main').prepend(node);}
+ function isSameDay(value){return new Date(value).toDateString()===new Date().toDateString();}
+ function statusFor(order){
+  if(order.paymentStatus==='paid')return 'Paid';
+  if(order.status==='processing'||order.status==='confirmed')return 'Packing';
+  if(order.status==='shipped')return 'Shipped';
+  if(order.status==='pending')return 'Pending';
+  if(order.status==='refunded')return 'Refunded';
+  if(order.status==='cancelled')return 'Cancelled';
+  return 'Completed';
+ }
+ function statusClass(label){return label.toLowerCase();}
+ function orderMatchesFilter(order){const label=statusFor(order).toLowerCase();return orderFilter==='all'||label===orderFilter;}
+ function sampleMode(){return !orders.length;}
+ function sparkPath(values){const min=Math.min(...values),max=Math.max(...values),range=max-min||1;return values.map((v,i)=>((i?'L':'M')+(2+i*10.8).toFixed(1)+' '+(27-(v-min)/range*23).toFixed(1))).join(' ');}
+ function setSpark(id,values){$(id).setAttribute('d',sparkPath(values));}
+ function setStats(stats,analyticsData){
+  const liveOrders=orders.length>0;
+  const todayOrders=orders.filter(o=>isSameDay(o.createdAt));
+  const todayValue=todayOrders.filter(o=>o.status==='completed').reduce((s,o)=>s+Number(o.total||0),0);
+  const newCustomers=Number(stats?.newUsersThisWeek||0);
+  const total=Number(stats?.totalOrders||orders.length),refunds=Number(stats?.refundedOrders||0);
+  $('revenueToday').textContent=money(liveOrders?todayValue:28450);
+  $('ordersToday').textContent=String(liveOrders?todayOrders.length:24);
+  $('newCustomers').textContent=String(liveOrders?newCustomers:18);
+  $('refundRate').textContent=(liveOrders?(total?refunds/total*100:0):1.8).toFixed(1)+'%';
+  const labels=analyticsData?.daily||[];
+  const vals=labels.map(x=>Number(x.completedOrderValue||0));
+  if(vals.length){setSpark('sparkRevenue',vals.slice(-8));setSpark('sparkOrders',labels.slice(-8).map(x=>Number(x.orderCount||0)));}else{sampleSpark.slice(0,2).forEach((v,i)=>setSpark(i?'sparkOrders':'sparkRevenue',v));}
+  setSpark('sparkCustomers',sampleSpark[2]);setSpark('sparkRefund',sampleSpark[3]);
+  const source=liveOrders?'Live database records':'Sample data preview';
+  ['revenueChange','ordersChange','customersChange','refundChange'].forEach((id,i)=>{const el=$(id);el.textContent=liveOrders?['Live today','Live today','Last 7 days','Status-based'][i]:['+8.4%','+12.5%','+6.2%','Sample'][i];if(liveOrders)el.classList.add('neutral');});
+  $('sampleBanner').hidden=liveOrders;
+  if(!liveOrders){$('sampleBanner').innerHTML='<span class="sample-dot"></span><strong>Sample data</strong><span>Illustrative preview only. Live order and customer records replace these values when available.</span>';}
+  $('financialNote').textContent=(analyticsData?.paymentNotice||'Completed order value is not the same as money collected. Demo checkout does not collect payment.')+' Refund rate is based on refunded order records; returns are not currently tracked.';
+ }
+ function dateKey(date){return date.toISOString().slice(0,10);}
+ function chartSeries(data,period){
+  const now=new Date();const rows=data?.daily||[];
+  if(period===365){
+   const months=[];for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');months.push({key,label:d.toLocaleDateString('en-PH',{month:'short'}),value:0});}
+   rows.forEach(r=>{const key=String(r.day||'').slice(0,7),m=months.find(x=>x.key===key);if(m)m.value+=Number(r.completedOrderValue||0);});
+   return months;
+  }
+  const result=[];for(let i=period-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i),key=dateKey(d),row=rows.find(x=>x.day===key);result.push({key,label:period===7?d.toLocaleDateString('en-PH',{weekday:'short'}):d.toLocaleDateString('en-PH',{day:'numeric',month:'short'}),value:Number(row?.completedOrderValue||0)});}
+  return result;
+ }
+ function renderChart(series,preview){
+  const svg=$('revenueChart'),tooltip=$('chartTooltip'),width=800,height=250,left=24,right=20,top=18,bottom=26,plotW=width-left-right,plotH=height-top-bottom;
+  const vals=series.map(x=>x.value);const peak=Math.max(1,...vals),floor=0;
+  const pts=series.map((d,i)=>({x:left+(series.length===1?plotW/2:i*plotW/(series.length-1)),y:top+plotH-(d.value-floor)/(peak||1)*plotH,d}));
+  svg.querySelectorAll('.chart-generated').forEach(n=>n.remove());
+  const ns='http://www.w3.org/2000/svg';
+  for(let k=0;k<4;k++){const y=top+k*plotH/3,line=document.createElementNS(ns,'line');line.setAttribute('x1',left);line.setAttribute('x2',width-right);line.setAttribute('y1',y);line.setAttribute('y2',y);line.setAttribute('class','chart-grid-line chart-generated');svg.append(line);}
+  const area=document.createElementNS(ns,'path');area.setAttribute('class','chart-area chart-generated');area.setAttribute('d','M '+pts.map(p=>p.x+' '+p.y).join(' L ')+' L '+(width-right)+' '+(height-bottom)+' L '+left+' '+(height-bottom)+' Z');svg.append(area);
+  const path=document.createElementNS(ns,'path');path.setAttribute('class','chart-line chart-generated');path.setAttribute('d',pts.map((p,i)=>(i?'L':'M')+' '+p.x+' '+p.y).join(' '));svg.append(path);
+  pts.forEach((p,i)=>{const c=document.createElementNS(ns,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r','5');c.setAttribute('class','chart-point chart-generated');c.setAttribute('tabindex','0');c.setAttribute('aria-label',p.d.label+': '+money(p.d.value));const show=(event)=>{tooltip.hidden=false;tooltip.innerHTML='<strong>'+safe(p.d.label)+'</strong>'+money(p.d.value)+(preview?'<br>Sample preview':'');const box=$('revenueChart').getBoundingClientRect();const rect=svg.getBoundingClientRect();const clientX=event.clientX||rect.left+p.x/width*rect.width;const clientY=event.clientY||rect.top+p.y/height*rect.height;tooltip.style.left=Math.max(0,Math.min(box.width-145,clientX-box.left+8))+'px';tooltip.style.top=Math.max(0,clientY-box.top-55)+'px';};c.addEventListener('mouseenter',show);c.addEventListener('focus',show);c.addEventListener('mouseleave',()=>tooltip.hidden=true);c.addEventListener('blur',()=>tooltip.hidden=true);c.addEventListener('mousemove',show);svg.append(c);});
+  const total=series.reduce((s,x)=>s+x.value,0);$('chartTotal').textContent=money(total);$('chartCaption').textContent=(days===365?'Last 12 months':('Last '+days+' days'))+(preview?' · sample preview':' · completed order value');
+  const labs=$('chartLabels');labs.innerHTML='';const stride=series.length>12?Math.ceil(series.length/6):1;series.forEach((p,i)=>{if(i%stride===0||i===series.length-1){const span=document.createElement('span');span.textContent=p.label;labs.append(span);}});
+ }
+ const donutColors=['#d4af5a','#6d9475','#8b7952','#577262','#b5894a','#3e715d'];
+ function renderMix(rows,preview){
+  const values=rows.length?rows.map(x=>({name:x.category||x.name,value:Number(x.completedOrderValue??x.value)||0})):sampleMix.map(x=>({name:x.category,value:x.value}));
+  const total=values.reduce((s,x)=>s+x.value,0)||1;let current=0;const stops=[];
+  values.forEach((v,i)=>{const start=current/total*100;current+=v.value;stops.push(donutColors[i%donutColors.length]+' '+start.toFixed(2)+'% '+(current/total*100).toFixed(2)+'%');});
+  $('salesDonut').style.background='conic-gradient('+stops.join(',')+')';$('donutTotal').textContent=preview?'Sample':Math.round(total>0?100:0)+'%';
+  $('salesLegend').innerHTML=values.slice(0,6).map((v,i)=>'<div class="legend-row"><span class="legend-dot" style="background:'+donutColors[i%donutColors.length]+'"></span><span>'+safe(v.name)+'</span><strong>'+Math.round(v.value/total*100)+'%</strong></div>').join('');
+ }
+ function renderTopProducts(sales){
+  const sourceProducts=products.filter(p=>p.status!=='archived'),list=[];
+  (sales||[]).forEach(item=>{const p=sourceProducts.find(x=>x.name===item.name);list.push({...p,...item,image:p?.image||'/assets/dia-editorial.webp',stock:Number(p?.stock??0)});});
+  if(!list.length){sampleProducts.forEach(x=>list.push({...x}));$('productSource').textContent='Sample preview';}
+  else $('productSource').textContent='Live catalog + order records';
+  $('topProducts').innerHTML=list.slice(0,5).map(p=>{const stock=Math.max(0,Number(p.stock||0)),width=Math.max(3,Math.min(100,stock/40*100));return '<div class="top-product"><img class="product-thumb" src="'+safe(p.image||'/assets/dia-editorial.webp')+'" alt="" onerror="this.onerror=null;this.src=\'/assets/dia-editorial.webp\'"><div class="product-name"><strong>'+safe(p.name)+'</strong><small>'+safe(p.category||'Dia selection')+(p.isSample?' · sample inventory':'')+'</small></div><div class="product-metric"><strong>'+money(p.completedOrderValue??p.revenue??0)+'</strong>'+Number(p.units||0)+' units sold</div><div class="stock-cell"><div class="stock-label"><span>Stock</span><b>'+stock+' left</b></div><div class="stock-bar"><span class="'+(stock<=5?'low':'')+'" style="width:'+width+'%"></span></div></div></div>';}).join('');
+ }
+ function renderOrders(){
+  const usingSample=!orders.length,rows=(usingSample?sampleOrders:orders).filter(orderMatchesFilter);
+  const body=$('orderRows');body.innerHTML=rows.map(o=>{const label=statusFor(o),date=dateLabel(o.createdAt);return '<tr><td><strong>'+safe(o.orderNumber)+'</strong><small>'+safe(o.status||'pending')+'</small></td><td><strong>'+safe(o.customerName)+'</strong><small>'+safe(o.customerEmail)+'</small></td><td>'+date+'</td><td><strong>'+money(o.total)+'</strong></td><td><span class="status '+statusClass(label)+'">'+label+'</span></td></tr>';}).join('');
+  $('ordersEmpty').hidden=rows.length>0;$('ordersSource').textContent=usingSample?'Sample preview':'Live order records';
+ }
+ function renderCustomers(){
+  if(!users.length){$('customerList').innerHTML='<div class="customer-card"><span class="customer-avatar">A</span><span><strong>Alex Morgan</strong><small>Sample customer preview</small></span></div><div class="customer-card"><span class="customer-avatar">J</span><span><strong>Jamie Lee</strong><small>Sample customer preview</small></span></div>';return;}
+  $('customerList').innerHTML=users.slice(0,6).map(u=>'<div class="customer-card"><span class="customer-avatar">'+safe((u.name||u.email||'D').slice(0,1).toUpperCase())+'</span><span><strong>'+safe(u.name||'Dia customer')+'</strong><small>'+safe(u.email||'')+' · '+safe(u.status||'active')+'</small></span></div>').join('');
+ }
+ function updatePage(link){
+  document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('active',a.dataset.nav===link.dataset.nav));
+  const label=link.dataset.nav;const title={overview:'Good day, welcome back.',orders:'Orders and fulfillment.',products:'Products and inventory.',customers:'Your Dia community.',analytics:'Analytics and performance.',settings:'Studio settings.'};
+  $('pageTitle').textContent=title[label]||'Dia studio';$('pageEyebrow').textContent='Dia studio / '+label;
+ }
+ document.querySelectorAll('[data-nav]').forEach(link=>link.addEventListener('click',()=>updatePage(link)));
+ $('orderFilters').addEventListener('click',event=>{const btn=event.target.closest('[data-filter]');if(!btn)return;orderFilter=btn.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===btn));renderOrders();});
+ async function loadOrders(searchValue){
+  try{const q=searchValue?('?search='+encodeURIComponent(searchValue)):'',data=await api('/api/admin/orders'+q);orders=data.orders||[];renderOrders();}
+  catch(error){orders=[];renderOrders();if(error.status!==401)showError(error.message);}
+ }
+ async function loadProducts(searchValue){
+  try{const q=searchValue?('?search='+encodeURIComponent(searchValue)):'',data=await api('/api/admin/products'+q);products=data.products||[];renderTopProducts(analytics?.topProducts||[]);}
+  catch(error){products=[];renderTopProducts([]);if(error.status!==401)showError(error.message);}
+ }
+ async function loadCustomers(){
+  try{const data=await api('/api/admin/users?limit=8');users=data.users||[];renderCustomers();}
+  catch(error){users=[];renderCustomers();}
+ }
+ async function loadStats(){
+  try{const data=await api('/api/admin/stats');return data;}
+  catch(error){showError(error.message);return {stats:{},financialNotice:'Live stats could not be loaded.'};}
+ }
+ async function loadAnalytics(period){
+  days=period;
+  try{analytics=await api('/api/admin/analytics?days='+period);}
+  catch(error){analytics=null;if(error.status!==401)showError(error.message);}
+  const preview=!analytics||!(analytics.daily||[]).length;
+  let series=chartSeries(analytics,period);
+  if(preview){if(period===7)series=sampleRevenue.map((v,i)=>({key:'sample-'+i,label:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i],value:v}));else if(period===30)series=Array.from({length:30},(_,i)=>({key:'sample-'+i,label:String(i+1),value:11000+Math.round((Math.sin(i/2)+1)*4800)+(i%5)*900}));else series=Array.from({length:12},(_,i)=>({key:'sample-'+i,label:['Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'][i],value:115000+i*4800+Math.round(Math.sin(i*1.5)*18000)}));}
+  renderChart(series,preview);renderMix(preview?[]:(analytics?.byCategory||[]),preview);renderTopProducts(analytics?.topProducts||[]);
+  if(preview)$('chartCaption').textContent=(period===365?'Last 12 months':('Last '+period+' days'))+' · sample preview';
+ }
+ async function loadAll(){
+  const [stats]=await Promise.all([loadStats(),loadOrders(),loadProducts(),loadCustomers(),loadAnalytics(7)]);
+  setStats(stats.stats,analytics);
+  renderOrders();renderCustomers();
+ }
+ $('globalSearch').addEventListener('input',()=>{clearTimeout(searchTimer);const value=$('globalSearch').value.trim();searchTimer=setTimeout(()=>{loadOrders(value);loadProducts(value);},260);});
+ document.querySelectorAll('[data-range]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-range]').forEach(x=>x.classList.toggle('active',x===btn));loadAnalytics(Number(btn.dataset.range));}));
+ function showSlide(next){slide=(next+slides.length)%slides.length;$('heroTrack').style.transform='translateX(-'+slide*100+'%)';dots.forEach((d,i)=>d.setAttribute('aria-current',String(i===slide)));const p=$('heroProgress');p.classList.remove('run');void p.offsetWidth;if(!reduced&&!paused)p.classList.add('run');}
+ function stopSlider(){clearTimeout(slideTimer);slideTimer=null;$('heroProgress').classList.remove('run');}
+ function startSlider(){stopSlider();if(reduced||paused)return;const p=$('heroProgress');p.classList.remove('run');void p.offsetWidth;p.classList.add('run');slideTimer=setTimeout(()=>{showSlide(slide+1);startSlider();},4000);}
+ $('heroDots').addEventListener('click',event=>{const b=event.target.closest('[data-slide]');if(b){showSlide(Number(b.dataset.slide));startSlider();}});
+ $('dashboardHero').addEventListener('mouseenter',()=>{paused=true;stopSlider();});$('dashboardHero').addEventListener('mouseleave',()=>{paused=false;startSlider();});
+ $('logoutButton').addEventListener('click',async()=>{const btn=$('logoutButton');btn.disabled=true;try{await api('/api/auth/logout',{method:'POST',body:{}});}catch{}window.location.assign('/admin/login');});
+ $('dashboardDate').textContent=new Date().toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+ async function boot(){
+  try{
+   const me=await api('/api/auth/me');
+   if(!me.user||me.user.role!=='admin'||me.authMethod!=='admin'){window.location.replace('/admin/login');return;}
+   adminUser=me.user;$('adminName').textContent=me.user.name||'Administrator';$('adminInitial').textContent=(me.user.name||'D').slice(0,1).toUpperCase();
+   await loadAll();startSlider();
+  }catch(error){window.location.replace('/admin/login');}
+ }
+ boot();
+})();
+</script>
 </body>
 </html>
