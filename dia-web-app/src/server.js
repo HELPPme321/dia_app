@@ -57,7 +57,10 @@ function createApp(options = {}) {
     const nonce=crypto.randomBytes(18).toString('base64');
     res.locals.diaCspNonce=nonce;
     const policy=res.getHeader('Content-Security-Policy');
-    if(typeof policy==='string')res.setHeader('Content-Security-Policy',policy.replace(/script-src\\s+([^;]+)/,"  app.use(express.json({limit:'32kb'})); 'nonce-"+nonce+"'"));
+    if(typeof policy==='string'){
+      const directive=policy.split(';').find(part=>part.trim().startsWith('script-src '));
+      if(directive)res.setHeader('Content-Security-Policy',policy.replace(directive,directive+" 'nonce-"+nonce+"'"));
+    }
     next();
   });
   app.use(express.json({limit:'32kb'}));
