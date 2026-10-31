@@ -252,19 +252,17 @@ test('empty identifiers and wrong username passwords are handled safely',async()
 
 test('desktop Dia pages are separate, role-aware, and protected',async()=>{
   await agent.get('/').expect(200).expect((r)=>{
-    assert.match(r.text,/id="intro"/);
-    assert.match(r.text,/class="site-nav"/);
-    assert.match(r.text,/class="editorial-hero"/);
-    assert.match(r.text,/id="featuredProducts"/);
+    assert.match(r.text,/class="site-header"/);
+    assert.match(r.text,/id="heroTrack"/);
+    assert.match(r.text,/id="productGrid"/);
     assert.match(r.text,/id="bagDrawer"/);
-    assert.match(r.text,/id="introSound"/);
-    assert.match(r.text,/id="skipIntro"/);
-    assert.ok(r.text.includes('<script src="/js/fashion.js?v=dia-cinematic-login-20261031" defer></script>'));
-    assert.ok(r.text.includes('<script src="/js/storefront.js?v=dia-live-storefront-20261031" defer></script>'));
-    assert.ok(r.text.includes("images.unsplash.com"));
-    assert.match(r.text,/id="collections"/);
+    assert.match(r.text,/id="newsletterForm"/);
+    assert.match(r.text,/Wear your/);
+    assert.match(r.text,/images.unsplash.com/);
+    assert.match(r.text,/id="looks"/);
     assert.match(r.text,/id="story"/);
-    assert.doesNotMatch(r.text,/phone-frame|appScreen|bottom-nav/);
+    assert.match(r.text,/nonce="[^"]+"/);
+    assert.doesNotMatch(r.text,/phone-frame|appScreen|bottom-nav|src="\/js\/storefront.js/);
   });
   await agent.get('/login').expect(200).expect((r)=>{
     assert.match(r.text,/id="loginForm"/);
