@@ -260,7 +260,7 @@ function createApp(options = {}) {
     return res.sendFile(path.join(ROOT,'dashboard.html'));
   }
   app.get('/login',customerHome);
-  app.get('/register',(req,res)=>res.redirect(302,'/login?mode=signup'));
+  app.get('/register',(_req,res)=>res.sendFile(path.join(ROOT,'register.html')));
   app.get('/admin/login',adminLoginPage);
   app.get('/admin',adminDashboardPage);
   app.get('/admin.html',adminDashboardPage);
@@ -278,7 +278,7 @@ function createApp(options = {}) {
     setHeaders(res){res.setHeader('Cache-Control','no-cache');}
   }));
   app.get('/',(_req,res)=>res.sendFile(path.join(ROOT,'index.html')));
-  for(const file of ['index.html','style.css','premium.css','script.js','admin.css','admin.js','auth-pages.css','auth.js','login.js','admin-login.js','dashboard.js']){
+  for(const file of ['index.html','register.html','style.css','premium.css','script.js','admin.css','admin.js','auth-pages.css','auth.js','login.js','admin-login.js','dashboard.js']){
     app.get('/'+file,(_req,res)=>res.sendFile(path.join(ROOT,file)));
   }
   app.use('/assets',express.static(path.join(ROOT,'assets'),{dotfiles:'deny',index:false}));
