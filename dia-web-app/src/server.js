@@ -1,6 +1,7 @@
 'use strict';
 require('dotenv').config();
 const express = require('express');
+const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const helmet = require('helmet');
@@ -50,6 +51,18 @@ function createApp(options = {}) {
     scriptSrc:["'self'","https://accounts.google.com/gsi/client"],styleSrc:["'self'","'unsafe-inline'","https://fonts.googleapis.com","https://accounts.google.com/gsi/style"],
     fontSrc:["'self'","https://fonts.gstatic.com","data:"],imgSrc:["'self'","data:","https:"],connectSrc:["'self'","https://accounts.google.com/gsi/"],frameSrc:["https://accounts.google.com/gsi/"]
   }} }));
+  // Authorize the self-contained storefront and dashboard scripts with a per-response nonce.
+  // Helmet's restrictive script-src remains in place; no unsafe-inline exception is added.
+  app.use((req,res,next)=>{
+    const nonce=crypto.randomBytes(18).toString('base64');
+    res.locals.diaCspNonce=nonce;
+    const policy=res.getHeader('Content-Security-Policy');
+    if(typeof policy==='string'){
+      const directive=policy.split(';').find(part=>part.trim().startsWith('script-src '));
+      if(directive)res.setHeader('Content-Security-Policy',policy.replace(directive,directive+" 'nonce-"+nonce+"'"));
+    }
+    next();
+  });
   app.use(express.json({limit:'32kb'}));
   app.use((req,res,next)=>{
     const reqOrigin=req.get('origin');
@@ -79,8 +92,15 @@ function createApp(options = {}) {
   function admin(req,res,next){if(!req.user)return error(res,401,'AUTHENTICATION_REQUIRED','Administrator sign-in is required.');if(req.user.role!=='admin'||req.user.status!=='active'||req.session?.auth_method!=='admin')return error(res,403,'ADMIN_ACCESS_REQUIRED','Administrator password sign-in is required.');next();}
   const limiter=rateLimit({windowMs:15*60*1000,limit:12,standardHeaders:'draft-8',legacyHeaders:false,message:{error:{code:'TOO_MANY_ATTEMPTS',message:'Too many sign-in attempts. Please wait before trying again.'}}});
   const registrationLimiter=rateLimit({windowMs:60*60*1000,limit:8,standardHeaders:'draft-8',legacyHeaders:false,message:{error:{code:'REGISTRATION_RATE_LIMITED',message:'Too many registration attempts. Please wait and try again.'}}});
+  const newsletterLimiter=rateLimit({windowMs:60*60*1000,limit:5,standardHeaders:'draft-8',legacyHeaders:false,message:{error:{code:'NEWSLETTER_RATE_LIMITED',message:'Too many signup attempts. Please try again later.'}}});
   app.get('/api/health',(_req,res)=>res.json({status:'ok', ...runtime}));
   app.get('/api/config',(_req,res)=>res.json({googleClientId:env.GOOGLE_CLIENT_ID||''}));
+  app.post('/api/newsletter',newsletterLimiter,csrf,(req,res)=>{
+    const email=emailNorm(req.body?.email);
+    if(!validEmail(email))return error(res,400,'INVALID_EMAIL','Enter a valid email address.');
+    db.prepare("INSERT OR IGNORE INTO newsletter_subscribers(id,email,created_at,status) VALUES(?,?,?,'subscribed')").run(crypto.randomUUID(),email,new Date().toISOString());
+    return res.json({subscribed:true,message:'You are on the list. Thank you.'});
+  });
   app.get('/api/auth/csrf',(req,res)=>{db.prepare('DELETE FROM sessions WHERE expires_at<=?').run(Date.now());if(req.session)return res.json({csrfToken:req.session.csrf_token});return res.json({csrfToken:startSession(req,res,null,TTL,'anonymous')});});
   app.get('/api/auth/me',(req,res)=>req.user?res.json({authenticated:true,user:safeUser(req.user),authMethod:req.session.auth_method}):res.status(401).json({authenticated:false,user:null,authMethod:null}));
   app.get('/api/profile',auth,(req,res)=>res.json({user:safeUser(req.user)}));
@@ -239,6 +259,10 @@ function createApp(options = {}) {
   });
   registerStoreRoutes(app,{db,auth,admin,csrf});
 
+  function sendInlinePage(res,fileName) {
+    const html=fs.readFileSync(path.join(ROOT,fileName),'utf8');
+    return res.type('html').send(html.replaceAll('@@DIA_NONCE@@',String(res.locals.diaCspNonce||'')));
+  }
   function customerHome(req,res) {
     if(req.user?.role==='admin'&&req.session?.auth_method==='admin') return res.redirect(302,'/admin');
     if(req.user?.role==='user'&&req.user.status==='active') return res.redirect(302,'/dashboard');
@@ -252,7 +276,7 @@ function createApp(options = {}) {
     if(!req.user) return res.redirect(302,'/admin/login');
     if(req.user.role!=='admin') return res.status(403).type('text/plain').send('Administrator access is restricted.');
     if(req.session?.auth_method!=='admin') return res.redirect(302,'/admin/login');
-    return res.sendFile(path.join(ROOT,'admin.html'));
+    return sendInlinePage(res,'admin.html');
   }
   function customerDashboardPage(req,res) {
     if(req.user?.role==='admin'&&req.session?.auth_method==='admin') return res.redirect(302,'/admin');
@@ -277,9 +301,9 @@ function createApp(options = {}) {
     dotfiles:'deny',index:false,fallthrough:true,maxAge:0,
     setHeaders(res){res.setHeader('Cache-Control','no-cache');}
   }));
-  app.get('/',(_req,res)=>res.sendFile(path.join(ROOT,'index.html')));
+  app.get('/',(_req,res)=>sendInlinePage(res,'index.html'));
   for(const file of ['index.html','register.html','style.css','premium.css','script.js','admin.css','admin.js','auth-pages.css','auth.js','login.js','admin-login.js','dashboard.js']){
-    app.get('/'+file,(_req,res)=>res.sendFile(path.join(ROOT,file)));
+    app.get('/'+file,(_req,res)=>file==='index.html'?sendInlinePage(res,file):res.sendFile(path.join(ROOT,file)));
   }
   app.use('/assets',express.static(path.join(ROOT,'assets'),{dotfiles:'deny',index:false}));
   // Keep API misses distinguishable from authentication/database failures. The requested

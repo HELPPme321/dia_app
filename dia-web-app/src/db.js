@@ -44,7 +44,14 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || DEFAULT_DATA
     "expires_at INTEGER NOT NULL" +
     ");" +
     "CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);" +
-    "CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);"
+    "CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);"+
+    "CREATE TABLE IF NOT EXISTS newsletter_subscribers ("+
+    "id TEXT PRIMARY KEY,"+
+    "email TEXT NOT NULL COLLATE NOCASE UNIQUE,"+
+    "created_at TEXT NOT NULL,"+
+    "status TEXT NOT NULL DEFAULT 'subscribed' CHECK (status IN ('subscribed', 'unsubscribed'))"+
+    ");"+
+    "CREATE INDEX IF NOT EXISTS idx_newsletter_created_at ON newsletter_subscribers(created_at DESC);"
   );
 
   // Additive migration: existing users and sessions are preserved.

@@ -33,11 +33,31 @@ async function adminSignIn(agent, db) {
     .send({ email: 'store-admin@example.net', password: adminPassword });
 }
 
+test('newsletter signup stores a normalized unique email in SQLite', async () => {
+  const db = createDatabase(':memory:');
+  try {
+    const { app } = createApp({ db, env: { NODE_ENV: 'test', APP_ORIGIN: 'http://localhost:3000' } });
+    const browser = request.agent(app);
+    const token = await csrf(browser);
+    const first = await browser.post('/api/newsletter').set('x-csrf-token', token)
+      .send({ email: '  Dia.Reader@Example.com  ' }).expect(200);
+    assert.equal(first.body.subscribed, true);
+    assert.equal(db.prepare('SELECT email FROM newsletter_subscribers').get().email, 'dia.reader@example.com');
+    await browser.post('/api/newsletter').set('x-csrf-token', token)
+      .send({ email: 'dia.reader@example.com' }).expect(200);
+    assert.equal(db.prepare('SELECT COUNT(*) count FROM newsletter_subscribers').get().count, 1);
+    await browser.post('/api/newsletter').set('x-csrf-token', token)
+      .send({ email: 'not-an-email' }).expect(400);
+  } finally {
+    db.close();
+  }
+});
+
 test('sample product seed is repeatable and never overwrites existing product edits', () => {
   const db = createDatabase(':memory:');
   try {
     const first = seedSampleProducts({ db, logger: quiet });
-    assert.equal(first.created.length, 4);
+    assert.equal(first.created.length, 6);
     assert.equal(first.skipped.length, 0);
     const product = db.prepare('SELECT name,price,stock,is_sample,cost_price FROM products WHERE id=?').get('essential-hoodie');
     assert.equal(product.name, 'Essential Hoodie');
@@ -45,11 +65,13 @@ test('sample product seed is repeatable and never overwrites existing product ed
     assert.equal(product.stock, 12);
     assert.equal(product.is_sample, 1);
     assert.equal(product.cost_price, null);
+    assert.ok(db.prepare('SELECT 1 FROM products WHERE id=?').get('everyday-tote'));
+    assert.ok(db.prepare('SELECT 1 FROM products WHERE id=?').get('relaxed-chinos'));
 
     db.prepare("UPDATE products SET price=1750,stock=4 WHERE id='essential-hoodie'").run();
     const second = seedSampleProducts({ db, logger: quiet });
     assert.equal(second.created.length, 0);
-    assert.equal(second.skipped.length, 4);
+    assert.equal(second.skipped.length, 6);
     const unchanged = db.prepare('SELECT price,stock FROM products WHERE id=?').get('essential-hoodie');
     assert.deepEqual(unchanged, { price: 1750, stock: 4 });
   } finally {
@@ -171,7 +193,7 @@ test('customer signup, DB cart, stock-safe demo order, order history, and admin 
 
     const stats = (await adminAgent.get('/api/admin/stats').expect(200)).body.stats;
     assert.equal(stats.totalUsers, 1);
-    assert.equal(stats.totalProducts, 5);
+    assert.equal(stats.totalProducts, 7);
     assert.equal(stats.totalOrders, 1);
     assert.equal(stats.completedOrders, 1);
     assert.equal(stats.completedOrderValue, 3670);

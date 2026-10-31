@@ -44,6 +44,28 @@ const PRODUCTS = [
     sizes: ['S', 'M', 'L', 'XL'],
     image: '/assets/dia-editorial.webp',
     description: 'A roomy, slightly structured layer in signature deep olive. Minimal detailing lets the fabric and shape do the talking.'
+  },
+  {
+    id: 'everyday-tote',
+    name: 'Everyday leather tote',
+    category: 'Accessories',
+    price: 1850,
+    tag: 'Everyday carry',
+    color: 'Espresso',
+    sizes: ['One size'],
+    image: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=1200&q=82',
+    description: 'A roomy everyday companion with a clean profile, soft structure, and considered carry space.'
+  },
+  {
+    id: 'relaxed-chinos',
+    name: 'Relaxed everyday chinos',
+    category: 'Bottoms',
+    price: 1490,
+    tag: 'New arrival',
+    color: 'Olive',
+    sizes: ['S', 'M', 'L', 'XL'],
+    image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=1200&q=82',
+    description: 'Easy structure with a comfortable leg and enough room to move through the day.'
   }
 ];
 

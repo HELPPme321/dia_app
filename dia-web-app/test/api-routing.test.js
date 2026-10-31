@@ -4,6 +4,8 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
+const bcrypt = require('bcryptjs');
 const request = require('supertest');
 const { createDatabase } = require('../src/db');
 const { createApp } = require('../src/server');
@@ -17,6 +19,7 @@ const routeSources = serverSource + '\n' + storeRouteSource;
 const routeContract = [
   ['GET', '/api/health'],
   ['GET', '/api/config'],
+  ['POST', '/api/newsletter'],
   ['GET', '/api/auth/csrf'],
   ['GET', '/api/auth/me'],
   ['GET', '/api/categories'],
@@ -92,16 +95,34 @@ test('frontend API calls use methods and paths registered by Express', () => {
     assert.ok(fs.existsSync(path.join(root, file)), 'Expected dedicated page file: ' + file);
   }
   const homePage = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-  assert.ok(homePage.includes('id="intro"'), 'The homepage must own the one-time brand intro');
-  assert.ok(homePage.includes('class="site-nav"'), 'Homepage must use normal website navigation');
-  assert.ok(homePage.includes('class="editorial-hero"'), 'Homepage must use the editorial fashion hero');
-  assert.ok(homePage.includes('id="featuredProducts"'), 'Homepage must render the live product catalog');
-  assert.ok(homePage.includes('id="bagDrawer"'), 'Homepage must include the account-backed bag');
-  for (const category of ['dress', 'sneaker', 'bag', 'shades']) {
-    assert.ok(homePage.includes('data-fashion-tile="' + category + '"'), 'Homepage must include the ' + category + ' category tile');
+  assert.ok(homePage.includes('Wear your'), 'Homepage must use the Wear your story brand message');
+  assert.ok(homePage.includes('id="heroTrack"') && homePage.includes('class="hero-slide"'), 'Homepage must include its editorial slideshow');
+  assert.ok(homePage.includes('id="productGrid"'), 'Homepage must render the four curated product slots');
+  assert.ok(homePage.includes('id="bagDrawer"') && homePage.includes('id="bagCount"'), 'Homepage must include the account-backed bag');
+  assert.ok(homePage.includes('id="newsletterForm"') && homePage.includes("api('/api/newsletter'"), 'Homepage newsletter must submit to the server');
+  assert.ok(homePage.includes("api('/api/cart/items'") && homePage.includes("api('/api/orders'"), 'Storefront bag and checkout must use protected store APIs');
+  assert.ok(homePage.includes('--forest:#0a1f16') && homePage.includes('--gold:#d4af5a'), 'Homepage must use the requested forest and gold palette');
+  assert.ok(homePage.includes('prefers-color-scheme:light') && homePage.includes('prefers-reduced-motion:reduce'), 'Homepage must follow device theme and reduced-motion settings');
+  assert.ok(homePage.includes('nonce="@@DIA_NONCE@@"'), 'Homepage inline script must use a server-injected CSP nonce');
+  assert.ok(!homePage.includes('/css/style.css') && !homePage.includes('/js/storefront.js'), 'Homepage must be self-contained');
+  const adminPage = fs.readFileSync(path.join(root, 'admin.html'), 'utf8');
+  for (const token of ['Overview','Orders','Products','Customers','Analytics','Settings']) {
+    assert.ok(adminPage.includes(token), 'Admin dashboard must include ' + token + ' navigation');
   }
-  assert.ok(homePage.includes('id="introSound"') && homePage.includes('id="skipIntro"'), 'Cinematic intro must expose sound and skip controls');
-  assert.ok(!homePage.includes('phone-frame'), 'Homepage must not be a phone mock-up');
+  for (const id of ['revenueToday','ordersToday','newCustomers','refundRate','revenueChart','salesDonut','topProducts','orderRows']) {
+    assert.ok(adminPage.includes('id="' + id + '"'), 'Admin dashboard must include ' + id);
+  }
+  assert.ok(adminPage.includes('id="heroTrack"') && adminPage.includes('data-range="365"'), 'Admin dashboard must include the hero and 12-month chart control');
+  assert.ok(adminPage.includes("api('/api/admin/analytics?days='") && adminPage.includes("api('/api/admin/orders'"), 'Admin dashboard must use protected analytics and order APIs');
+  assert.ok(adminPage.includes('Sample data') && adminPage.includes('prefers-color-scheme:light'), 'Admin dashboard must label preview data and follow device theme');
+  assert.ok(adminPage.includes('nonce="@@DIA_NONCE@@"'), 'Admin inline script must use a server-injected CSP nonce');
+  assert.ok(!adminPage.includes('src="/admin.js"') && !adminPage.includes('href="/admin.css"'), 'Admin dashboard must be self-contained');
+  for (const [label, page] of [['storefront', homePage], ['admin', adminPage]]) {
+    const inlineScripts = [...page.matchAll(/<script nonce="@@DIA_NONCE@@">([\s\S]*?)<\/script>/g)];
+    assert.equal(inlineScripts.length, 1, label + ' must have exactly one self-contained inline script');
+    assert.doesNotMatch(page, /\son(?:error|click|load)=/i, label + ' must not rely on CSP-blocked inline event handlers');
+    assert.doesNotThrow(() => new vm.Script(inlineScripts[0][1], { filename: label + '.inline.js' }), label + ' inline JavaScript must parse');
+  }
   for (const file of ['login.html', 'admin-login.html']) {
     const page = fs.readFileSync(path.join(root, file), 'utf8');
     const authVersion = file === 'login.html' ? 'dia-cinematic-login-20261031' : 'dia-desktop-20261030';
@@ -214,9 +235,27 @@ test('frontend asset URLs deliver Dia design rules and shared scripts', async ()
   try {
     const { app } = createApp({ db, env: { NODE_ENV: 'test', APP_ORIGIN: 'http://localhost:3000' } });
     const home = await request(app).get('/').expect(200);
-    assert.ok(home.text.includes('href="/css/style.css?v=dia-zip-integration-20261031"'));
-    assert.ok(home.text.includes('src="/js/fashion.js?v=dia-cinematic-login-20261031"'));
-    assert.ok(home.text.includes('src="/js/storefront.js?v=dia-live-storefront-20261031"'));
+    const nonceMatch = home.text.match(/<script nonce="([^"]+)">/);
+    assert.ok(nonceMatch, 'Homepage must receive a per-response inline-script nonce');
+    const policy = home.headers['content-security-policy'] || '';
+    assert.ok(policy.includes("'nonce-" + nonceMatch[1] + "'"), 'CSP must authorize the matching homepage script nonce');
+    assert.doesNotMatch(policy, /script-src[^;]*unsafe-inline/, 'CSP must not allow arbitrary inline scripts');
+    assert.ok(home.text.includes('id="heroTrack"') && home.text.includes('id="newsletterForm"'));
+    const directHome = await request(app).get('/index.html').expect(200);
+    assert.ok(directHome.headers['content-security-policy'].includes("'nonce-"));
+
+    const now = new Date().toISOString();
+    db.prepare("INSERT INTO users(id,email,password_hash,name,role,status,created_at,updated_at) VALUES('inline-admin','inline-admin@example.net',?,'Inline Administrator','admin','active',?,?)")
+      .run(bcrypt.hashSync('Inline-admin-test-password-2026!', 4), now, now);
+    const administrator = request.agent(app);
+    const adminCsrf = (await administrator.get('/api/auth/csrf').expect(200)).body.csrfToken;
+    await administrator.post('/api/auth/admin-login').set('x-csrf-token', adminCsrf)
+      .send({ email: 'inline-admin@example.net', password: 'Inline-admin-test-password-2026!' }).expect(200);
+    const dashboard = await administrator.get('/admin').expect(200);
+    const dashboardNonce = dashboard.text.match(/<script nonce="([^"]+)">/);
+    assert.ok(dashboardNonce, 'Protected admin dashboard must receive a script nonce');
+    assert.ok(dashboard.headers['content-security-policy'].includes("'nonce-" + dashboardNonce[1] + "'"));
+    assert.doesNotMatch(dashboard.headers['content-security-policy'], /script-src[^;]*unsafe-inline/);
 
     const login = await request(app).get('/login').expect(200);
     assert.ok(login.text.includes('href="/css/style.css?v=dia-zip-integration-20261031"'));
