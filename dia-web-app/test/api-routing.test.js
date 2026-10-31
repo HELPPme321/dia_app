@@ -219,7 +219,7 @@ test('frontend asset URLs deliver Dia design rules and shared scripts', async ()
     assert.ok(home.text.includes('src="/js/storefront.js?v=dia-live-storefront-20261031"'));
 
     const login = await request(app).get('/login').expect(200);
-    assert.ok(login.text.includes('href="/css/style.css?v=dia-desktop-20261030"'));
+    assert.ok(login.text.includes('href="/css/style.css?v=dia-zip-integration-20261031"'));
     assert.ok(login.text.includes('src="/js/auth.js?v=dia-cinematic-login-20261031"'));
     assert.ok(login.text.includes('src="/js/fashion.js?v=dia-cinematic-login-20261031"'));
 
