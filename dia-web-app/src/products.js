@@ -44,7 +44,7 @@ const PRODUCTS = [
     sizes: ['S', 'M', 'L', 'XL'],
     image: '/assets/dia-editorial.webp',
     description: 'A roomy, slightly structured layer in signature deep olive. Minimal detailing lets the fabric and shape do the talking.'
-  }  ,
+  },
   {
     id: 'everyday-tote',
     name: 'Everyday leather tote',
