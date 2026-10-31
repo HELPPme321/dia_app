@@ -6,7 +6,8 @@ Dia is a multi-page fashion website built with separate HTML documents, shared C
 
 - index.html — Dia editorial storefront with a one-shot post-login cinematic introduction, product collection, and live bag.
 - js/storefront.js — database-backed catalog, product quick view, customer bag, and account-aware navigation.
-- `login.html` — role-aware customer/admin sign-in and customer registration.
+- `login.html` — role-aware customer/admin sign-in.
+- `register.html` — separate customer registration page using the same secure API and shared visual system.
 - `admin-login.html` — dedicated administrator sign-in.
 - `forgot.html` — password-recovery information.
 - `dashboard.html` — protected customer dashboard.
@@ -17,9 +18,11 @@ Dia is a multi-page fashion website built with separate HTML documents, shared C
 
 ## Authentication
 
+The customer sign-in and registration experiences are separate HTML pages (`/login` and `/register`), not a single-page application. Both use the shared `js/auth.js` helpers and the database-backed Express API.
+
 Dia uses the Express and SQLite backend. The browser never contains hard-coded users or passwords. Customer login is tried first; when it returns `INVALID_CREDENTIALS`, the role-aware flow tries the administrator endpoint. Only the server can grant administrator access after checking the stored active role.
 
-Administrator identifiers are plain text and accept a trimmed username or email, case-insensitively. The existing `milesadmin` account is supported without an `@` character. Customer registration still validates the email field separately.
+Administrator identifiers are plain text and accept a trimmed username or email, case-insensitively. The existing `milesadmin` account is supported without an `@` character. Customer registration runs on its own page and validates the email and password rules separately; usernames remain plain-text identifiers and do not require an `@` character.
 
 The backend maintains CSRF protection, server-backed sessions, expiry, logout invalidation, and protected user/admin routes. A customer cannot access the admin console or APIs.
 
@@ -39,7 +42,7 @@ Then open `http://localhost:3000`. Do not open HTML files directly or use a stat
 
 ## Storefront experience
 
-To seed the example inventory without creating demo accounts, run npm.cmd run products:seed. The homepage loads its product catalog from the Express /api/products endpoint. Product details and the signed-in customer's bag are read from SQLite through the existing store API; bag changes require an authenticated session and CSRF token. The browser does not use local storage as an account or cart database. Product and campaign photographs use Unsplash image URLs with the bundled Dia editorial image as a fallback.
+To seed the example inventory without creating demo accounts, run npm.cmd run products:seed. The homepage includes four SVG line-art category shortcuts (Dresses, Shoes, Bags, and Eyewear) and loads its product catalog from the Express /api/products endpoint. Product details and the signed-in customer's bag are read from SQLite through the existing store API; bag changes require an authenticated session and CSRF token. The browser does not use local storage as an account or cart database. Product and campaign photographs use Unsplash image URLs with the bundled Dia editorial image as a fallback.
 
 The cinematic introduction is armed only after a successful customer password, registration, or verified Google sign-in. It consumes a one-shot sessionStorage flag before playback, so visiting the homepage directly, refreshing after the cutscene, and ordinary navigation do not replay it. Audio starts muted. A visitor must explicitly press the sound control to enable the subtle Web Audio transition cue; the skip control and reduced-motion preference remain available.
 

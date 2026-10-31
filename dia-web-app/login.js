@@ -2,29 +2,10 @@
 (() => {
   const $ = (id) => document.getElementById(id);
   const notice = $('authNotice');
-  const loginTab = $('loginTab');
-  const registerTab = $('registerTab');
   let busy = false;
 
   function showMessage(text, success) {
     DiaAuth.message(notice, text, success);
-  }
-
-  function mode(value) {
-    const signup = value === 'signup';
-    $('loginPanel').hidden = signup;
-    $('registerPanel').hidden = !signup;
-    loginTab.setAttribute('aria-selected', String(!signup));
-    registerTab.setAttribute('aria-selected', String(signup));
-    $('authTitle').innerHTML = signup ? 'Make it<br><em>yours.</em>' : 'Welcome<br><em>back.</em>';
-    $('authDescription').textContent = signup
-      ? 'Create your Dia account and keep your favorite pieces together.'
-      : 'Sign in to discover the collection, save your favorites, and keep your bag close.';
-    showMessage('');
-    const url = new URL(location.href);
-    if (signup) url.searchParams.set('mode', 'signup');
-    else url.searchParams.delete('mode');
-    history.replaceState({}, '', url);
   }
 
   async function roleAwareLogin(identifier, password, rememberMe) {
@@ -73,58 +54,10 @@
     }
   });
 
-  $('registerForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    if (busy) return;
-    const name = $('registerName').value.trim().replace(/\s+/g, ' ');
-    const username = $('registerUsername').value.trim().toLowerCase();
-    const email = $('registerEmail').value.trim();
-    const password = $('registerPassword').value;
-    const confirmPassword = $('registerConfirm').value;
-    if (name.length < 2) { showMessage('Enter your full name.'); $('registerName').focus(); return; }
-    if (!username) {
-      showMessage('Enter a username.');
-      $('registerUsername').focus(); return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
-      showMessage('Enter a valid email address.'); $('registerEmail').focus(); return;
-    }
-    if (password.length < 12 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
-      showMessage('Use at least 12 characters, including a letter and a number.'); $('registerPassword').focus(); return;
-    }
-    if (password !== confirmPassword) {
-      showMessage('The passwords do not match.'); $('registerConfirm').focus(); return;
-    }
-    busy = true;
-    showMessage('');
-    DiaAuth.setBusy($('registerSubmit'), true, 'Creating your account…');
-    try {
-      const data = await DiaAuth.request('/api/auth/register', {
-        method: 'POST',
-        body: { name, username, email, password, confirmPassword }
-      });
-      if (data.user?.role !== 'user' || data.user.status !== 'active') {
-        throw new Error('This account cannot be registered as a customer.');
-      }
-      $('registerForm').reset();
-      DiaAuth.redirectByRole(data.user, 'password', { cinematic: true });
-    } catch (error) {
-      showMessage(error.message || 'We could not create your account. Please try again.');
-    } finally {
-      busy = false;
-      DiaAuth.setBusy($('registerSubmit'), false);
-    }
-  });
-
-  loginTab.addEventListener('click', () => mode('login'));
-  registerTab.addEventListener('click', () => mode('signup'));
-  $('showRegister').addEventListener('click', () => mode('signup'));
-  $('showLogin').addEventListener('click', () => mode('login'));
   DiaAuth.bindPasswordToggles();
 
   (async () => {
     $('authYear').textContent = String(new Date().getFullYear());
-    if (new URLSearchParams(location.search).get('mode') === 'signup') mode('signup');
     const params = new URLSearchParams(location.search);
     if (params.has('loggedOut')) showMessage('You have signed out securely.', true);
     try {
