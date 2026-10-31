@@ -60,7 +60,7 @@ test('frontend API calls use methods and paths registered by Express', () => {
     ['auth.js', "fetch('/api/auth/csrf'"],
     ['js/auth.js', "fetch('/api/auth/csrf'"],
     ['login.js', "DiaAuth.request('/api/auth/login'"],
-    ['login.js', "DiaAuth.request('/api/auth/register'"],
+    ['js/register.js', "DiaAuth.request('/api/auth/register'"],
     ['login.js', "DiaAuth.request('/api/auth/google'"],
     ['login.js', "DiaAuth.request('/api/config'"],
     ['login.js', "DiaAuth.request('/api/auth/me'"],
@@ -88,7 +88,7 @@ test('frontend API calls use methods and paths registered by Express', () => {
     ['admin.js', "api('/api/auth/logout'"],
     ['admin.js', "fetch('/api/auth/me'"]
   ];
-  for (const file of ['index.html', 'login.html', 'admin-login.html', 'dashboard.html', 'forgot.html', 'forgot-password.html']) {
+  for (const file of ['index.html', 'login.html', 'register.html', 'admin-login.html', 'dashboard.html', 'forgot.html', 'forgot-password.html']) {
     assert.ok(fs.existsSync(path.join(root, file)), 'Expected dedicated page file: ' + file);
   }
   const homePage = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
@@ -97,6 +97,9 @@ test('frontend API calls use methods and paths registered by Express', () => {
   assert.ok(homePage.includes('class="editorial-hero"'), 'Homepage must use the editorial fashion hero');
   assert.ok(homePage.includes('id="featuredProducts"'), 'Homepage must render the live product catalog');
   assert.ok(homePage.includes('id="bagDrawer"'), 'Homepage must include the account-backed bag');
+  for (const category of ['dress', 'sneaker', 'bag', 'shades']) {
+    assert.ok(homePage.includes('data-fashion-tile="' + category + '"'), 'Homepage must include the ' + category + ' category tile');
+  }
   assert.ok(homePage.includes('id="introSound"') && homePage.includes('id="skipIntro"'), 'Cinematic intro must expose sound and skip controls');
   assert.ok(!homePage.includes('phone-frame'), 'Homepage must not be a phone mock-up');
   for (const file of ['login.html', 'admin-login.html']) {
@@ -211,7 +214,7 @@ test('frontend asset URLs deliver Dia design rules and shared scripts', async ()
   try {
     const { app } = createApp({ db, env: { NODE_ENV: 'test', APP_ORIGIN: 'http://localhost:3000' } });
     const home = await request(app).get('/').expect(200);
-    assert.ok(home.text.includes('href="/css/style.css?v=dia-editorial-storefront-20261031"'));
+    assert.ok(home.text.includes('href="/css/style.css?v=dia-zip-integration-20261031"'));
     assert.ok(home.text.includes('src="/js/fashion.js?v=dia-cinematic-login-20261031"'));
     assert.ok(home.text.includes('src="/js/storefront.js?v=dia-live-storefront-20261031"'));
 
@@ -220,9 +223,18 @@ test('frontend asset URLs deliver Dia design rules and shared scripts', async ()
     assert.ok(login.text.includes('src="/js/auth.js?v=dia-cinematic-login-20261031"'));
     assert.ok(login.text.includes('src="/js/fashion.js?v=dia-cinematic-login-20261031"'));
 
-    const css = await request(app).get('/css/style.css?v=dia-editorial-storefront-20261031').expect(200);
+    const registration = await request(app).get('/register').expect(200);
+    assert.ok(registration.text.includes('id="registerForm"'));
+    assert.ok(registration.text.includes('src="/js/register.js?v=dia-register-page-20261031"'));
+    await request(app).get('/register.html').expect(200);
+
+    const registerScript = await request(app).get('/js/register.js?v=dia-register-page-20261031').expect(200);
+    assert.ok(registerScript.headers['content-type'].includes('javascript'));
+    assert.ok(registerScript.text.includes("DiaAuth.request('/api/auth/register'"));
+
+    const css = await request(app).get('/css/style.css?v=dia-zip-integration-20261031').expect(200);
     assert.ok(css.headers['content-type'].includes('text/css'));
-    for (const selector of ['.site-nav', '.editorial-hero', '.product-grid', '.product-visual', '.fashion-stage', '.login-layout', '.login-card', '.gold-button']) {
+    for (const selector of ['.site-nav', '.editorial-hero', '.collection-grid', '.collection-card', '.product-grid', '.product-visual', '.fashion-stage', '.login-layout', '.login-card', '.gold-button']) {
       assert.ok(css.text.includes(selector), 'Dia stylesheet must include ' + selector);
     }
 
