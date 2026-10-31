@@ -472,3 +472,21 @@ body.bag-open{overflow:hidden}
 .product-visual.has-secondary .product-secondary-image{position:absolute;inset:0;opacity:0;transform:scale(1);transition:opacity .35s ease,transform .85s cubic-bezier(.2,.7,.2,1)}
 .product-visual.has-secondary:hover .product-secondary-image,.product-visual.has-secondary:focus-visible .product-secondary-image{opacity:1;transform:scale(1.04)}
 .checkout-notice-success{color:#2d7650!important;font-weight:700}
+
+
+/* Category shortcuts carried over from the Dia line-art concept */
+.collection-shortcuts{margin-top:58px}
+.collection-shortcuts__heading{display:flex;justify-content:space-between;align-items:end;gap:26px;margin-bottom:20px}
+.collection-shortcuts__heading h3{margin:8px 0 0;color:var(--ivory);font:500 clamp(2rem,3.4vw,3.1rem)/.98 var(--serif)}
+.collection-shortcuts__heading h3 em{color:var(--champagne);font-weight:400}
+.collection-shortcuts__heading>p{max-width:350px;margin:0 0 3px;color:var(--mute);font-size:.73rem;line-height:1.85}
+.collection-grid--editorial .collection-card{min-height:222px;padding:22px 20px;background:linear-gradient(155deg,rgba(15,81,50,.45),rgba(6,38,28,.86))}
+.collection-grid--editorial .collection-card__art{height:126px;margin-bottom:9px}
+.collection-grid--editorial .collection-card__art svg{width:112px;height:112px;transition:transform .45s var(--ease)}
+.collection-grid--editorial .collection-card:hover .collection-card__art svg{transform:translateY(-5px) scale(1.04)}
+.collection-grid--editorial .collection-card__foot{display:flex;justify-content:space-between;align-items:end;gap:12px}
+.collection-grid--editorial .collection-card h3{margin:0 0 4px;font-size:1.7rem}
+.collection-grid--editorial .collection-card p{font-size:.56rem}
+.collection-grid--editorial .collection-card__foot>span{color:var(--gold);font-size:1rem}
+@media(max-width:780px){.collection-shortcuts__heading{align-items:flex-start;flex-direction:column;gap:12px}.collection-grid--editorial .collection-card{min-height:205px;padding:18px 15px}}
+@media(prefers-reduced-motion:reduce){.collection-grid--editorial .collection-card__art svg{transition:none}}
