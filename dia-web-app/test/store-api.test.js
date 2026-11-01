@@ -220,6 +220,32 @@ test('customer signup, DB cart, stock-safe demo order, order history, and admin 
 });
 
 
+test('sample catalogue uses the provided local product photos and refreshes known legacy artwork only', () => {
+  const db = createDatabase(':memory:');
+  try {
+    seedSampleProducts({ db, logger: quiet });
+    const expected = {
+      'everyday-tee': '/images/02-product-black-tee.webp',
+      'everyday-tote': '/images/08-product-leather-totes.webp',
+      'core-cap': '/images/09-product-white-cap.webp',
+      'relaxed-chinos': '/images/10-product-chino-pants.webp'
+    };
+    for (const [id, image] of Object.entries(expected)) {
+      assert.equal(db.prepare('SELECT image_url FROM products WHERE id=?').get(id).image_url, image);
+    }
+    db.prepare('UPDATE products SET image_url=? WHERE id=?').run(
+      'https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&fit=crop&w=1200&q=82',
+      'everyday-tee'
+    );
+    db.prepare('UPDATE products SET image_url=? WHERE id=?').run('https://example.com/custom.webp', 'everyday-tote');
+    seedSampleProducts({ db, logger: quiet });
+    assert.equal(db.prepare('SELECT image_url FROM products WHERE id=?').get('everyday-tee').image_url, expected['everyday-tee']);
+    assert.equal(db.prepare('SELECT image_url FROM products WHERE id=?').get('everyday-tote').image_url, 'https://example.com/custom.webp');
+  } finally {
+    db.close();
+  }
+});
+
 test('sample product seeding refreshes only untouched placeholder images', () => {
   const db = createDatabase(':memory:');
   try {

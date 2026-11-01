@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://images.unsplash.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/dia-brand.css?v=photo-integration-20261101">
 <style>
 :root{
  color-scheme:dark;--forest:#0a1f16;--panel:#12301f;--panel2:#183b29;--gold:#d4af5a;--gold-hi:#f0d58a;
@@ -211,9 +212,9 @@ td small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
  <section id="overview" aria-labelledby="overviewTitle">
   <div class="hero" id="dashboardHero">
    <div class="hero-track" id="heroTrack">
-    <article class="hero-slide" style="--hero-image:url('https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=1600&amp;q=82')"><div class="hero-copy"><p class="eyebrow">Dia / Store pulse · 01 / 03</p><h2>Good things<br><em>take shape.</em></h2><p>A clear view of the people, products, and stories moving through the Dia studio.</p></div><figure class="hero-photo"><img src="https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=700&amp;q=82" alt="Dia editorial model look"></figure></article>
-    <article class="hero-slide" style="--hero-image:url('https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=1600&amp;q=82')"><div class="hero-copy"><p class="eyebrow">The collection · 02 / 03</p><h2>Details make<br><em>the difference.</em></h2><p>Keep the small things in focus. Every piece, order, and customer belongs to the bigger picture.</p></div><figure class="hero-photo"><img src="https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=700&amp;q=82" alt="Dia relaxed streetwear look" loading="lazy"></figure></article>
-    <article class="hero-slide" style="--hero-image:url('https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=1600&amp;q=82')"><div class="hero-copy"><p class="eyebrow">Your studio · 03 / 03</p><h2>Wear your<br><em>story.</em></h2><p>Build a store that feels personal, thoughtful, and ready for whatever comes next.</p></div><figure class="hero-photo"><img src="https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=700&amp;q=82" alt="Dia weekend editorial look" loading="lazy"></figure></article>
+    <article class="hero-slide" style="--hero-image:url('/images/01-model-moss-bomber.webp')"><div class="hero-copy"><p class="eyebrow">Dia / Store pulse · 01 / 03</p><h2>Good things<br><em>take shape.</em></h2><p>A clear view of the people, products, and stories moving through the Dia studio.</p></div><figure class="hero-photo"><img src="/images/01-model-moss-bomber.webp" alt="Dia editorial model look"></figure></article>
+    <article class="hero-slide" style="--hero-image:url('/images/04-model-monogram-jacket.webp')"><div class="hero-copy"><p class="eyebrow">The collection · 02 / 03</p><h2>Details make<br><em>the difference.</em></h2><p>Keep the small things in focus. Every piece, order, and customer belongs to the bigger picture.</p></div><figure class="hero-photo"><img src="/images/04-model-monogram-jacket.webp" alt="Dia relaxed streetwear look" loading="lazy"></figure></article>
+    <article class="hero-slide" style="--hero-image:url('/images/06-model-striped-polo.webp')"><div class="hero-copy"><p class="eyebrow">Your studio · 03 / 03</p><h2>Wear your<br><em>story.</em></h2><p>Build a store that feels personal, thoughtful, and ready for whatever comes next.</p></div><figure class="hero-photo"><img src="/images/06-model-striped-polo.webp" alt="Dia weekend editorial look" loading="lazy"></figure></article>
    </div>
    <div class="hero-dots" id="heroDots"><button class="hero-dot" data-slide="0" aria-label="Show slide 1" aria-current="true"></button><button class="hero-dot" data-slide="1" aria-label="Show slide 2" aria-current="false"></button><button class="hero-dot" data-slide="2" aria-label="Show slide 3" aria-current="false"></button></div><div class="hero-progress"><span id="heroProgress"></span></div>
   </div>
@@ -290,10 +291,10 @@ td small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
  const sampleMix=[{category:'Essentials',value:45},{category:'Bottoms',value:26},{category:'Accessories',value:19},{category:'Outerwear',value:10}];
  const sampleRevenue=[12400,16800,14200,21600,19400,24200,29640];
  const sampleProducts=[
-  {name:'Everyday heavyweight tee',category:'Essentials',price:890,stock:22,image:'/assets/dia-editorial.webp',units:38,revenue:24500},
-  {name:'Relaxed everyday chinos',category:'Bottoms',price:1490,stock:14,image:'/assets/dia-editorial.webp',units:26,revenue:38740},
-  {name:'Core six-panel cap',category:'Accessories',price:690,stock:4,image:'/assets/dia-editorial.webp',units:19,revenue:13110},
-  {name:'Everyday leather tote',category:'Accessories',price:1850,stock:31,image:'/assets/dia-editorial.webp',units:14,revenue:25900}
+  {name:'Everyday heavyweight tee',category:'Essentials',price:890,stock:22,image:'/images/02-product-black-tee.webp',units:38,revenue:24500},
+  {name:'Relaxed everyday chinos',category:'Bottoms',price:1490,stock:14,image:'/images/10-product-chino-pants.webp',units:26,revenue:38740},
+  {name:'Core six-panel cap',category:'Accessories',price:690,stock:4,image:'/images/09-product-white-cap.webp',units:19,revenue:13110},
+  {name:'Everyday leather tote',category:'Accessories',price:1850,stock:31,image:'/images/08-product-leather-totes.webp',units:14,revenue:25900}
  ];
  const sampleSpark=[[2,12,8,17,14,22,25,30],[5,9,7,18,14,25,22,31],[3,10,9,12,17,14,25,31],[30,28,26,28,20,17,13,10]];
  async function api(path,options={}){

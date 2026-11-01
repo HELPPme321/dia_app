@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://images.unsplash.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/dia-brand.css?v=photo-integration-20261101">
 <style>
 :root{
  color-scheme:dark;
@@ -107,7 +108,7 @@ img{display:block;max-width:100%}
 .add-button:disabled{cursor:not-allowed;opacity:.48}
 .catalog-message{margin:14px 0 0;color:var(--sage);font-size:11px}
 .looks-section{padding-top:74px;background:var(--panel)}
-.looks-grid{display:grid;grid-template-columns:1.05fr .9fr 1fr;grid-template-rows:260px 260px;gap:16px}
+.looks-grid{display:grid;grid-template-columns:1.05fr .9fr 1fr;grid-template-rows:260px 260px 220px;gap:16px}
 .look-card{position:relative;min-height:210px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
 .look-card:first-child{grid-row:span 2}
 .look-card:nth-child(4){grid-column:2/4}
@@ -178,7 +179,7 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
  .promise-inner{grid-template-columns:1fr}.promise{justify-content:flex-start;padding:15px 10px;border-right:0;border-bottom:1px solid var(--line)}.promise:last-child{border-bottom:0}
  .section{padding:70px 0}.section-heading{display:block;margin-bottom:24px}.section-heading>p{margin-top:16px;font-size:11px}.section-heading h2{font-size:54px}
  .product-grid{gap:11px}.product-info{padding:12px}.product-info h3{font-size:22px}.product-info p{font-size:9px;min-height:48px}.product-bottom{align-items:flex-start;flex-direction:column}.add-button{width:100%}
- .looks-section{padding-top:58px}.looks-grid{grid-template-columns:1fr 1fr;grid-template-rows:260px 180px 180px;gap:10px}.look-card:first-child{grid-row:span 2}.look-card:nth-child(4){grid-column:1/3}.look-caption span:first-child{font-size:23px}
+ .looks-section{padding-top:58px}.looks-grid{grid-template-columns:1fr 1fr;grid-template-rows:260px 180px 180px 180px;gap:10px}.look-card:first-child{grid-row:span 2}.look-card:nth-child(4){grid-column:1/3}.look-caption span:first-child{font-size:23px}
  .story-band{margin:65px auto;padding:37px 23px}.story-band h2{font-size:49px}.story-band p{font-size:11px}.newsletter-form{flex-direction:column}.newsletter-form .gold-button{width:100%}
  .footer-inner{grid-template-columns:1fr;gap:14px}.footer-links{justify-content:flex-start;flex-wrap:wrap}.footer-copy{order:3}
  .bag-drawer{padding:22px}.store-toast{right:14px;bottom:14px}
@@ -204,17 +205,17 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
 <main>
  <section class="hero" id="home" aria-label="Dia editorial looks">
   <div class="hero-track" id="heroTrack">
-   <article class="hero-slide" style="--hero-image:url('https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=1800&amp;q=82')">
+   <article class="hero-slide" style="--hero-image:url('/images/01-model-moss-bomber.webp')">
     <div class="hero-copy"><p class="eyebrow">Dia streetwear · Cebu · 01 / 03</p><h1>Wear your<br><em>story.</em></h1><p class="hero-desc">Everyday pieces with a point of view. Thoughtful fits, considered details, and room for your own way of wearing them.</p><div class="hero-actions"><a class="gold-button" href="#shop">Shop the collection <span aria-hidden="true">↗</span></a><a class="outline-button" href="#looks">See the looks <span aria-hidden="true">↗</span></a></div><div class="hero-note"><span>01 — THE CITY EDIT</span><span>Made to move with you</span></div></div>
-    <figure class="hero-photo-wrap"><img src="https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=1000&amp;q=84" alt="Dia editorial model in a contemporary layered look" fetchpriority="high"><figcaption>Look 01 · City uniform</figcaption></figure>
+    <figure class="hero-photo-wrap"><img src="/images/01-model-moss-bomber.webp" alt="Dia editorial model in a contemporary layered look" fetchpriority="high"><figcaption>Look 01 · City uniform</figcaption></figure>
    </article>
-   <article class="hero-slide" style="--hero-image:url('https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=1800&amp;q=82')">
+   <article class="hero-slide" style="--hero-image:url('/images/03-model-black-tee.webp')">
     <div class="hero-copy"><p class="eyebrow">The everyday edit · 02 / 03</p><h1>Make room<br>for <em>you.</em></h1><p class="hero-desc">Easy layers, strong silhouettes, and details that speak softly. Your wardrobe should feel like an extension of who you are.</p><div class="hero-actions"><a class="gold-button" href="#shop">Shop the collection <span aria-hidden="true">↗</span></a><a class="outline-button" href="#looks">See the looks <span aria-hidden="true">↗</span></a></div><div class="hero-note"><span>02 — THE FORM EDIT</span><span>Built for repeat wear</span></div></div>
-    <figure class="hero-photo-wrap"><img src="https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=1000&amp;q=84" alt="Model wearing a clean, relaxed streetwear silhouette" loading="lazy"><figcaption>Look 02 · Form in motion</figcaption></figure>
+    <figure class="hero-photo-wrap"><img src="/images/03-model-black-tee.webp" alt="Model wearing a clean, relaxed streetwear silhouette" loading="lazy"><figcaption>Look 02 · Form in motion</figcaption></figure>
    </article>
-   <article class="hero-slide" style="--hero-image:url('https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=1800&amp;q=82')">
+   <article class="hero-slide" style="--hero-image:url('/images/05-model-city-tailoring.webp')">
     <div class="hero-copy"><p class="eyebrow">Personal style · 03 / 03</p><h1>Own your<br><em>everyday.</em></h1><p class="hero-desc">A considered collection for the moments that make a day yours. Find the pieces, then make the story.</p><div class="hero-actions"><a class="gold-button" href="#shop">Shop the collection <span aria-hidden="true">↗</span></a><a class="outline-button" href="#looks">See the looks <span aria-hidden="true">↗</span></a></div><div class="hero-note"><span>03 — THE WEEKEND EDIT</span><span>Clothes with character</span></div></div>
-    <figure class="hero-photo-wrap"><img src="https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=1000&amp;q=84" alt="Fashion model in an outdoor contemporary look" loading="lazy"><figcaption>Look 03 · After hours</figcaption></figure>
+    <figure class="hero-photo-wrap"><img src="/images/05-model-city-tailoring.webp" alt="Fashion model in an outdoor contemporary look" loading="lazy"><figcaption>Look 03 · After hours</figcaption></figure>
    </article>
   </div>
   <div class="hero-controls" id="heroDots" aria-label="Choose an editorial slide"><button class="hero-dot" type="button" data-slide="0" aria-label="Show slide 1" aria-current="true"></button><button class="hero-dot" type="button" data-slide="1" aria-label="Show slide 2" aria-current="false"></button><button class="hero-dot" type="button" data-slide="2" aria-label="Show slide 3" aria-current="false"></button></div>
@@ -225,21 +226,23 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
   <div class="section-heading"><div><p class="eyebrow">The latest from Dia</p><h2>New <em>arrivals.</em></h2></div><p>Everyday staples, with a little more intention. Find the pieces that fit your rhythm and make them your own.</p></div>
   <div class="section-topline"><span>Current selection / 04 pieces</span><span id="catalogLabel">Collection preview</span></div>
   <div class="product-grid" id="productGrid" aria-live="polite">
-   <article class="product-card"><div class="product-image"><img src="/assets/dia-editorial.webp" alt="Dia tee sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Essentials</span><span>01 / 04</span></div><h3>Everyday heavyweight tee</h3><p>A structured cotton staple with a relaxed finish.</p><div class="product-bottom"><span class="product-price">₱890</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
-   <article class="product-card"><div class="product-image"><img src="/assets/dia-editorial.webp" alt="Leather tote sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Accessories</span><span>02 / 04</span></div><h3>Everyday leather tote</h3><p>A roomy companion with a clean silhouette.</p><div class="product-bottom"><span class="product-price">₱1,850</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
-   <article class="product-card"><div class="product-image"><img src="/assets/dia-editorial.webp" alt="Dia cap sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Accessories</span><span>03 / 04</span></div><h3>Core six-panel cap</h3><p>A familiar shape, finished for every day.</p><div class="product-bottom"><span class="product-price">₱690</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
-   <article class="product-card"><div class="product-image"><img src="/assets/dia-editorial.webp" alt="Relaxed chinos sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Bottoms</span><span>04 / 04</span></div><h3>Relaxed everyday chinos</h3><p>Easy structure with room to move.</p><div class="product-bottom"><span class="product-price">₱1,490</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
+   <article class="product-card"><div class="product-image"><img src="/images/02-product-black-tee.webp" alt="Dia tee sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Essentials</span><span>01 / 04</span></div><h3>Everyday heavyweight tee</h3><p>A structured cotton staple with a relaxed finish.</p><div class="product-bottom"><span class="product-price">₱890</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
+   <article class="product-card"><div class="product-image"><img src="/images/08-product-leather-totes.webp" alt="Leather tote sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Accessories</span><span>02 / 04</span></div><h3>Everyday leather tote</h3><p>A roomy companion with a clean silhouette.</p><div class="product-bottom"><span class="product-price">₱1,850</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
+   <article class="product-card"><div class="product-image"><img src="/images/09-product-white-cap.webp" alt="Dia cap sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Accessories</span><span>03 / 04</span></div><h3>Core six-panel cap</h3><p>A familiar shape, finished for every day.</p><div class="product-bottom"><span class="product-price">₱690</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
+   <article class="product-card"><div class="product-image"><img src="/images/10-product-chino-pants.webp" alt="Relaxed chinos sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Bottoms</span><span>04 / 04</span></div><h3>Relaxed everyday chinos</h3><p>Easy structure with room to move.</p><div class="product-bottom"><span class="product-price">₱1,490</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
   </div>
   <p class="catalog-message" id="catalogMessage" role="status">Sample product cards are shown until the catalog is populated.</p>
  </section>
  <section class="section looks-section" id="looks">
   <div class="wrap"><div class="section-heading"><div><p class="eyebrow">Styled in real life</p><h2>The <em>looks.</em></h2></div><p>One collection. Different ways to wear it. Explore a few directions, then build a look that feels like yours.</p></div>
    <div class="looks-grid">
-    <a class="look-card" href="#shop"><img src="https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&amp;fit=crop&amp;w=1000&amp;q=82" alt="City uniform editorial look" loading="lazy"><span class="look-caption"><span>City uniform</span><span>LOOK 01</span></span></a>
-    <a class="look-card" href="#shop"><img src="https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&amp;fit=crop&amp;w=900&amp;q=82" alt="The form edit editorial look" loading="lazy"><span class="look-caption"><span>The form edit</span><span>LOOK 02</span></span></a>
-    <a class="look-card" href="#shop"><img src="https://images.unsplash.com/photo-1753719734459-91c8cfcc1c3d?auto=format&amp;fit=crop&amp;w=900&amp;q=82" alt="Weekend editorial style" loading="lazy"><span class="look-caption"><span>Weekend ease</span><span>LOOK 03</span></span></a>
-    <a class="look-card" href="#shop"><img src="/assets/dia-editorial.webp" alt="Dia studio editorial look" loading="lazy"><span class="look-caption"><span>After hours</span><span>LOOK 04</span></span></a>
-   </div>
+     <a class="look-card" href="#shop"><img src="/images/01-model-moss-bomber.webp" alt="Moss bomber editorial look" loading="lazy"><span class="look-caption"><span>The moss edit</span><span>LOOK 01</span></span></a>
+     <a class="look-card" href="#shop"><img src="/images/03-model-black-tee.webp" alt="Black tee editorial look" loading="lazy"><span class="look-caption"><span>Everyday form</span><span>LOOK 02</span></span></a>
+     <a class="look-card" href="#shop"><img src="/images/04-model-monogram-jacket.webp" alt="Monogram jacket editorial look" loading="lazy"><span class="look-caption"><span>Quiet statement</span><span>LOOK 03</span></span></a>
+     <a class="look-card" href="#shop"><img src="/images/05-model-city-tailoring.webp" alt="City tailoring editorial look" loading="lazy"><span class="look-caption"><span>City uniform</span><span>LOOK 04</span></span></a>
+     <a class="look-card" href="#shop"><img src="/images/06-model-striped-polo.webp" alt="Striped polo editorial look" loading="lazy"><span class="look-caption"><span>Weekend ease</span><span>LOOK 05</span></span></a>
+     <a class="look-card" href="#shop"><img src="/images/07-model-ivory-suit.webp" alt="Ivory suit editorial look" loading="lazy"><span class="look-caption"><span>After hours</span><span>LOOK 06</span></span></a>
+    </div>
   </div>
  </section>
  <section class="story-band wrap" id="story">
@@ -288,10 +291,10 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
  }
  function fallbackCards(){
   return [
-   {name:'Everyday heavyweight tee',category:'Essentials',description:'A structured cotton staple with a relaxed finish.',price:890,image:'/assets/dia-editorial.webp',tag:'Sample preview'},
-   {name:'Everyday leather tote',category:'Accessories',description:'A roomy companion with a clean silhouette.',price:1850,image:'/assets/dia-editorial.webp',tag:'Sample preview'},
-   {name:'Core six-panel cap',category:'Accessories',description:'A familiar shape, finished for every day.',price:690,image:'/assets/dia-editorial.webp',tag:'Sample preview'},
-   {name:'Relaxed everyday chinos',category:'Bottoms',description:'Easy structure with room to move.',price:1490,image:'/assets/dia-editorial.webp',tag:'Sample preview'}
+   {name:'Everyday heavyweight tee',category:'Essentials',description:'A structured cotton staple with a relaxed finish.',price:890,image:'/images/02-product-black-tee.webp',tag:'Sample preview'},
+   {name:'Everyday leather tote',category:'Accessories',description:'A roomy companion with a clean silhouette.',price:1850,image:'/images/08-product-leather-totes.webp',tag:'Sample preview'},
+   {name:'Core six-panel cap',category:'Accessories',description:'A familiar shape, finished for every day.',price:690,image:'/images/09-product-white-cap.webp',tag:'Sample preview'},
+   {name:'Relaxed everyday chinos',category:'Bottoms',description:'Easy structure with room to move.',price:1490,image:'/images/10-product-chino-pants.webp',tag:'Sample preview'}
   ];
  }
  function renderProducts(){

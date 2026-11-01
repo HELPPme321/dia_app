@@ -306,6 +306,7 @@ function createApp(options = {}) {
     app.get('/'+file,(_req,res)=>file==='index.html'?sendInlinePage(res,file):res.sendFile(path.join(ROOT,file)));
   }
   app.use('/assets',express.static(path.join(ROOT,'assets'),{dotfiles:'deny',index:false}));
+  app.use('/images',express.static(path.join(ROOT,'images'),{dotfiles:'deny',index:false,fallthrough:true,maxAge:'7d'}));
   // Keep API misses distinguishable from authentication/database failures. The requested
   // path deliberately excludes its query string so diagnostics never log search terms or tokens.
   app.use('/api',(req,res)=>{

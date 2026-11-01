@@ -5,6 +5,12 @@ const { createDatabase } = require('../src/db');
 const { PRODUCTS } = require('../src/products');
 
 const SAMPLE_STOCK = 12;
+const LEGACY_SAMPLE_IMAGES = {
+  'everyday-tee': 'https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&fit=crop&w=1200&q=82',
+  'core-cap': 'https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&fit=crop&w=1200&q=82',
+  'everyday-tote': 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=1200&q=82',
+  'relaxed-chinos': 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=1200&q=82'
+};
 const POSITIONS = {
   'essential-hoodie': 'center 43%',
   'everyday-tee': '76% 39%',
@@ -28,9 +34,11 @@ function seedSampleProducts({ db: suppliedDb, logger = console } = {}) {
       const existing = db.prepare('SELECT id,is_sample,image_url FROM products WHERE id=?').get(product.id);
       if (existing) {
         // Refresh only untouched sample placeholders. Any administrator-edited image remains intact.
-        if (existing.is_sample === 1 && existing.image_url === '/assets/dia-editorial.webp') {
+        const legacyImage = LEGACY_SAMPLE_IMAGES[product.id];
+        const isKnownPlaceholder = existing.image_url === '/assets/dia-editorial.webp' || (legacyImage && existing.image_url === legacyImage);
+        if (existing.is_sample === 1 && isKnownPlaceholder) {
           db.prepare('UPDATE products SET image_url=?,image_position=?,updated_at=? WHERE id=? AND is_sample=1 AND image_url=?')
-            .run(product.image || '/assets/dia-editorial.webp', POSITIONS[product.id] || 'center center', new Date().toISOString(), product.id, '/assets/dia-editorial.webp');
+            .run(product.image || '/assets/dia-editorial.webp', POSITIONS[product.id] || 'center center', new Date().toISOString(), product.id, existing.image_url);
         }
         skipped.push(product.id);
         continue;
