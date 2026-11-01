@@ -129,6 +129,7 @@ test('frontend API calls use methods and paths registered by Express', () => {
   assert.ok(adminPage.includes('/css/dia-brand.css'), 'Admin dashboard must load the shared Dia stylesheet');
   assert.doesNotMatch(adminPage, /\.hero-slide:before[^}]*blur|--hero-image/i, 'Admin hero must not render a blurred duplicate behind its photos');
   assert.ok(adminPage.includes('srcset=') && adminPage.includes('sizes=') && adminPage.includes('width="269" height="480"'), 'Admin hero photos must declare intrinsic dimensions and responsive sizing hints');
+  assert.ok(adminPage.includes('href="/images/04-model-monogram-jacket.webp"'), 'Admin dashboard must preload the next slideshow photo');
   assert.ok(fs.existsSync(path.join(root, 'css', 'dia-brand.css')), 'Shared Dia brand stylesheet must exist');
   for (const file of photoFiles) {
     assert.ok(fs.existsSync(path.join(root, 'images', file)), 'Missing optimized Dia photo: ' + file);
