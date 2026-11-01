@@ -109,6 +109,12 @@ test('frontend API calls use methods and paths registered by Express', () => {
   assert.ok(homePage.includes('id="newsletterForm"') && homePage.includes("api('/api/newsletter'"), 'Homepage newsletter must submit to the server');
   assert.ok(homePage.includes("api('/api/cart/items'") && homePage.includes("api('/api/orders'"), 'Storefront bag and checkout must use protected store APIs');
   assert.ok(homePage.includes('--forest:#0a1f16') && homePage.includes('--gold:#d4af5a'), 'Homepage must use the requested forest and gold palette');
+  assert.ok(homePage.includes('fetchpriority="high"') && homePage.includes('href="/images/03-model-black-tee.webp"'), 'Homepage must prioritize the first hero photo and preload slide two');
+  assert.ok(homePage.includes('srcset=') && homePage.includes('sizes=') && homePage.includes('width="360" height="470"'), 'Hero photos must declare image sizing and intrinsic dimensions');
+  assert.doesNotMatch(homePage, /\.hero-slide:before[^}]*blur|--hero-image|filter:saturate/i, 'Hero photos must not use blurred duplicates or photo filters');
+  assert.ok(homePage.includes('object-fit:contain') && homePage.includes('max-width:100%;max-height:100%'), 'Product photos must be centered and fit within their source dimensions');
+  assert.ok(homePage.includes('look-card:hover img{opacity:.97}') && !homePage.includes('.look-card:after{'), 'Lookbook photos must not have a dark overlay or zoom animation');
+  assert.doesNotMatch(homePage, /transform:scale\(1\.0[5-9]/, 'Storefront hover scaling must stay below the 1.05 limit');
   assert.ok(homePage.includes('prefers-color-scheme:light') && homePage.includes('prefers-reduced-motion:reduce'), 'Homepage must follow device theme and reduced-motion settings');
   assert.ok(homePage.includes('nonce="@@DIA_NONCE@@"'), 'Homepage inline script must use a server-injected CSP nonce');
   assert.ok(!homePage.includes('/css/style.css') && !homePage.includes('/js/storefront.js'), 'Homepage must be self-contained');
@@ -121,6 +127,9 @@ test('frontend API calls use methods and paths registered by Express', () => {
   }
   assert.ok(adminPage.includes('id="heroTrack"') && adminPage.includes('data-range="365"'), 'Admin dashboard must include the hero and 12-month chart control');
   assert.ok(adminPage.includes('/css/dia-brand.css'), 'Admin dashboard must load the shared Dia stylesheet');
+  assert.doesNotMatch(adminPage, /\.hero-slide:before[^}]*blur|--hero-image/i, 'Admin hero must not render a blurred duplicate behind its photos');
+  assert.ok(adminPage.includes('srcset=') && adminPage.includes('sizes=') && adminPage.includes('width="269" height="480"'), 'Admin hero photos must declare intrinsic dimensions and responsive sizing hints');
+  assert.ok(adminPage.includes('href="/images/04-model-monogram-jacket.webp"'), 'Admin dashboard must preload the next slideshow photo');
   assert.ok(fs.existsSync(path.join(root, 'css', 'dia-brand.css')), 'Shared Dia brand stylesheet must exist');
   for (const file of photoFiles) {
     assert.ok(fs.existsSync(path.join(root, 'images', file)), 'Missing optimized Dia photo: ' + file);
