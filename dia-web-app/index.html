@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://images.unsplash.com">
+<link rel="preload" as="image" href="/images/03-model-black-tee.webp" fetchpriority="high">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/dia-brand.css?v=photo-integration-20261101">
 <style>
@@ -48,11 +49,9 @@ img{display:block;max-width:100%}
 .bag-trigger{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--cream);padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:background .25s,border-color .25s}
 .bag-trigger:hover{background:var(--soft);border-color:var(--gold)}
 .bag-count{display:grid;place-items:center;min-width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--gold-hi),var(--gold));color:#17251a;font-size:10px}
-.hero{position:relative;isolation:isolate;min-height:650px;height:min(730px,calc(100svh - 82px));overflow:hidden;border-bottom:1px solid var(--line);background:var(--forest)}
+.hero{position:relative;isolation:isolate;min-height:650px;height:min(730px,calc(100svh - 82px));overflow:hidden;border-bottom:1px solid var(--line);background:#0a1f16}
 .hero-track{display:flex;width:100%;height:100%;transition:transform .9s cubic-bezier(.22,.72,.22,1);will-change:transform}
-.hero-slide{position:relative;isolation:isolate;flex:0 0 100%;min-width:0;min-height:650px;display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,.88fr);align-items:center;gap:50px;padding:58px max(6vw,calc((100vw - 1240px)/2));overflow:hidden}
-.hero-slide:before{content:"";position:absolute;z-index:-2;inset:-35px;background-image:var(--hero-image);background-position:center 36%;background-size:cover;filter:blur(21px) brightness(.36) saturate(.72);transform:scale(1.12)}
-.hero-slide:after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,rgba(6,22,15,.88) 0%,rgba(6,22,15,.67) 42%,rgba(6,22,15,.28) 100%),linear-gradient(0deg,rgba(6,22,15,.35),transparent 56%)}
+.hero-slide{position:relative;isolation:isolate;flex:0 0 100%;min-width:0;min-height:650px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:clamp(22px,4vw,58px);padding:58px max(6vw,calc((100vw - 1240px)/2));overflow:hidden;background:linear-gradient(90deg,#0a1f16 0%,#0a1f16 38%,rgba(10,31,22,.84) 62%,rgba(10,31,22,.35) 100%),radial-gradient(circle at 84% 28%,rgba(212,175,90,.14),transparent 42%)}
 .hero-copy{max-width:590px;padding:16px 0 50px}
 .hero-copy .eyebrow{color:var(--gold-hi)}
 .hero-copy h1{max-width:650px;margin:0;color:#f4ead6;font-family:var(--display);font-size:clamp(76px,9vw,132px);font-weight:500;letter-spacing:-.055em;line-height:.78}
@@ -66,9 +65,9 @@ img{display:block;max-width:100%}
 .outline-button:hover{border-color:var(--gold-hi);background:rgba(240,213,138,.1);transform:translateY(-3px)}
 .hero-note{display:flex;align-items:center;gap:18px;margin-top:58px;color:rgba(242,234,215,.55);font-size:9px;font-weight:800;letter-spacing:.17em;text-transform:uppercase}
 .hero-note span:first-child{color:var(--gold-hi)}
-.hero-photo-wrap{position:relative;justify-self:center;width:min(100%,450px);height:min(560px,70vh);min-height:440px;padding:10px;border:1px solid rgba(240,213,138,.75);background:rgba(240,213,138,.06);box-shadow:0 26px 80px rgba(0,0,0,.36);transform:rotate(1.3deg)}
-.hero-photo-wrap:before{content:"DIA / EDITORIAL";position:absolute;z-index:2;top:20px;left:22px;color:#f4ead6;font-size:8px;font-weight:800;letter-spacing:.2em;text-shadow:0 2px 12px #000}
-.hero-photo-wrap img{width:100%;height:100%;object-fit:cover;object-position:center 35%;filter:saturate(.8)}
+.hero-photo-wrap{position:relative;justify-self:end;width:min(100%,var(--photo-max-width,430px));aspect-ratio:var(--photo-ratio,4/5);height:auto;margin:0;padding:7px;border:1px solid rgba(240,213,138,.9);background:#0a1f16;box-shadow:0 22px 54px rgba(0,0,0,.22);overflow:hidden}
+.hero-photo-wrap:before{content:"DIA / EDITORIAL";position:absolute;z-index:2;top:18px;left:19px;color:#f4ead6;font-size:8px;font-weight:800;letter-spacing:.2em;text-shadow:0 2px 12px #000}
+.hero-photo-wrap img{display:block;width:100%;height:100%;object-fit:cover;object-position:var(--photo-position,50% 35%);filter:none;image-rendering:auto}
 .hero-photo-wrap figcaption{position:absolute;right:18px;bottom:18px;color:#f5ead2;font-size:8px;letter-spacing:.18em;text-transform:uppercase;text-shadow:0 2px 12px #000}
 .hero-controls{position:absolute;z-index:5;bottom:28px;left:50%;display:flex;align-items:center;gap:12px;transform:translateX(-50%)}
 .hero-dot{width:7px;height:7px;border:1px solid var(--gold-hi);border-radius:50%;background:transparent;padding:0;transition:width .25s,background .25s}
@@ -93,9 +92,9 @@ img{display:block;max-width:100%}
 .product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:19px}
 .product-card{min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s}
 .product-card:hover{transform:translateY(-8px);border-color:rgba(240,213,138,.68);box-shadow:var(--shadow)}
-.product-image{position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--panel-2)}
-.product-image img{width:100%;height:100%;object-fit:cover;transition:transform .75s cubic-bezier(.2,.7,.2,1),filter .45s}
-.product-card:hover .product-image img{transform:scale(1.055);filter:saturate(1.08)}
+.product-image{position:relative;display:grid;place-items:center;aspect-ratio:4/5;overflow:hidden;padding:14px;background:#f0eadb}
+.product-image img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;image-rendering:auto;transition:opacity .25s ease}
+.product-card:hover .product-image img{opacity:.97}
 .product-badge{position:absolute;top:14px;left:14px;padding:6px 9px;border:1px solid rgba(240,213,138,.45);border-radius:3px;background:rgba(10,31,22,.78);color:var(--gold-hi);font-size:8px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
 .product-info{padding:17px 17px 19px}
 .product-meta{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
@@ -112,8 +111,8 @@ img{display:block;max-width:100%}
 .look-card{position:relative;min-height:210px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
 .look-card:first-child{grid-row:span 2}
 .look-card:nth-child(4){grid-column:2/4}
-.look-card img{width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.2,.7,.2,1),filter .4s}
-.look-card:hover img{transform:scale(1.06);filter:saturate(1.1)}
+.look-card img{display:block;width:100%;height:100%;object-fit:cover;image-rendering:auto;transition:opacity .25s ease}
+.look-card:hover img{opacity:.97}
 .look-card:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(0deg,rgba(5,19,13,.83),transparent)}
 .look-caption{position:absolute;z-index:2;right:19px;bottom:17px;left:19px;display:flex;justify-content:space-between;align-items:end;color:#f4ead6}
 .look-caption span:first-child{font-family:var(--display);font-size:29px;line-height:1}
@@ -165,7 +164,7 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
 @media(max-width:900px){
  .nav{grid-template-columns:1fr auto;gap:12px}.nav-links{grid-column:1/-1;grid-row:2;justify-content:center;padding:0 0 15px}.nav{padding-top:12px}.nav-actions{gap:12px}
  .hero{height:auto;min-height:670px}.hero-slide{grid-template-columns:1fr .82fr;gap:26px;padding:54px 34px 78px;min-height:670px}
- .hero-copy h1{font-size:clamp(62px,9vw,100px)}.hero-photo-wrap{height:470px;min-height:0}
+ .hero-copy h1{font-size:clamp(62px,9vw,100px)}.hero-photo-wrap{width:min(100%,var(--photo-max-width,430px))}
  .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
  .looks-grid{grid-template-rows:230px 230px}
 }
@@ -174,7 +173,7 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
  .nav{min-height:70px;grid-template-columns:1fr auto}.brand{font-size:31px}.nav-links{gap:20px;overflow:auto;justify-content:flex-start;white-space:nowrap}.nav-links a,.nav-login{font-size:9px}.nav-actions{gap:9px}.bag-trigger{padding:7px 10px;font-size:9px}.nav-login{display:none}
  .hero{min-height:790px}.hero-track,.hero-slide{min-height:790px}.hero-slide{display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:18px;padding:56px 22px 75px}
  .hero-copy{padding:0}.hero-copy h1{font-size:clamp(60px,17vw,88px)}.hero-copy p.hero-desc{max-width:360px;margin:19px 0 20px;font-size:11px}.hero-note{margin-top:27px}
- .hero-photo-wrap{align-self:center;width:min(76%,330px);height:320px;min-height:320px;margin:0 6% 0 auto;transform:rotate(1deg)}
+ .hero-photo-wrap{align-self:center;justify-self:center;width:min(76%,var(--photo-max-width,430px),320px);height:auto;margin:0 6% 0 auto;transform:none}
  .hero-controls{bottom:26px}.hero-index{display:none}
  .promise-inner{grid-template-columns:1fr}.promise{justify-content:flex-start;padding:15px 10px;border-right:0;border-bottom:1px solid var(--line)}.promise:last-child{border-bottom:0}
  .section{padding:70px 0}.section-heading{display:block;margin-bottom:24px}.section-heading>p{margin-top:16px;font-size:11px}.section-heading h2{font-size:54px}
@@ -205,17 +204,17 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
 <main>
  <section class="hero" id="home" aria-label="Dia editorial looks">
   <div class="hero-track" id="heroTrack">
-   <article class="hero-slide" style="--hero-image:url('/images/01-model-moss-bomber.webp')">
+   <article class="hero-slide">
     <div class="hero-copy"><p class="eyebrow">Dia streetwear · Cebu · 01 / 03</p><h1>Wear your<br><em>story.</em></h1><p class="hero-desc">Everyday pieces with a point of view. Thoughtful fits, considered details, and room for your own way of wearing them.</p><div class="hero-actions"><a class="gold-button" href="#shop">Shop the collection <span aria-hidden="true">↗</span></a><a class="outline-button" href="#looks">See the looks <span aria-hidden="true">↗</span></a></div><div class="hero-note"><span>01 — THE CITY EDIT</span><span>Made to move with you</span></div></div>
-    <figure class="hero-photo-wrap"><img src="/images/01-model-moss-bomber.webp" alt="Dia editorial model in a contemporary layered look" fetchpriority="high"><figcaption>Look 01 · City uniform</figcaption></figure>
+    <figure class="hero-photo-wrap" style="--photo-max-width:430px;--photo-ratio:485/633;--photo-position:50% 35%"><img src="/images/01-model-moss-bomber.webp" srcset="/images/01-model-moss-bomber.webp 485w" sizes="(max-width: 620px) 76vw, (max-width: 900px) 40vw, 430px" width="485" height="633" alt="Dia editorial model in a contemporary layered look" loading="eager" fetchpriority="high" decoding="async"><figcaption>Look 01 · City uniform</figcaption></figure>
    </article>
-   <article class="hero-slide" style="--hero-image:url('/images/03-model-black-tee.webp')">
+   <article class="hero-slide">
     <div class="hero-copy"><p class="eyebrow">The everyday edit · 02 / 03</p><h1>Make room<br>for <em>you.</em></h1><p class="hero-desc">Easy layers, strong silhouettes, and details that speak softly. Your wardrobe should feel like an extension of who you are.</p><div class="hero-actions"><a class="gold-button" href="#shop">Shop the collection <span aria-hidden="true">↗</span></a><a class="outline-button" href="#looks">See the looks <span aria-hidden="true">↗</span></a></div><div class="hero-note"><span>02 — THE FORM EDIT</span><span>Built for repeat wear</span></div></div>
-    <figure class="hero-photo-wrap"><img src="/images/03-model-black-tee.webp" alt="Model wearing a clean, relaxed streetwear silhouette" loading="lazy"><figcaption>Look 02 · Form in motion</figcaption></figure>
+    <figure class="hero-photo-wrap" style="--photo-max-width:400px;--photo-ratio:443/626;--photo-position:50% 35%"><img src="/images/03-model-black-tee.webp" srcset="/images/03-model-black-tee.webp 443w" sizes="(max-width: 620px) 76vw, (max-width: 900px) 40vw, 400px" width="443" height="626" alt="Model wearing a clean, relaxed streetwear silhouette" loading="eager" decoding="async"><figcaption>Look 02 · Form in motion</figcaption></figure>
    </article>
-   <article class="hero-slide" style="--hero-image:url('/images/05-model-city-tailoring.webp')">
+   <article class="hero-slide">
     <div class="hero-copy"><p class="eyebrow">Personal style · 03 / 03</p><h1>Own your<br><em>everyday.</em></h1><p class="hero-desc">A considered collection for the moments that make a day yours. Find the pieces, then make the story.</p><div class="hero-actions"><a class="gold-button" href="#shop">Shop the collection <span aria-hidden="true">↗</span></a><a class="outline-button" href="#looks">See the looks <span aria-hidden="true">↗</span></a></div><div class="hero-note"><span>03 — THE WEEKEND EDIT</span><span>Clothes with character</span></div></div>
-    <figure class="hero-photo-wrap"><img src="/images/05-model-city-tailoring.webp" alt="Fashion model in an outdoor contemporary look" loading="lazy"><figcaption>Look 03 · After hours</figcaption></figure>
+    <figure class="hero-photo-wrap" style="--photo-max-width:400px;--photo-ratio:452/678;--photo-position:50% 34%"><img src="/images/05-model-city-tailoring.webp" srcset="/images/05-model-city-tailoring.webp 452w" sizes="(max-width: 620px) 76vw, (max-width: 900px) 40vw, 400px" width="452" height="678" alt="Fashion model in an outdoor contemporary look" loading="lazy" decoding="async"><figcaption>Look 03 · After hours</figcaption></figure>
    </article>
   </div>
   <div class="hero-controls" id="heroDots" aria-label="Choose an editorial slide"><button class="hero-dot" type="button" data-slide="0" aria-label="Show slide 1" aria-current="true"></button><button class="hero-dot" type="button" data-slide="1" aria-label="Show slide 2" aria-current="false"></button><button class="hero-dot" type="button" data-slide="2" aria-label="Show slide 3" aria-current="false"></button></div>
@@ -226,22 +225,22 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
   <div class="section-heading"><div><p class="eyebrow">The latest from Dia</p><h2>New <em>arrivals.</em></h2></div><p>Everyday staples, with a little more intention. Find the pieces that fit your rhythm and make them your own.</p></div>
   <div class="section-topline"><span>Current selection / 04 pieces</span><span id="catalogLabel">Collection preview</span></div>
   <div class="product-grid" id="productGrid" aria-live="polite">
-   <article class="product-card"><div class="product-image"><img src="/images/02-product-black-tee.webp" alt="Dia tee sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Essentials</span><span>01 / 04</span></div><h3>Everyday heavyweight tee</h3><p>A structured cotton staple with a relaxed finish.</p><div class="product-bottom"><span class="product-price">₱890</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
-   <article class="product-card"><div class="product-image"><img src="/images/08-product-leather-totes.webp" alt="Leather tote sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Accessories</span><span>02 / 04</span></div><h3>Everyday leather tote</h3><p>A roomy companion with a clean silhouette.</p><div class="product-bottom"><span class="product-price">₱1,850</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
-   <article class="product-card"><div class="product-image"><img src="/images/09-product-white-cap.webp" alt="Dia cap sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Accessories</span><span>03 / 04</span></div><h3>Core six-panel cap</h3><p>A familiar shape, finished for every day.</p><div class="product-bottom"><span class="product-price">₱690</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
-   <article class="product-card"><div class="product-image"><img src="/images/10-product-chino-pants.webp" alt="Relaxed chinos sample" loading="lazy"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Bottoms</span><span>04 / 04</span></div><h3>Relaxed everyday chinos</h3><p>Easy structure with room to move.</p><div class="product-bottom"><span class="product-price">₱1,490</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
+   <article class="product-card"><div class="product-image"><img src="/images/02-product-black-tee.webp" srcset="/images/02-product-black-tee.webp 720w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="720" height="720" alt="Dia tee sample" loading="lazy" decoding="async"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Essentials</span><span>01 / 04</span></div><h3>Everyday heavyweight tee</h3><p>A structured cotton staple with a relaxed finish.</p><div class="product-bottom"><span class="product-price">₱890</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
+   <article class="product-card"><div class="product-image"><img src="/images/08-product-leather-totes.webp" srcset="/images/08-product-leather-totes.webp 1080w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="1080" height="1080" alt="Leather tote sample" loading="lazy" decoding="async"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Accessories</span><span>02 / 04</span></div><h3>Everyday leather tote</h3><p>A roomy companion with a clean silhouette.</p><div class="product-bottom"><span class="product-price">₱1,850</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
+   <article class="product-card"><div class="product-image"><img src="/images/09-product-white-cap.webp" srcset="/images/09-product-white-cap.webp 360w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="360" height="201" alt="Dia cap sample" loading="lazy" decoding="async"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Accessories</span><span>03 / 04</span></div><h3>Core six-panel cap</h3><p>A familiar shape, finished for every day.</p><div class="product-bottom"><span class="product-price">₱690</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
+   <article class="product-card"><div class="product-image"><img src="/images/10-product-chino-pants.webp" srcset="/images/10-product-chino-pants.webp 1500w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="1500" height="1500" alt="Relaxed chinos sample" loading="lazy" decoding="async"><span class="product-badge">Sample preview</span></div><div class="product-info"><div class="product-meta"><span>Bottoms</span><span>04 / 04</span></div><h3>Relaxed everyday chinos</h3><p>Easy structure with room to move.</p><div class="product-bottom"><span class="product-price">₱1,490</span><button class="add-button" type="button" disabled>Coming soon</button></div></div></article>
   </div>
   <p class="catalog-message" id="catalogMessage" role="status">Sample product cards are shown until the catalog is populated.</p>
  </section>
  <section class="section looks-section" id="looks">
   <div class="wrap"><div class="section-heading"><div><p class="eyebrow">Styled in real life</p><h2>The <em>looks.</em></h2></div><p>One collection. Different ways to wear it. Explore a few directions, then build a look that feels like yours.</p></div>
    <div class="looks-grid">
-     <a class="look-card" href="#shop"><img src="/images/01-model-moss-bomber.webp" alt="Moss bomber editorial look" loading="lazy"><span class="look-caption"><span>The moss edit</span><span>LOOK 01</span></span></a>
-     <a class="look-card" href="#shop"><img src="/images/03-model-black-tee.webp" alt="Black tee editorial look" loading="lazy"><span class="look-caption"><span>Everyday form</span><span>LOOK 02</span></span></a>
-     <a class="look-card" href="#shop"><img src="/images/04-model-monogram-jacket.webp" alt="Monogram jacket editorial look" loading="lazy"><span class="look-caption"><span>Quiet statement</span><span>LOOK 03</span></span></a>
-     <a class="look-card" href="#shop"><img src="/images/05-model-city-tailoring.webp" alt="City tailoring editorial look" loading="lazy"><span class="look-caption"><span>City uniform</span><span>LOOK 04</span></span></a>
-     <a class="look-card" href="#shop"><img src="/images/06-model-striped-polo.webp" alt="Striped polo editorial look" loading="lazy"><span class="look-caption"><span>Weekend ease</span><span>LOOK 05</span></span></a>
-     <a class="look-card" href="#shop"><img src="/images/07-model-ivory-suit.webp" alt="Ivory suit editorial look" loading="lazy"><span class="look-caption"><span>After hours</span><span>LOOK 06</span></span></a>
+     <a class="look-card" href="#shop"><img src="/images/01-model-moss-bomber.webp" srcset="/images/01-model-moss-bomber.webp 485w" sizes="(max-width: 620px) 48vw, 32vw" width="485" height="633" alt="Moss bomber editorial look" loading="lazy" decoding="async"><span class="look-caption"><span>The moss edit</span><span>LOOK 01</span></span></a>
+     <a class="look-card" href="#shop"><img src="/images/03-model-black-tee.webp" srcset="/images/03-model-black-tee.webp 443w" sizes="(max-width: 620px) 48vw, 32vw" width="443" height="626" alt="Black tee editorial look" loading="lazy" decoding="async"><span class="look-caption"><span>Everyday form</span><span>LOOK 02</span></span></a>
+     <a class="look-card" href="#shop"><img src="/images/04-model-monogram-jacket.webp" srcset="/images/04-model-monogram-jacket.webp 335w" sizes="(max-width: 620px) 48vw, 32vw" width="335" height="597" alt="Monogram jacket editorial look" loading="lazy" decoding="async"><span class="look-caption"><span>Quiet statement</span><span>LOOK 03</span></span></a>
+     <a class="look-card" href="#shop"><img src="/images/05-model-city-tailoring.webp" srcset="/images/05-model-city-tailoring.webp 452w" sizes="(max-width: 620px) 48vw, 32vw" width="452" height="678" alt="City tailoring editorial look" loading="lazy" decoding="async"><span class="look-caption"><span>City uniform</span><span>LOOK 04</span></span></a>
+     <a class="look-card" href="#shop"><img src="/images/06-model-striped-polo.webp" srcset="/images/06-model-striped-polo.webp 640w" sizes="(max-width: 620px) 48vw, 32vw" width="640" height="640" alt="Striped polo editorial look" loading="lazy" decoding="async"><span class="look-caption"><span>Weekend ease</span><span>LOOK 05</span></span></a>
+     <a class="look-card" href="#shop"><img src="/images/07-model-ivory-suit.webp" srcset="/images/07-model-ivory-suit.webp 1131w" sizes="(max-width: 620px) 48vw, 32vw" width="1131" height="1500" alt="Ivory suit editorial look" loading="lazy" decoding="async"><span class="look-caption"><span>After hours</span><span>LOOK 06</span></span></a>
     </div>
   </div>
  </section>
@@ -297,6 +296,12 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
    {name:'Relaxed everyday chinos',category:'Bottoms',description:'Easy structure with room to move.',price:1490,image:'/images/10-product-chino-pants.webp',tag:'Sample preview'}
   ];
  }
+ const productImageSizes={
+  '/images/02-product-black-tee.webp':[720,720],
+  '/images/08-product-leather-totes.webp':[1080,1080],
+  '/images/09-product-white-cap.webp':[360,201],
+  '/images/10-product-chino-pants.webp':[1500,1500]
+ };
  function renderProducts(){
   const grid=$('productGrid');
   const fallback=fallbackCards();
@@ -312,7 +317,9 @@ dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}
   $('catalogMessage').textContent=products.length?(sampleCount?'The catalog is live. Unmatched styles are shown as sample previews until those products are added.':'Showing products from the live Dia catalog.'):'Sample product cards are shown until the catalog is populated. Add products from the administrator dashboard to enable the bag.';
   grid.innerHTML=chosen.map((p,i)=>{
    const isSample=!p.id;
-   return '<article class="product-card"><div class="product-image"><img src="'+esc(p.image||'/assets/dia-editorial.webp')+'" alt="'+esc(p.name)+'" loading="lazy"><span class="product-badge">'+esc(p.tag||p.category||'Dia selection')+'</span></div><div class="product-info"><div class="product-meta"><span>'+esc(p.category||'Dia selection')+'</span><span>0'+(i+1)+' / 04</span></div><h3>'+esc(p.name)+'</h3><p>'+esc(p.description||'A considered Dia essential for everyday wear.')+'</p><div class="product-bottom"><span class="product-price">'+money(p.price)+'</span><button class="add-button" type="button" data-add="'+esc(p.id||'')+'" '+(isSample||!p.id?'disabled':'')+'>'+(isSample?'Sample only':'Add to bag')+'</button></div></div></article>';
+   const image=p.image||'/assets/dia-editorial.webp';
+   const dimensions=productImageSizes[image]||[1200,1500];
+   return '<article class="product-card"><div class="product-image"><img src="'+esc(image)+'" srcset="'+esc(image)+' '+dimensions[0]+'w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="'+dimensions[0]+'" height="'+dimensions[1]+'" alt="'+esc(p.name)+'" loading="lazy" decoding="async"><span class="product-badge">'+esc(p.tag||p.category||'Dia selection')+'</span></div><div class="product-info"><div class="product-meta"><span>'+esc(p.category||'Dia selection')+'</span><span>0'+(i+1)+' / 04</span></div><h3>'+esc(p.name)+'</h3><p>'+esc(p.description||'A considered Dia essential for everyday wear.')+'</p><div class="product-bottom"><span class="product-price">'+money(p.price)+'</span><button class="add-button" type="button" data-add="'+esc(p.id||'')+'" '+(isSample||!p.id?'disabled':'')+'>'+(isSample?'Sample only':'Add to bag')+'</button></div></div></article>';
   }).join('');
   grid.querySelectorAll('img').forEach(image=>image.addEventListener('error',()=>{if(image.dataset.fallback)return;image.dataset.fallback='1';image.src='/assets/dia-editorial.webp';}));
   grid.querySelectorAll('[data-add]').forEach(btn=>btn.addEventListener('click',()=>addToBag(btn.dataset.add)));
