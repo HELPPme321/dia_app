@@ -193,7 +193,7 @@ test('health, config, products, and protected endpoints return their expected be
     assert.ok(Array.isArray(products.body.products));
     assert.ok(products.body.products.length > 0);
     for (const file of photoFiles) {
-      await request(app).get('/images/' + file).expect(200).expect('Content-Type', /image\\/webp/);
+      await request(app).get('/images/' + file).expect(200).expect('Content-Type', /image\/webp/);
     }
 
     const csrf = await request(app).get('/api/auth/csrf').expect(200);
