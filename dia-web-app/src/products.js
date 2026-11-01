@@ -20,7 +20,7 @@ const PRODUCTS = [
     tag: 'New arrival',
     color: 'Oat',
     sizes: ['S', 'M', 'L', 'XL'],
-    image: 'https://images.unsplash.com/photo-1768825099647-4fb34a87f590?auto=format&fit=crop&w=1200&q=82',
+    image: '/images/02-product-black-tee.webp',
     description: 'A clean-cut cotton tee in a warm oat shade. Made to sit comfortably on its own or layer under a hoodie.'
   },
   {
@@ -31,7 +31,7 @@ const PRODUCTS = [
     tag: 'Everyday staple',
     color: 'Washed black',
     sizes: ['One size'],
-    image: 'https://images.unsplash.com/photo-1768825159293-222e85f3ec05?auto=format&fit=crop&w=1200&q=82',
+    image: '/images/09-product-white-cap.webp',
     description: 'An understated six-panel cap with a curved brim and an embroidered sparkle.'
   },
   {
@@ -53,7 +53,7 @@ const PRODUCTS = [
     tag: 'Everyday carry',
     color: 'Espresso',
     sizes: ['One size'],
-    image: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=1200&q=82',
+    image: '/images/08-product-leather-totes.webp',
     description: 'A roomy everyday companion with a clean profile, soft structure, and considered carry space.'
   },
   {
@@ -64,7 +64,7 @@ const PRODUCTS = [
     tag: 'New arrival',
     color: 'Olive',
     sizes: ['S', 'M', 'L', 'XL'],
-    image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=1200&q=82',
+    image: '/images/10-product-chino-pants.webp',
     description: 'Easy structure with a comfortable leg and enough room to move through the day.'
   }
 ];

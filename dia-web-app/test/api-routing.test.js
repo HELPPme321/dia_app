@@ -12,6 +12,12 @@ const { createApp } = require('../src/server');
 const { seedSampleProducts } = require('../scripts/seed-sample-products');
 
 const root = path.join(__dirname, '..');
+const photoFiles = [
+  '01-model-moss-bomber.webp','02-product-black-tee.webp','03-model-black-tee.webp',
+  '04-model-monogram-jacket.webp','05-model-city-tailoring.webp','06-model-striped-polo.webp',
+  '07-model-ivory-suit.webp','08-product-leather-totes.webp','09-product-white-cap.webp',
+  '10-product-chino-pants.webp'
+];
 const serverSource = fs.readFileSync(path.join(root, 'src', 'server.js'), 'utf8');
 const storeRouteSource = fs.readFileSync(path.join(root, 'src', 'store-routes.js'), 'utf8');
 const routeSources = serverSource + '\n' + storeRouteSource;
@@ -97,6 +103,7 @@ test('frontend API calls use methods and paths registered by Express', () => {
   const homePage = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   assert.ok(homePage.includes('Wear your'), 'Homepage must use the Wear your story brand message');
   assert.ok(homePage.includes('id="heroTrack"') && homePage.includes('class="hero-slide"'), 'Homepage must include its editorial slideshow');
+  assert.ok(homePage.includes('/css/dia-brand.css'), 'Homepage must load the shared Dia stylesheet');
   assert.ok(homePage.includes('id="productGrid"'), 'Homepage must render the four curated product slots');
   assert.ok(homePage.includes('id="bagDrawer"') && homePage.includes('id="bagCount"'), 'Homepage must include the account-backed bag');
   assert.ok(homePage.includes('id="newsletterForm"') && homePage.includes("api('/api/newsletter'"), 'Homepage newsletter must submit to the server');
@@ -113,6 +120,12 @@ test('frontend API calls use methods and paths registered by Express', () => {
     assert.ok(adminPage.includes('id="' + id + '"'), 'Admin dashboard must include ' + id);
   }
   assert.ok(adminPage.includes('id="heroTrack"') && adminPage.includes('data-range="365"'), 'Admin dashboard must include the hero and 12-month chart control');
+  assert.ok(adminPage.includes('/css/dia-brand.css'), 'Admin dashboard must load the shared Dia stylesheet');
+  assert.ok(fs.existsSync(path.join(root, 'css', 'dia-brand.css')), 'Shared Dia brand stylesheet must exist');
+  for (const file of photoFiles) {
+    assert.ok(fs.existsSync(path.join(root, 'images', file)), 'Missing optimized Dia photo: ' + file);
+    assert.ok(homePage.includes('/images/' + file) || adminPage.includes('/images/' + file), 'Photo is not referenced: ' + file);
+  }
   assert.ok(adminPage.includes("api('/api/admin/analytics?days='") && adminPage.includes("api('/api/admin/orders'"), 'Admin dashboard must use protected analytics and order APIs');
   assert.ok(adminPage.includes('Sample data') && adminPage.includes('prefers-color-scheme:light'), 'Admin dashboard must label preview data and follow device theme');
   assert.ok(adminPage.includes('nonce="@@DIA_NONCE@@"'), 'Admin inline script must use a server-injected CSP nonce');
@@ -179,6 +192,9 @@ test('health, config, products, and protected endpoints return their expected be
     const products = await request(app).get('/api/products').expect(200);
     assert.ok(Array.isArray(products.body.products));
     assert.ok(products.body.products.length > 0);
+    for (const file of photoFiles) {
+      await request(app).get('/images/' + file).expect(200).expect('Content-Type', /image\/webp/);
+    }
 
     const csrf = await request(app).get('/api/auth/csrf').expect(200);
     assert.equal(typeof csrf.body.csrfToken, 'string');
