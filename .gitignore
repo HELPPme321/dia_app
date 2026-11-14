@@ -13,3 +13,9 @@ npm-debug.log*
 *.sqlite-shm
 *.sqlite-wal
 *.zip
+
+originals/
+screenshots/
+scripts/seed-demo-accounts.js
+scripts/disable-demo-accounts.js
+scripts/setup-demo-environment.js
