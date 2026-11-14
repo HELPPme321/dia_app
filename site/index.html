@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a1f16">
+<meta name="description" content="Dia — Wear your story. Modern luxury unisex fashion label, considered silhouettes, atelier tailoring, and 3D interactive garments crafted in small batches.">
+<!-- Legacy placeholder reference retired: images.unsplash.com -->
+<title>Dia — Wear your story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="image" href="/images/02-model-plaid-flannel-look.webp" fetchpriority="high">
+<link rel="preload" as="image" href="/images/03-model-black-tee-wide-trousers.webp">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/dia-brand.css?v=dia-luxury-202611">
+<script src="/js/vendor/supabase.js"></script>
+<script src="/config.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/storefront.js" defer></script>
+<style>
+.product-skeleton{display:flex;flex-direction:column;gap:12px;padding:16px;background:rgba(18,48,31,.4);border:1px solid rgba(212,175,90,.15);border-radius:8px;}
+.skeleton-img{width:100%;aspect-ratio:1/1;border-radius:6px;background:linear-gradient(90deg,rgba(20,53,35,.5) 25%,rgba(44,77,59,.5) 50%,rgba(20,53,35,.5) 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;}
+.skeleton-line{height:14px;border-radius:4px;background:rgba(212,175,90,.12);animation:skeleton-shimmer 1.5s infinite;}
+.skeleton-title{width:70%;height:18px;}
+.skeleton-price{width:40%;}
+@keyframes skeleton-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+:root{
+ color-scheme:dark;
+ --forest:#0a1f16;--forest-deep:#061811;--panel:#112d1e;--panel-2:#163926;
+ --gold:#d4af5a;--gold-hi:#f0d58a;--gold-dim:#9e823f;--gold-glow:rgba(212,175,90,.32);
+ --cream:#f6f1e4;--sage:#d4e2d8;--muted:#a3b8aa;--line:rgba(212,175,90,.26);
+ --shadow:0 24px 65px rgba(0,0,0,.36);--shadow-gold:0 12px 36px rgba(212,175,90,.18);
+ --display:'Cormorant Garamond',serif;--sans:'Manrope',sans-serif;
+ --surface:rgba(17,45,30,.92);--button-ink:#142318;--soft:rgba(242,234,215,.06);
+ --ease:cubic-bezier(.22,1,.36,1);--ease-bounce:cubic-bezier(.34,1.56,.64,1)
+}
+@media(prefers-color-scheme:light){
+ :root{
+  color-scheme:light;
+  --forest:#0a1f16;--forest-deep:#061811;--panel:#112d1e;--panel-2:#163926;
+  --gold:#d4af5a;--gold-hi:#f0d58a;--gold-dim:#9e823f;--gold-glow:rgba(212,175,90,.32);
+  --cream:#f6f1e4;--sage:#d4e2d8;--muted:#a3b8aa;--line:rgba(212,175,90,.26);
+  --shadow:0 24px 65px rgba(0,0,0,.36);--shadow-gold:0 12px 36px rgba(212,175,90,.18);
+  --surface:rgba(17,45,30,.92);--button-ink:#142318;--soft:rgba(242,234,215,.06);
+ }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:90px;background:var(--forest)}
+body{margin:0;background:var(--forest);color:var(--cream);font-family:var(--sans);font-size:14px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit}
+button,a{-webkit-tap-highlight-color:transparent}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none;transition:color .25s ease}
+img{display:block;max-width:100%;height:auto}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--gold-hi);outline-offset:4px}
+::selection{background:var(--gold);color:#112319}
+
+/* Page Intro Curtain */
+.page-intro{position:fixed;inset:0;z-index:9999;background:var(--forest-deep);display:grid;place-items:center;pointer-events:none;transition:opacity .65s var(--ease),visibility .65s}
+.page-intro.done{opacity:0;visibility:hidden}
+.intro-brand{text-align:center;animation:introPulse 1.8s var(--ease) forwards}
+.intro-brand h1{margin:0;font-family:var(--display);font-size:clamp(56px,8vw,92px);letter-spacing:-.06em;color:var(--cream)}
+.intro-brand h1 span{color:var(--gold)}
+.intro-brand p{margin:10px 0 0;font-size:11px;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:var(--gold-hi)}
+@keyframes introPulse{0%{opacity:0;transform:scale(.95)}40%{opacity:1;transform:scale(1)}85%{opacity:1;transform:scale(1.02)}100%{opacity:0;transform:scale(1.04)}}
+
+/* Custom Gold Ring Cursor (Desktop only) */
+.custom-cursor{position:fixed;top:0;left:0;width:32px;height:32px;border:1.5px solid var(--gold);border-radius:50%;pointer-events:none;z-index:9990;transform:translate(-50%,-50%);transition:width .2s,height .2s,border-color .2s,background .2s,transform .06s linear;mix-blend-mode:difference}
+.custom-cursor.active{width:56px;height:56px;background:rgba(212,175,90,.18);border-color:var(--gold-hi)}
+@media(hover:none) or (pointer:coarse){.custom-cursor{display:none}}
+
+/* Grain Overlay */
+.grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:998;opacity:.025;background-image:radial-gradient(#d4af5a 1px,transparent 0);background-size:24px 24px}
+
+.wrap{width:min(1280px,calc(100% - 64px));margin-inline:auto}
+.eyebrow{margin:0 0 16px;color:var(--gold-hi);font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase}
+.display{font-family:var(--display);font-weight:500;letter-spacing:-.03em;line-height:.95}
+.gold-line{height:1px;width:100%;background:linear-gradient(90deg,transparent,var(--line),var(--gold),var(--line),transparent);margin:40px 0}
+
+/* Reveal on Scroll */
+.reveal-init{opacity:0;transform:translateY(28px);transition:opacity .85s var(--ease),transform .85s var(--ease)}
+.reveal-init.is-revealed{opacity:1;transform:translateY(0)}
+
+/* Header & Nav */
+.site-header{position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(212,175,90,.32);background:rgba(10,31,22,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 10px 30px rgba(0,0,0,.35);transition:background .3s,box-shadow .3s}
+.nav{width:min(1360px,calc(100% - 48px));min-height:86px;margin:auto;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:36px}
+.brand{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-size:38px;font-weight:700;letter-spacing:-.06em;line-height:1;color:#d4af5a!important;text-shadow:0 2px 14px rgba(212,175,90,.3)}
+.brand-mark{color:#f0d58a!important;font-family:var(--sans);font-size:18px;transform:translateY(-4px);transition:transform .3s var(--ease)}
+.brand:hover .brand-mark{transform:translateY(-4px) rotate(45deg);color:#fff}
+.nav-links{display:flex;align-items:center;justify-content:center;gap:36px}
+.nav-links a,.nav-login{color:#f6f1e4!important;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;position:relative;padding:8px 0;transition:color .25s ease}
+.nav-links a::after{content:'';position:absolute;left:0;bottom:0;width:0;height:2px;background:linear-gradient(90deg,#d4af5a,#f0d58a);transition:width .25s var(--ease)}
+.nav-links a:hover,.nav-login:hover{color:#f0d58a!important}
+.nav-links a:hover::after{width:100%}
+.nav-actions{display:flex;align-items:center;justify-content:flex-end;gap:16px}
+.nav-link-account{color:#f0d58a!important;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.wishlist-trigger{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid rgba(212,175,90,.38);border-radius:50%;background:rgba(246,241,228,.08);color:#f6f1e4!important;font-size:16px;transition:all .25s ease}
+.wishlist-trigger:hover{border-color:#f0d58a;color:#f0d58a!important;background:rgba(212,175,90,.16);transform:translateY(-1px)}
+.wishlist-count{display:none}
+.bag-trigger{display:inline-flex;align-items:center;gap:11px;min-height:44px;padding:0 20px;border:1px solid rgba(212,175,90,.55);border-radius:999px;background:rgba(212,175,90,.12);color:#f6f1e4!important;font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;box-shadow:0 4px 18px rgba(0,0,0,.25);transition:background .25s,border-color .25s,transform .25s,box-shadow .25s}
+.bag-trigger:hover{background:rgba(212,175,90,.26);border-color:#f0d58a;color:#ffffff!important;transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,175,90,.25)}
+.cart-icon{width:16px;height:16px;stroke:currentColor;fill:none;flex-shrink:0}
+.bag-count{display:grid;place-items:center;min-width:22px;height:22px;padding:0 5px;border-radius:999px;background:linear-gradient(135deg,#f0d58a,#d4af5a);color:#0a1f16!important;font-size:11px;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+
+/* Mobile Nav */
+.mobile-toggle{display:none;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid rgba(212,175,90,.4);border-radius:8px;background:rgba(246,241,228,.08);color:#f6f1e4}
+.mobile-toggle svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.mobile-nav{display:none;position:fixed;top:86px;left:0;right:0;background:rgba(10,31,22,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(212,175,90,.3);padding:24px 32px 32px;box-shadow:var(--shadow);z-index:99}
+.mobile-nav.open{display:flex;flex-direction:column;gap:18px}
+.mobile-nav a{color:#f6f1e4;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:10px 0;border-bottom:1px solid rgba(212,175,90,.16);transition:color .2s}
+.mobile-nav a:hover{color:#f0d58a}
+
+/* Marquee Ticker */
+.marquee-strip{overflow:hidden;white-space:nowrap;padding:12px 0;border-bottom:1px solid var(--line);background:var(--forest-deep);font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.marquee-content{display:inline-block;animation:marquee 28s linear infinite}
+.marquee-item{display:inline-flex;align-items:center;gap:18px;margin-right:24px}
+.marquee-item span{color:var(--gold-hi)}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* Cinematic Hero */
+.hero{position:relative;isolation:isolate;min-height:720px;height:min(780px,calc(100svh - 86px));overflow:hidden;border-bottom:1px solid var(--line);background:#0a1f16}
+.hero-track{display:flex;width:100%;height:100%;transition:transform .9s cubic-bezier(.22,.72,.22,1);will-change:transform}
+.hero-slide{position:relative;isolation:isolate;flex:0 0 100%;min-width:0;min-height:720px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);align-items:center;gap:clamp(28px,4vw,64px);padding:44px max(6vw,calc((100vw - 1280px)/2));overflow:hidden;background:linear-gradient(90deg,#0a1f16 0%,#0a1f16 42%,rgba(10,31,22,.84) 68%,rgba(10,31,22,.32) 100%),radial-gradient(circle at 84% 28%,rgba(212,175,90,.16),transparent 44%)}
+.hero-copy{max-width:640px;position:relative;z-index:2}
+.hero-copy h1{max-width:680px;margin:0;color:#f6f1e4;font-family:var(--display);font-size:clamp(68px,8.2vw,120px);font-weight:500;letter-spacing:-.05em;line-height:.82}
+.hero-copy h1 em{color:var(--gold-hi);font-weight:400;font-style:italic}
+.hero-copy h1 .word{display:inline-block;opacity:0;transform:translateY(24px);animation:wordReveal .8s var(--ease) forwards}
+.hero-copy h1 .word:nth-child(1){animation-delay:.15s}
+.hero-copy h1 .word:nth-child(2){animation-delay:.35s}
+@keyframes wordReveal{to{opacity:1;transform:translateY(0)}}
+.hero-desc{max-width:480px;margin:24px 0 32px;color:rgba(242,234,215,.82);font-size:14px;line-height:1.9}
+.hero-actions{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.gold-button,.outline-button{display:inline-flex;align-items:center;justify-content:center;gap:14px;min-height:50px;padding:0 26px;border:1px solid transparent;border-radius:6px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;transition:transform .25s,box-shadow .25s,background .25s,border-color .25s}
+.gold-button{background:linear-gradient(115deg,var(--gold-hi),var(--gold) 78%);color:#142518;box-shadow:0 10px 28px rgba(212,175,90,.2)}
+.gold-button:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(212,175,90,.32)}
+.outline-button{border-color:rgba(240,213,138,.55);background:rgba(10,31,22,.32);color:#f2ead7}
+.outline-button:hover{border-color:var(--gold-hi);background:rgba(240,213,138,.12);transform:translateY(-2px)}
+
+/* Model Photos: Capped at Natural Width (~736px), Framed Panel Presentation */
+.hero-photo-wrap{position:relative;justify-self:end;width:min(100%,360px);aspect-ratio:360/470;margin:0;padding:8px;border:1px solid rgba(240,213,138,.85);background:#0a1f16;box-shadow:0 24px 60px rgba(0,0,0,.36);overflow:hidden}
+.hero-photo-wrap:before{content:"DIA / ATELIER";position:absolute;z-index:2;top:18px;left:19px;color:#f6f1e4;font-size:8px;font-weight:800;letter-spacing:.22em;text-shadow:0 2px 10px rgba(0,0,0,.9)}
+.hero-photo-wrap img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 30%;filter:none;image-rendering:auto}
+.hero-photo-wrap figcaption{position:absolute;right:18px;bottom:18px;color:#f6f1e4;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;text-shadow:0 2px 10px rgba(0,0,0,.9)}
+
+/* Slideshow Controls */
+.hero-controls{position:absolute;z-index:5;bottom:30px;left:50%;display:flex;align-items:center;gap:14px;transform:translateX(-50%)}
+.hero-arrow{width:32px;height:32px;border:1px solid var(--line);border-radius:50%;background:rgba(10,31,22,.65);color:var(--cream);display:grid;place-items:center;font-size:14px;transition:all .25s ease}
+.hero-arrow:hover{border-color:var(--gold);color:var(--gold-hi);background:var(--soft)}
+.hero-dots{display:flex;align-items:center;gap:10px}
+.hero-dot{width:8px;height:8px;border:1px solid var(--gold-hi);border-radius:50%;background:transparent;padding:0;transition:width .25s,background .25s}
+.hero-dot[aria-current="true"]{width:28px;border-radius:9px;background:var(--gold-hi)}
+.hero-progress{position:absolute;z-index:6;bottom:0;left:0;width:100%;height:3px;background:rgba(240,213,138,.16)}
+.hero-progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-hi))}
+.hero-progress span.run{animation:progress 4s linear forwards}
+@keyframes progress{to{width:100%}}
+.hero-index{position:absolute;right:32px;bottom:28px;color:rgba(242,234,215,.6);font-size:10px;letter-spacing:.18em}
+
+/* Benefits Strip */
+.promise-strip{border-bottom:1px solid var(--line);background:var(--panel)}
+.promise-inner{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.promise{display:flex;align-items:center;justify-content:center;gap:14px;padding:26px 14px;border-right:1px solid var(--line);color:var(--sage);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.promise:last-child{border-right:0}
+.promise-symbol{color:var(--gold);font-size:20px}
+
+/* Section Common */
+.section{padding:100px 0}
+.section-heading{display:flex;justify-content:space-between;align-items:end;gap:36px;margin-bottom:34px}
+.section-heading h2{margin:0;color:var(--cream);font-family:var(--display);font-size:clamp(52px,6.5vw,84px);font-weight:500;letter-spacing:-.045em;line-height:.88}
+.section-heading h2 em{color:var(--gold);font-weight:400;font-style:italic}
+.section-heading>p{max-width:420px;margin:0 0 6px;color:var(--sage);font-size:13px;line-height:1.9}
+
+/* Sticky Filter Bar */
+.sticky-filter-bar{position:sticky;top:86px;z-index:50;padding:16px 0;margin-bottom:32px;background:rgba(10,31,22,.94);backdrop-filter:blur(18px);border-bottom:1px solid var(--line);transition:box-shadow .25s ease}
+.filter-bar-inner{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:18px}
+.filter-tabs{display:flex;flex-wrap:wrap;gap:8px}
+.filter-tab{padding:8px 16px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--sage);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;transition:all .25s ease}
+.filter-tab:hover{border-color:var(--gold);color:var(--gold-hi);background:var(--soft)}
+.filter-tab.active{background:linear-gradient(135deg,var(--gold-hi),var(--gold));color:#142318;border-color:transparent}
+
+/* Extended Filter Controls */
+.filter-tools{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+.search-wrapper{position:relative}
+.search-input{min-height:38px;padding:0 14px 0 34px;border:1px solid var(--line);border-radius:999px;background:var(--soft);color:var(--cream);font-size:11px;outline:none;transition:border-color .25s}
+.search-input:focus{border-color:var(--gold-hi);box-shadow:0 0 0 2px var(--gold-glow)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:13px;height:13px;stroke:var(--muted);fill:none}
+.search-suggestions{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:60;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
+.search-suggestions.open{display:block}
+.suggestion-item{padding:9px 14px;color:var(--cream);font-size:11px;cursor:pointer;border-bottom:1px solid rgba(212,175,90,.1)}
+.suggestion-item:hover{background:rgba(212,175,90,.15);color:var(--gold-hi)}
+.size-filter-select,.sort-select{padding:7px 14px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--cream);font-size:11px;cursor:pointer}
+.size-filter-select:focus,.sort-select:focus{border-color:var(--gold-hi);outline:none}
+.stock-toggle-label{display:inline-flex;align-items:center;gap:7px;color:var(--sage);font-size:11px;font-weight:700;cursor:pointer;user-select:none}
+.stock-toggle-label input{cursor:pointer;accent-color:var(--gold)}
+
+/* Topline & Results Count */
+.section-topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.section-topline span{color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.reset-filters-btn{color:var(--gold-hi);font-size:11px;font-weight:700;text-decoration:underline;cursor:pointer;background:none;border:none;padding:0}
+
+/* Product Cards Grid & 3D Tilt Effect */
+.product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;perspective:1000px}
+.product-card{position:relative;display:flex;flex-direction:column;min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden;transition:transform .3s var(--ease),border-color .3s,box-shadow .3s;transform-style:preserve-3d}
+.product-card:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:var(--shadow-gold)}
+.card-wishlist{position:absolute;top:14px;right:14px;z-index:10;width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:rgba(10,31,22,.8);backdrop-filter:blur(6px);color:var(--cream);display:grid;place-items:center;font-size:14px;transition:all .25s ease}
+.card-wishlist:hover{border-color:var(--gold);color:var(--gold-hi);transform:scale(1.1)}
+.card-wishlist.active{color:#e25555;border-color:#e25555}
+
+/* Product Image & Swap on Hover */
+.product-image{position:relative;display:grid;place-items:center;aspect-ratio:4/5;overflow:hidden;padding:16px;background:#ede6d6;cursor:pointer}
+.product-image img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;image-rendering:auto;transition:opacity .35s ease,transform .4s var(--ease)}
+.product-image .model-swap-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:0;transition:opacity .35s ease}
+.product-card:hover .product-image .model-swap-img{opacity:1}
+.product-card:hover .product-image img:not(.model-swap-img){transform:scale(1.025)}
+.product-badge{position:absolute;top:14px;left:14px;z-index:2;padding:6px 10px;border:1px solid rgba(240,213,138,.45);border-radius:4px;background:rgba(10,31,22,.85);color:var(--gold-hi);font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.product-badge.low-stock{border-color:#d49a42;color:#f0c070}
+.product-badge.sold-out{border-color:#a84b4b;color:#f58a8a}
+.quick-view-badge{position:absolute;bottom:14px;left:50%;transform:translateX(-50%) translateY(8px);opacity:0;padding:8px 16px;border:1px solid var(--line);border-radius:999px;background:rgba(10,31,22,.92);backdrop-filter:blur(8px);color:var(--gold-hi);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;transition:all .25s ease;pointer-events:none}
+.product-card:hover .quick-view-badge{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.product-info{display:flex;flex-direction:column;flex:1;padding:20px 20px 22px}
+.product-meta{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.product-info h3{margin:10px 0 6px;color:var(--cream);font-family:var(--display);font-size:26px;font-weight:600;line-height:1.08}
+.product-info p{min-height:44px;margin:0 0 16px;color:var(--sage);font-size:11px;line-height:1.65}
+.product-bottom{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.product-price{color:var(--gold-hi);font-size:15px;font-weight:800}
+.add-button{min-height:38px;padding:0 16px;border:1px solid var(--line);border-radius:5px;background:transparent;color:var(--cream);font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;transition:all .2s ease}
+.add-button:hover:not(:disabled){border-color:var(--gold);background:var(--gold);color:#142518;transform:translateY(-1px)}
+.add-button:disabled{cursor:not-allowed;opacity:.5}
+.catalog-message{margin:22px 0 0;color:var(--sage);font-size:12px}
+
+/* Empty State */
+.shop-empty{grid-column:1/-1;padding:64px 20px;text-align:center;border:1px dashed var(--line);border-radius:14px;background:var(--panel-2)}
+.shop-empty h3{font-family:var(--display);font-size:36px;margin:0 0 10px;color:var(--cream)}
+.shop-empty p{color:var(--sage);margin:0 0 20px}
+
+/* Recently Viewed Strip */
+.recently-viewed-section{padding:40px 0 80px}
+.recently-viewed-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+
+/* Looks Editorial Section */
+.looks-section{padding:100px 0;background:var(--panel)}
+.looks-grid{display:grid;grid-template-columns:1.05fr .9fr 1fr;grid-template-rows:280px 280px;gap:20px}
+.look-card{position:relative;display:flex;flex-direction:column;align-items:center;min-height:240px;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--panel-2);transition:border-color .3s,box-shadow .3s}
+.look-card:hover{border-color:var(--gold);box-shadow:var(--shadow-gold)}
+.look-card:first-child{grid-row:span 2}
+.look-card:nth-child(4){grid-column:2/4}
+.look-card img{display:block;width:auto;height:auto;max-width:100%;max-height:calc(100% - 58px);object-fit:contain;image-rendering:auto;transition:opacity .25s ease;margin:auto}
+.look-card:hover img{opacity:.97}
+.look-caption{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:end;gap:12px;width:100%;margin-top:auto;padding:16px 20px;background:#0a1f16;color:#f6f1e4;border-top:1px solid var(--line)}
+.look-caption span:first-child{font-family:var(--display);font-size:30px;line-height:1}
+.look-caption span:last-child{color:var(--gold-hi);font-size:9px;font-weight:800;letter-spacing:.18em}
+
+/* Story & Newsletter */
+.story-band{position:relative;isolation:isolate;overflow:hidden;margin:104px auto;padding:72px 64px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(110deg,rgba(10,31,22,.96),rgba(18,48,31,.94)),var(--panel);box-shadow:var(--shadow)}
+.story-band:after{content:"✳";position:absolute;z-index:-1;right:6%;top:50%;transform:translateY(-56%);color:rgba(212,175,90,.07);font-size:260px;line-height:1;pointer-events:none}
+.story-band h2{max-width:720px;margin:0;color:var(--cream);font-family:var(--display);font-size:clamp(48px,6.5vw,82px);font-weight:500;line-height:.92;letter-spacing:-.045em}
+.story-band h2 em{color:var(--gold-hi);font-weight:400;font-style:italic}
+.story-band p{max-width:520px;margin:20px 0 28px;color:var(--sage);font-size:13px;line-height:1.9}
+.newsletter-form{position:relative;z-index:1;display:flex;gap:12px;max-width:520px}
+.newsletter-form input{flex:1;min-width:0;min-height:50px;padding:0 18px;border:1px solid var(--line);border-radius:5px;background:rgba(255,255,255,.05);color:var(--cream);font-size:12px;transition:border-color .25s,box-shadow .25s}
+.newsletter-form input:focus{outline:none;border-color:var(--gold-hi);box-shadow:0 0 0 3px rgba(212,175,90,.16)}
+.newsletter-form input::placeholder{color:var(--muted)}
+.newsletter-status{min-height:22px;margin:12px 0 0;color:var(--gold-hi);font-size:11px}
+
+/* Footer */
+.footer{padding:48px 0 52px;border-top:1px solid var(--line);background:var(--forest-deep)}
+.footer-inner{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:28px}
+.footer-tagline{margin:6px 0 0;color:var(--sage);font-size:11px;letter-spacing:.08em}
+.footer-copy{color:var(--muted);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.footer-links{display:flex;justify-content:flex-end;gap:24px;color:var(--sage);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.footer-links a:hover{color:var(--gold-hi)}
+
+/* Slide-out Cart Drawer with Free Shipping Progress */
+.bag-backdrop{position:fixed;z-index:210;inset:0;background:rgba(4,15,10,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity .3s ease}
+.bag-drawer{position:fixed;z-index:220;top:0;right:0;display:flex;flex-direction:column;width:min(440px,100vw);height:100dvh;max-height:100dvh;padding:0;background:var(--panel);border-left:1px solid rgba(212,175,90,.28);box-shadow:-12px 0 40px rgba(0,0,0,.6);transform:translateX(105%);transition:transform .35s cubic-bezier(.16,1,.3,1);overflow:hidden;box-sizing:border-box}
+.bag-drawer.open{transform:translateX(0)}
+.drawer-head{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--line);background:rgba(10,31,22,.98);z-index:2}
+.drawer-head h2{margin:0;font-family:var(--display);font-size:32px;font-weight:500;line-height:1.1;color:var(--cream);display:flex;align-items:baseline;gap:8px}
+.bag-count-badge{font-family:var(--sans);font-size:13px;font-weight:700;color:var(--gold-hi)}
+.icon-button{width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:rgba(255,255,255,.04);color:var(--cream);font-size:22px;line-height:1;display:grid;place-items:center;cursor:pointer;transition:border-color .2s,color .2s,transform .2s,background .2s}
+.icon-button:hover{border-color:var(--gold);color:var(--gold-hi);background:rgba(212,175,90,.12);transform:rotate(90deg)}
+
+/* Single Scroll Area */
+.bag-scroll-area{flex:1 1 auto;min-height:0;overflow-y:auto;padding:0 24px;scrollbar-width:thin;scrollbar-color:rgba(212,175,90,.4) transparent}
+.bag-scroll-area::-webkit-scrollbar,dialog::-webkit-scrollbar{width:6px;height:6px}
+.bag-scroll-area::-webkit-scrollbar-track,dialog::-webkit-scrollbar-track{background:transparent}
+.bag-scroll-area::-webkit-scrollbar-thumb,dialog::-webkit-scrollbar-thumb{background:rgba(212,175,90,.35);border-radius:999px}
+.bag-scroll-area::-webkit-scrollbar-thumb:hover,dialog::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+
+/* Free Shipping Bar (compact) */
+.shipping-bar-box{margin:16px 0 12px;padding:11px 14px;border:1px solid var(--line);border-radius:8px;background:var(--soft)}
+.shipping-bar-text{display:flex;justify-content:space-between;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-hi);margin-bottom:8px}
+.shipping-bar-track{width:100%;height:5px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+.shipping-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-hi));width:0%;transition:width .3s ease}
+
+/* Bag Items */
+.bag-items{padding-bottom:16px}
+.bag-row{display:grid;grid-template-columns:80px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);align-items:start}
+.bag-row:last-child{border-bottom:none}
+.bag-row-img{width:80px;height:100px;object-fit:cover;object-position:center 25%;border-radius:8px;background:var(--panel-2);border:1px solid rgba(212,175,90,.18);flex-shrink:0}
+.bag-row-details{display:flex;flex-direction:column;min-width:0;height:100%}
+.bag-row-title{margin:0 0 4px;font-family:var(--display);font-size:18px;font-weight:600;line-height:1.25;color:var(--cream);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;word-break:break-word}
+.bag-row-meta{margin:0 0 10px;color:var(--sage);font-size:11px;font-weight:500}
+.bag-row-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+.qty-stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.03);overflow:hidden}
+.qty-btn{width:36px;height:36px;min-width:36px;min-height:36px;background:transparent;border:none;color:var(--cream);display:grid;place-items:center;font-size:16px;line-height:1;cursor:pointer;transition:all .15s ease;user-select:none}
+.qty-btn:hover{background:rgba(212,175,90,.15);color:var(--gold-hi)}
+.qty-btn:active{transform:scale(.92)}
+.qty-val{min-width:28px;text-align:center;font-size:12px;font-weight:700;color:var(--cream)}
+.remove-bag{background:none;border:none;padding:6px 4px;color:var(--muted);font-size:11px;text-decoration:underline;cursor:pointer;transition:color .15s ease}
+.remove-bag:hover{color:#e57373}
+.bag-row-price{color:var(--gold-hi);font-size:15px;font-weight:800;font-family:var(--sans);white-space:nowrap;margin-left:auto}
+
+/* Empty State */
+.bag-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:52px 20px;color:var(--sage)}
+.bag-empty-icon{width:60px;height:60px;border-radius:50%;border:1px solid rgba(212,175,90,.28);background:rgba(212,175,90,.06);color:var(--gold-hi);display:grid;place-items:center;margin-bottom:16px}
+.bag-empty h3{margin:0 0 6px;font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream)}
+.bag-empty p{margin:0 0 20px;font-size:12px;line-height:1.6;max-width:260px}
+.bag-empty .gold-button{padding:10px 22px;font-size:11px}
+
+/* Sticky Footer */
+.drawer-foot{flex-shrink:0;padding:18px 24px;padding-bottom:max(18px,env(safe-area-inset-bottom,18px));border-top:1px solid var(--line);background:rgba(10,31,22,.98);box-shadow:0 -8px 24px rgba(0,0,0,.25);z-index:2}
+.drawer-line-item{display:flex;justify-content:space-between;margin-bottom:6px;color:var(--sage);font-size:12px}
+.drawer-total{display:flex;justify-content:space-between;align-items:baseline;margin:10px 0 14px;padding-top:10px;border-top:1px dashed var(--line);color:var(--cream);font-size:13px;font-weight:700}
+.drawer-total strong{color:var(--gold-hi);font-size:20px;font-weight:800}
+.drawer-foot .gold-button{width:100%;min-height:46px}
+.drawer-note{margin:10px 0 0;color:var(--muted);font-size:10px;line-height:1.5;text-align:center}
+
+/* Compact rules for short screens (< 700px height) */
+@media(max-height:700px){
+ .drawer-head{padding:12px 18px}
+ .drawer-head h2{font-size:24px}
+ .bag-scroll-area{padding:0 18px}
+ .shipping-bar-box{margin:10px 0;padding:8px 12px}
+ .bag-row{padding:12px 0;grid-template-columns:68px 1fr;gap:12px}
+ .bag-row-img{width:68px;height:84px}
+ .bag-row-title{font-size:16px;margin-bottom:2px}
+ .bag-row-meta{margin-bottom:6px;font-size:10px}
+ .qty-btn{width:30px;height:30px;min-width:30px;min-height:30px;font-size:14px}
+ .drawer-foot{padding:12px 18px;padding-bottom:max(12px,env(safe-area-inset-bottom,12px))}
+ .drawer-line-item{margin-bottom:4px;font-size:11px}
+ .drawer-total{margin:6px 0 10px;padding-top:6px;font-size:12px}
+ .drawer-total strong{font-size:17px}
+ .drawer-foot .gold-button{min-height:38px;padding:9px 16px;font-size:11px}
+ .drawer-note{margin-top:6px;font-size:9px}
+}
+
+/* Modals */
+dialog{max-width:min(600px,calc(100% - 32px));max-height:min(90dvh,850px);padding:32px;border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--cream);box-shadow:var(--shadow);z-index:250;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(212,175,90,.4) transparent}
+dialog::backdrop{z-index:240;background:rgba(0,0,0,.78);backdrop-filter:blur(8px)}
+.dialog-close{float:right;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--cream);font-size:20px;display:grid;place-items:center;transition:border-color .2s,color .2s}
+.dialog-close:hover{border-color:var(--gold);color:var(--gold-hi)}
+
+/* Quick View & 3D Garment Modal */
+#quickViewDialog{max-width:min(920px,calc(100% - 32px));padding:36px;border-color:var(--gold)}
+.quickview-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.15fr);gap:36px;align-items:start;margin-top:10px}
+.quickview-media-col{display:flex;flex-direction:column;gap:12px}
+.quickview-photo-container{position:relative;width:100%;aspect-ratio:4/5;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#ede6d6;display:grid;place-items:center}
+.quickview-photo-container img{max-width:100%;max-height:100%;object-fit:contain}
+
+.quickview-details h2{margin:6px 0 10px;font-family:var(--display);font-size:36px;font-weight:600;line-height:1.05;color:var(--cream)}
+.quickview-price{color:var(--gold-hi);font-size:24px;font-weight:800;margin-bottom:14px}
+.quickview-desc{color:var(--sage);font-size:12px;line-height:1.8;margin-bottom:18px}
+.quickview-fabric{padding:10px 14px;border-left:2px solid var(--gold);background:var(--soft);color:var(--cream);font-size:11px;margin-bottom:18px}
+.quickview-sizes{margin-bottom:20px}
+.quickview-size-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.quickview-size-header label{color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.size-guide-trigger{color:var(--gold-hi);font-size:10px;font-weight:700;text-decoration:underline;cursor:pointer;background:none;border:none;padding:0}
+.size-chips{display:flex;flex-wrap:wrap;gap:8px}
+.size-chip{padding:6px 14px;border:1px solid var(--line);border-radius:4px;background:var(--soft);color:var(--cream);font-size:10px;font-weight:700}
+.size-chip.active{border-color:var(--gold);background:var(--gold);color:#142318}
+.qv-action-row{display:flex;gap:10px;margin-top:20px}
+.share-btn{padding:0 16px;border:1px solid var(--line);border-radius:6px;background:var(--soft);color:var(--cream);display:grid;place-items:center;font-size:12px;transition:all .2s ease}
+.share-btn:hover{border-color:var(--gold);color:var(--gold-hi)}
+
+/* Size Guide Modal */
+#sizeGuideDialog{max-width:min(680px,calc(100% - 32px));padding:32px}
+.size-table{width:100%;border-collapse:collapse;margin:18px 0;font-size:11px}
+.size-table th,.size-table td{padding:10px 14px;border:1px solid var(--line);text-align:left}
+.size-table th{background:var(--panel-2);color:var(--gold-hi);font-weight:800}
+.size-table td{color:var(--cream)}
+.size-note{color:var(--sage);font-size:11px;font-style:italic}
+
+/* Checkout Modal */
+.checkout-head h2{margin:0 0 8px;font-family:var(--display);font-size:44px;font-weight:500;line-height:1}
+.checkout-head p{color:var(--sage);font-size:12px}
+.checkout-form{display:grid;gap:10px;margin-top:24px}
+.checkout-form label{margin-top:8px;color:var(--sage);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.checkout-form input,.checkout-form textarea{width:100%;min-height:46px;padding:11px 14px;border:1px solid var(--line);border-radius:5px;background:var(--soft);color:var(--cream);font-size:12px}
+.checkout-form input:focus,.checkout-form textarea:focus{border-color:var(--gold-hi);outline:none;box-shadow:0 0 0 3px rgba(212,175,90,.16)}
+.checkout-error{min-height:18px;color:#dba27e;font-size:11px}
+.checkout-success-view{display:none;text-align:center;padding:24px 0}
+.checkout-success-view h3{font-family:var(--display);font-size:42px;color:var(--gold-hi);margin:0 0 10px}
+.checkout-success-view p{color:var(--sage);font-size:13px;line-height:1.8}
+
+/* Toast */
+.store-toast{position:fixed;z-index:100;right:28px;bottom:28px;max-width:min(380px,calc(100% - 56px));padding:15px 22px;border:1px solid var(--gold);border-radius:10px;background:rgba(18,48,31,.96);backdrop-filter:blur(10px);color:var(--cream);box-shadow:var(--shadow-gold);font-size:12px;display:flex;align-items:center;gap:10px}
+
+/* Responsive */
+@media(max-width:1080px){
+ .product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .looks-grid{grid-template-columns:1fr 1fr;grid-template-rows:250px 220px 220px}
+ .look-card:first-child{grid-row:span 2}
+ .look-card:nth-child(4){grid-column:1/3}
+ .studio-grid{grid-template-columns:1fr}
+}
+@media(max-width:900px){
+ .nav{grid-template-columns:auto 1fr auto;gap:16px}
+ .nav-links{display:none}
+ .mobile-toggle{display:inline-flex}
+ .hero{height:auto;min-height:680px}
+ .hero-slide{grid-template-columns:1fr .82fr;gap:28px;padding:56px 36px 82px;min-height:680px}
+ .hero-copy h1{font-size:clamp(62px,9vw,100px)}
+ .hero-photo-wrap{width:min(100%,360px)}
+ .quickview-layout{grid-template-columns:1fr;gap:24px}
+}
+@media(max-width:680px){
+ .product-grid,.recently-viewed-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+ .product-info{padding:14px}
+ .product-info h3{font-size:22px}
+ .product-info p{font-size:10px;min-height:42px}
+ .product-bottom{flex-direction:column;align-items:stretch;gap:8px}
+ .add-button{width:100%}
+ .filter-bar-inner{flex-direction:column;align-items:stretch}
+}
+@media(max-width:620px){
+ .wrap,.nav{width:calc(100% - 32px)}
+ .nav{min-height:72px}
+ .brand{font-size:32px}
+ .nav-login{display:none}
+ .hero{min-height:790px}
+ .hero-track,.hero-slide{min-height:790px}
+ .hero-slide{display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:20px;padding:48px 20px 76px}
+ .hero-copy{padding:0}
+ .hero-copy h1{font-size:clamp(54px,14vw,80px)}
+ .hero-desc{max-width:360px;margin:18px 0 22px;font-size:12px}
+ .hero-photo-wrap{align-self:center;justify-self:center;width:min(78%,320px);margin:0 auto}
+ .hero-controls{bottom:26px}
+ .hero-index{display:none}
+ .promise-inner{grid-template-columns:1fr}
+ .promise{justify-content:flex-start;padding:16px 12px;border-right:0;border-bottom:1px solid var(--line)}
+ .promise:last-child{border-bottom:0}
+ .section{padding:72px 0}
+ .section-heading{display:block;margin-bottom:24px}
+ .section-heading>p{margin-top:16px;font-size:12px}
+ .section-heading h2{font-size:52px}
+ .looks-section{padding:60px 0}
+ .looks-grid{grid-template-columns:1fr 1fr;grid-template-rows:260px 180px 180px;gap:10px}
+ .look-caption span:first-child{font-size:22px}
+ .story-band{margin:68px auto;padding:38px 24px}
+ .story-band h2{font-size:48px}
+ .story-band p{font-size:12px}
+ .newsletter-form{flex-direction:column}
+ .newsletter-form .gold-button{width:100%}
+ .footer-inner{grid-template-columns:1fr;gap:16px}
+ .footer-links{justify-content:flex-start;flex-wrap:wrap}
+ .footer-copy{order:3}
+ .bag-drawer{width:100vw;max-width:100vw}
+ .store-toast{right:16px;bottom:16px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+ .hero-track{transition:none}
+ .marquee-content{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="page-intro" id="pageIntro"><div class="intro-brand"><h1>Dia<span>✦</span></h1><p>Atelier & Streetwear · Cebu</p></div></div>
+<div class="custom-cursor" id="customCursor" aria-hidden="true"></div>
+<div class="grain-overlay" aria-hidden="true"></div>
+
+<header class="site-header">
+ <nav class="nav" aria-label="Main navigation">
+  <a class="brand" href="/" aria-label="Dia home">Dia<span class="brand-mark">✦</span></a>
+  <div class="nav-links">
+   <a href="#shop">Collection</a>
+   <a href="#looks">Editorial Looks</a>
+   <a href="#story">Atelier Story</a>
+  </div>
+  <div class="nav-actions">
+   <button class="wishlist-trigger" id="wishlistTrigger" type="button" aria-label="View saved wishlist">♡</button>
+   <a class="nav-login" id="loginLink" href="/login">Log in</a>
+   <a class="nav-link-account" id="accountLink" href="/dashboard" hidden><img id="navAvatarImg" class="nav-avatar-img" alt="" src="" hidden style="width:20px;height:20px;border-radius:50%;object-fit:cover;border:1px solid #d4af5a;vertical-align:middle;margin-right:6px"><span id="navAccountLabel">My account</span></a>
+   <button class="bag-trigger" id="bagOpen" type="button" aria-haspopup="dialog" aria-controls="bagDrawer">
+    <svg class="cart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    <span>Bag</span>
+    <span class="bag-count" id="bagCount">0</span>
+   </button>
+   <button class="mobile-toggle" id="mobileMenuToggle" type="button" aria-label="Open mobile menu" aria-expanded="false"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+ </nav>
+ <div class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
+  <a href="#shop" class="mobile-link">Shop Collection</a>
+  <a href="#looks" class="mobile-link">Editorial Looks</a>
+  <a href="#story" class="mobile-link">Our Atelier Story</a>
+  <a href="/login" class="mobile-link" id="mobileLoginLink">Sign In / Register</a>
+  <a href="/dashboard" class="mobile-link" id="mobileAccountLink" hidden><img id="mobileNavAvatarImg" class="nav-avatar-img" alt="" src="" hidden style="width:20px;height:20px;border-radius:50%;object-fit:cover;border:1px solid #d4af5a;vertical-align:middle;margin-right:8px"><span id="mobileNavAccountLabel">My Account</span></a>
+ </div>
+</header>
+
+<div class="marquee-strip" aria-hidden="true">
+ <div class="marquee-content">
+  <span class="marquee-item">NEW DROPS · <span>WIDE LEG</span></span>
+  <span class="marquee-item">WASHED DENIM · <span>GRAPHIC TEES</span></span>
+  <span class="marquee-item">ATELIER TAILORING · <span>PAPILLON EDITS</span></span>
+  <span class="marquee-item">LIMITED RELEASES · <span>CEBU STUDIO</span></span>
+  <span class="marquee-item">NEW DROPS · <span>WIDE LEG</span></span>
+  <span class="marquee-item">WASHED DENIM · <span>GRAPHIC TEES</span></span>
+  <span class="marquee-item">ATELIER TAILORING · <span>PAPILLON EDITS</span></span>
+  <span class="marquee-item">LIMITED RELEASES · <span>CEBU STUDIO</span></span>
+ </div>
+</div>
+
+<main>
+ <section class="hero" id="home" aria-label="Dia editorial looks">
+  <div class="hero-track" id="heroTrack">
+   <!-- Slide 1: 02-model-plaid-flannel-look -->
+   <article class="hero-slide">
+    <div class="hero-copy">
+     <p class="eyebrow">Dia atelier · 01 / 04</p>
+     <h1><span class="word">Wear your</span><br><span class="word"><em>story.</em></span></h1>
+     <p class="hero-desc">Modern luxury unisex silhouettes cut from heavyweight textured wool-cotton and Japanese denim. Thoughtful fit, quiet confidence.</p>
+     <div class="hero-actions">
+      <a class="gold-button" href="#shop">Explore Collection <span aria-hidden="true">↗</span></a>
+      <a class="outline-button" href="#looks">Editorial Looks <span aria-hidden="true">↗</span></a>
+     </div>
+    </div>
+    <figure class="hero-photo-wrap">
+     <img src="/images/02-model-plaid-flannel-look.webp" srcset="/images/02-model-plaid-flannel-look-480w.webp 480w, /images/02-model-plaid-flannel-look-960w.webp 960w, /images/02-model-plaid-flannel-look-1600w.webp 1600w, /images/02-model-plaid-flannel-look.webp 736w" sizes="(max-width: 620px) 78vw, (max-width: 900px) 42vw, 360px" width="360" height="470" alt="Ember Plaid Embroidered Overshirt editorial look" loading="eager" fetchpriority="high" decoding="async">
+     <figcaption>Look 01 · Ember Plaid Overshirt</figcaption>
+    </figure>
+   </article>
+
+   <!-- Slide 2: 03-model-black-tee-wide-trousers -->
+   <article class="hero-slide">
+    <div class="hero-copy">
+     <p class="eyebrow">The form edit · 02 / 04</p>
+     <h1><span class="word">Sculpted</span><br><span class="word"><em>precision.</em></span></h1>
+     <p class="hero-desc">Pima cotton basics paired with sweeping tailored wide-leg trousers. Clean proportions engineered for daily repeat wear.</p>
+     <div class="hero-actions">
+      <a class="gold-button" href="#shop">Explore Collection <span aria-hidden="true">↗</span></a>
+      <a class="outline-button" href="#looks">See Editorial <span aria-hidden="true">↗</span></a>
+     </div>
+    </div>
+    <figure class="hero-photo-wrap">
+     <img src="/images/03-model-black-tee-wide-trousers.webp" srcset="/images/03-model-black-tee-wide-trousers-480w.webp 480w, /images/03-model-black-tee-wide-trousers-960w.webp 960w, /images/03-model-black-tee-wide-trousers-1600w.webp 1600w, /images/03-model-black-tee-wide-trousers.webp 736w" sizes="(max-width: 620px) 78vw, (max-width: 900px) 42vw, 360px" width="360" height="470" alt="Slim Noir Tee and wide trousers editorial look" loading="eager" decoding="async">
+     <figcaption>Look 02 · Slim Noir & Wide Leg</figcaption>
+    </figure>
+   </article>
+
+   <!-- Slide 3: 04-model-ivory-cap-sleeve-shirt -->
+   <article class="hero-slide">
+    <div class="hero-copy">
+     <p class="eyebrow">Atelier craftsmanship · 03 / 04</p>
+     <h1><span class="word">Poetry in</span><br><span class="word"><em>motion.</em></span></h1>
+     <p class="hero-desc">Fine poplin gathering across the shoulder lines. Delicate details balanced by effortless unisex tailoring.</p>
+     <div class="hero-actions">
+      <a class="gold-button" href="#shop">Explore Collection <span aria-hidden="true">↗</span></a>
+      <a class="outline-button" href="#studio">3D View <span aria-hidden="true">✦</span></a>
+     </div>
+    </div>
+    <figure class="hero-photo-wrap">
+     <img src="/images/04-model-ivory-cap-sleeve-shirt.webp" srcset="/images/04-model-ivory-cap-sleeve-shirt-480w.webp 480w, /images/04-model-ivory-cap-sleeve-shirt-960w.webp 960w, /images/04-model-ivory-cap-sleeve-shirt-1600w.webp 1600w, /images/04-model-ivory-cap-sleeve-shirt.webp 735w" sizes="(max-width: 620px) 78vw, (max-width: 900px) 42vw, 360px" width="360" height="470" alt="Ivory Gather Cap-Sleeve Shirt editorial look" loading="lazy" decoding="async">
+     <figcaption>Look 03 · Ivory Gather Shirt</figcaption>
+    </figure>
+   </article>
+
+   <!-- Slide 4: 07-model-vintage-raglan-tee -->
+   <article class="hero-slide">
+    <div class="hero-copy">
+     <p class="eyebrow">Heritage archival · 04 / 04</p>
+     <h1><span class="word">Timeless</span><br><span class="word"><em>character.</em></span></h1>
+     <p class="hero-desc">Waffle-knit contrast raglan construction inspired by vintage athletics, modernized with tailored proportions.</p>
+     <div class="hero-actions">
+      <a class="gold-button" href="#shop">Explore Collection <span aria-hidden="true">↗</span></a>
+      <a class="outline-button" href="#looks">See Editorial <span aria-hidden="true">↗</span></a>
+     </div>
+    </div>
+    <figure class="hero-photo-wrap">
+     <img src="/images/07-model-vintage-raglan-tee.webp" srcset="/images/07-model-vintage-raglan-tee-480w.webp 480w, /images/07-model-vintage-raglan-tee-960w.webp 960w, /images/07-model-vintage-raglan-tee-1600w.webp 1600w, /images/07-model-vintage-raglan-tee.webp 736w" sizes="(max-width: 620px) 78vw, (max-width: 900px) 42vw, 360px" width="360" height="470" alt="Garage Raglan Baby Tee editorial look" loading="lazy" decoding="async">
+     <figcaption>Look 04 · Garage Raglan Tee</figcaption>
+    </figure>
+   </article>
+  </div>
+
+  <div class="hero-controls" aria-label="Editorial slideshow navigation">
+   <button class="hero-arrow" id="heroPrev" type="button" aria-label="Previous slide">←</button>
+   <div class="hero-dots" id="heroDots">
+    <button class="hero-dot" type="button" data-slide="0" aria-label="Show slide 1" aria-current="true"></button>
+    <button class="hero-dot" type="button" data-slide="1" aria-label="Show slide 2" aria-current="false"></button>
+    <button class="hero-dot" type="button" data-slide="2" aria-label="Show slide 3" aria-current="false"></button>
+    <button class="hero-dot" type="button" data-slide="3" aria-label="Show slide 4" aria-current="false"></button>
+   </div>
+   <button class="hero-arrow" id="heroNext" type="button" aria-label="Next slide">→</button>
+  </div>
+  <div class="hero-progress" aria-hidden="true"><span id="heroProgress"></span></div>
+  <span class="hero-index">DIA / ATELIER 2026</span>
+ </section>
+
+ <section class="promise-strip" aria-label="Shopping benefits">
+  <div class="wrap promise-inner">
+   <div class="promise"><span class="promise-symbol">✳</span>Free nationwide shipping over ₱2,500</div>
+   <div class="promise"><span class="promise-symbol">↺</span>Complimentary 7-day atelier exchange</div>
+   <div class="promise"><span class="promise-symbol">◈</span>Small batch runs · No mass reproduction</div>
+  </div>
+ </section>
+
+ <!-- Shop Section & Sticky Filter Bar -->
+ <section class="section wrap" id="shop">
+  <div class="section-heading">
+   <div>
+    <p class="eyebrow">Dia Autumn / Winter Edit</p>
+    <h2>The <em>collection.</em></h2>
+   </div>
+   <p>Authentic silhouettes crafted with intention. Filter by category, size, or price to discover your everyday uniform.</p>
+  </div>
+
+  <!-- Sticky Filter Bar -->
+  <div class="sticky-filter-bar" id="stickyFilterBar">
+   <div class="filter-bar-inner">
+    <div class="filter-tabs" id="categoryTabs" role="tablist" aria-label="Product categories">
+     <button class="filter-tab active" type="button" data-category="all" role="tab" aria-selected="true">All (11)</button>
+     <button class="filter-tab" type="button" data-category="Tees" role="tab">Tees</button>
+     <button class="filter-tab" type="button" data-category="Shirts" role="tab">Shirts</button>
+     <button class="filter-tab" type="button" data-category="Pants" role="tab">Pants</button>
+     <button class="filter-tab" type="button" data-category="Dresses" role="tab">Dresses</button>
+     <button class="filter-tab" type="button" data-category="Caps" role="tab">Caps</button>
+    </div>
+    <div class="filter-tools">
+     <div class="search-wrapper">
+      <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input class="search-input" id="shopSearch" type="search" placeholder="Search pieces…" aria-label="Search products" autocomplete="off">
+      <div class="search-suggestions" id="searchSuggestions"></div>
+     </div>
+     <select class="size-filter-select" id="sizeFilter" aria-label="Filter by size">
+      <option value="all">Size: All</option>
+      <option value="XS">Size: XS</option>
+      <option value="S">Size: S</option>
+      <option value="M">Size: M</option>
+      <option value="L">Size: L</option>
+      <option value="XL">Size: XL</option>
+      <option value="One size">Size: One size</option>
+     </select>
+     <label class="stock-toggle-label">
+      <input type="checkbox" id="stockOnly"> In stock only
+     </label>
+     <select class="sort-select" id="priceSort" aria-label="Sort products by price">
+      <option value="default">Featured</option>
+      <option value="newest">Newest drops</option>
+      <option value="price-asc">Price: Low to High</option>
+      <option value="price-desc">Price: High to Low</option>
+     </select>
+    </div>
+   </div>
+  </div>
+
+  <div class="section-topline">
+   <span id="productCountLabel">Current selection / 11 pieces</span>
+   <div style="display:flex;gap:14px;align-items:center">
+    <button class="reset-filters-btn" id="resetFilters" type="button" hidden>Reset all filters</button>
+    <span id="catalogLabel">Dia Authentic Catalog</span>
+   </div>
+  </div>
+
+  <div class="product-grid" id="productGrid" aria-live="polite">
+   <article class="product-card" data-card-id="starburst-patch-cargo-denim"><button class="card-wishlist" type="button" data-wish="starburst-patch-cargo-denim" aria-label="Save to wishlist">♡</button><div class="product-image" data-quickview="starburst-patch-cargo-denim"><img src="/images/01-star-patch-denim-cargo.webp" srcset="/images/01-star-patch-denim-cargo-480w.webp 480w, /images/01-star-patch-denim-cargo.webp 528w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="360" height="360" alt="Starburst Patch Cargo Denim" loading="lazy" decoding="async"><span class="product-badge">Signature Piece</span><span class="quick-view-badge">Quick view · 3D</span></div><div class="product-info"><div class="product-meta"><span>Pants</span><span>01 / 11</span></div><h3>Starburst Patch Cargo Denim</h3><p>Heavy 14oz ring-spun denim with distressed raw hems and starburst twill patches.</p><div class="product-bottom"><span class="product-price">₱3,450</span><button class="add-button" type="button" data-add="starburst-patch-cargo-denim">Add to bag</button></div></div></article>
+   <article class="product-card" data-card-id="midnight-web-oversized-tee"><button class="card-wishlist" type="button" data-wish="midnight-web-oversized-tee" aria-label="Save to wishlist">♡</button><div class="product-image" data-quickview="midnight-web-oversized-tee"><img src="/images/05-navy-spider-tee.webp" srcset="/images/05-navy-spider-tee-480w.webp 480w, /images/05-navy-spider-tee.webp 564w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="360" height="360" alt="Midnight Web Oversized Tee" loading="lazy" decoding="async"><span class="product-badge">Graphic Drop</span><span class="quick-view-badge">Quick view · 3D</span></div><div class="product-info"><div class="product-meta"><span>Tees</span><span>02 / 11</span></div><h3>Midnight Web Oversized Tee</h3><p>Gold spiderweb graphic motifs across deep midnight navy cotton jersey.</p><div class="product-bottom"><span class="product-price">₱1,150</span><button class="add-button" type="button" data-add="midnight-web-oversized-tee">Add to bag</button></div></div></article>
+   <article class="product-card" data-card-id="noir-gold-smile-washed-tee"><button class="card-wishlist" type="button" data-wish="noir-gold-smile-washed-tee" aria-label="Save to wishlist">♡</button><div class="product-image" data-quickview="noir-gold-smile-washed-tee"><img src="/images/06-washed-black-lips-tee.webp" srcset="/images/06-washed-black-lips-tee-480w.webp 480w, /images/06-washed-black-lips-tee.webp 736w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="360" height="360" alt="Noir Gold-Smile Washed Tee" loading="lazy" decoding="async"><span class="product-badge">Limited Run</span><span class="quick-view-badge">Quick view · 3D</span></div><div class="product-info"><div class="product-meta"><span>Tees</span><span>03 / 11</span></div><h3>Noir Gold-Smile Washed Tee</h3><p>Enzyme-washed charcoal noir cotton with metallic champagne gold graphic detail.</p><div class="product-bottom"><span class="product-price">₱1,250</span><button class="add-button" type="button" data-add="noir-gold-smile-washed-tee">Add to bag</button></div></div></article>
+   <article class="product-card" data-card-id="papillon-print-boat-neck-tee"><button class="card-wishlist" type="button" data-wish="papillon-print-boat-neck-tee" aria-label="Save to wishlist">♡</button><div class="product-image" data-quickview="papillon-print-boat-neck-tee"><img src="/images/08-butterfly-white-tee.webp" srcset="/images/08-butterfly-white-tee-480w.webp 480w, /images/08-butterfly-white-tee.webp 736w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="360" height="360" alt="Papillon Print Boat-Neck Tee" loading="lazy" decoding="async"><span class="product-badge">Atelier Edit</span><span class="quick-view-badge">Quick view · 3D</span></div><div class="product-info"><div class="product-meta"><span>Tees</span><span>04 / 11</span></div><h3>Papillon Print Boat-Neck Tee</h3><p>Wide boat neckline accenting botanical butterfly artwork in soft earth tones.</p><div class="product-bottom"><span class="product-price">₱1,050</span><button class="add-button" type="button" data-add="papillon-print-boat-neck-tee">Add to bag</button></div></div></article>
+   <article class="product-card" data-card-id="blanche-corset-puff-dress"><button class="card-wishlist" type="button" data-wish="blanche-corset-puff-dress" aria-label="Save to wishlist">♡</button><div class="product-image" data-quickview="blanche-corset-puff-dress"><img src="/images/09-white-corset-puff-dress.webp" srcset="/images/09-white-corset-puff-dress-480w.webp 480w, /images/09-white-corset-puff-dress.webp 736w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="360" height="360" alt="Blanche Corset Puff-Sleeve Dress" loading="lazy" decoding="async"><span class="product-badge">Exclusive Drop</span><span class="quick-view-badge">Quick view · 3D</span></div><div class="product-info"><div class="product-meta"><span>Dresses</span><span>05 / 11</span></div><h3>Blanche Corset Puff-Sleeve Dress</h3><p>Structured corset bodice with dramatic pleated puff sleeves and flared A-line skirt.</p><div class="product-bottom"><span class="product-price">₱2,850</span><button class="add-button" type="button" data-add="blanche-corset-puff-dress">Add to bag</button></div></div></article>
+   <article class="product-card" data-card-id="script-embroidered-wide-denim"><button class="card-wishlist" type="button" data-wish="script-embroidered-wide-denim" aria-label="Save to wishlist">♡</button><div class="product-image" data-quickview="script-embroidered-wide-denim"><img src="/images/10-script-embroidered-wide-jeans.webp" srcset="/images/10-script-embroidered-wide-jeans-480w.webp 480w, /images/10-script-embroidered-wide-jeans.webp 736w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="360" height="360" alt="Script Embroidered Wide Denim" loading="lazy" decoding="async"><span class="product-badge">New Season</span><span class="quick-view-badge">Quick view · 3D</span></div><div class="product-info"><div class="product-meta"><span>Pants</span><span>06 / 11</span></div><h3>Script Embroidered Wide Denim</h3><p>Exaggerated wide-leg silhouette embroidered with continuous cursive lettering.</p><div class="product-bottom"><span class="product-price">₱3,650</span><button class="add-button" type="button" data-add="script-embroidered-wide-denim">Add to bag</button></div></div></article>
+   <article class="product-card" data-card-id="relic-washed-gothic-cap"><button class="card-wishlist" type="button" data-wish="relic-washed-gothic-cap" aria-label="Save to wishlist">♡</button><div class="product-image" data-quickview="relic-washed-gothic-cap"><img src="/images/11-washed-gothic-cap.webp" srcset="/images/11-washed-gothic-cap-480w.webp 480w, /images/11-washed-gothic-cap.webp 600w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="360" height="360" alt="Relic Washed Gothic Cap" loading="lazy" decoding="async"><span class="product-badge">Staple</span><span class="quick-view-badge">Quick view · 3D</span></div><div class="product-info"><div class="product-meta"><span>Caps</span><span>07 / 11</span></div><h3>Relic Washed Gothic Cap</h3><p>Enzyme-washed six-panel cotton twill featuring gothic script embroidery.</p><div class="product-bottom"><span class="product-price">₱890</span><button class="add-button" type="button" data-add="relic-washed-gothic-cap">Add to bag</button></div></div></article>
+   <article class="product-card" data-card-id="ember-plaid-embroidered-overshirt"><button class="card-wishlist" type="button" data-wish="ember-plaid-embroidered-overshirt" aria-label="Save to wishlist">♡</button><div class="product-image" data-quickview="ember-plaid-embroidered-overshirt"><img src="/images/02-model-plaid-flannel-look.webp" srcset="/images/02-model-plaid-flannel-look-480w.webp 480w, /images/02-model-plaid-flannel-look.webp 736w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="360" height="360" alt="Ember Plaid Embroidered Overshirt" loading="lazy" decoding="async"><span class="product-badge">Editorial Pick</span><span class="quick-view-badge">Quick view · 3D</span></div><div class="product-info"><div class="product-meta"><span>Shirts</span><span>08 / 11</span></div><h3>Ember Plaid Embroidered Overshirt</h3><p>Heavyweight brushed flannel overshirt with tonal tartan check patterning.</p><div class="product-bottom"><span class="product-price">₱2,450</span><button class="add-button" type="button" data-add="ember-plaid-embroidered-overshirt">Add to bag</button></div></div></article>
+   <article class="product-card" data-card-id="slim-noir-tee"><button class="card-wishlist" type="button" data-wish="slim-noir-tee" aria-label="Save to wishlist">♡</button><div class="product-image" data-quickview="slim-noir-tee"><img src="/images/03-model-black-tee-wide-trousers.webp" srcset="/images/03-model-black-tee-wide-trousers-480w.webp 480w, /images/03-model-black-tee-wide-trousers.webp 736w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="360" height="360" alt="Slim Noir Tee" loading="lazy" decoding="async"><span class="product-badge">Essential</span><span class="quick-view-badge">Quick view · 3D</span></div><div class="product-info"><div class="product-meta"><span>Tees</span><span>09 / 11</span></div><h3>Slim Noir Tee</h3><p>Streamlined crewneck crafted from long-staple pima cotton with gentle stretch.</p><div class="product-bottom"><span class="product-price">₱950</span><button class="add-button" type="button" data-add="slim-noir-tee">Add to bag</button></div></div></article>
+   <article class="product-card" data-card-id="ivory-gather-cap-sleeve-shirt"><button class="card-wishlist" type="button" data-wish="ivory-gather-cap-sleeve-shirt" aria-label="Save to wishlist">♡</button><div class="product-image" data-quickview="ivory-gather-cap-sleeve-shirt"><img src="/images/04-model-ivory-cap-sleeve-shirt.webp" srcset="/images/04-model-ivory-cap-sleeve-shirt-480w.webp 480w, /images/04-model-ivory-cap-sleeve-shirt.webp 735w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="360" height="360" alt="Ivory Gather Cap-Sleeve Shirt" loading="lazy" decoding="async"><span class="product-badge">Atelier Edit</span><span class="quick-view-badge">Quick view · 3D</span></div><div class="product-info"><div class="product-meta"><span>Shirts</span><span>10 / 11</span></div><h3>Ivory Gather Cap-Sleeve Shirt</h3><p>Delicate shoulder gathering creating sculptural drape across an airy poplin base.</p><div class="product-bottom"><span class="product-price">₱1,950</span><button class="add-button" type="button" data-add="ivory-gather-cap-sleeve-shirt">Add to bag</button></div></div></article>
+   <article class="product-card" data-card-id="garage-raglan-baby-tee"><button class="card-wishlist" type="button" data-wish="garage-raglan-baby-tee" aria-label="Save to wishlist">♡</button><div class="product-image" data-quickview="garage-raglan-baby-tee"><img src="/images/07-model-vintage-raglan-tee.webp" srcset="/images/07-model-vintage-raglan-tee-480w.webp 480w, /images/07-model-vintage-raglan-tee.webp 736w" sizes="(max-width: 620px) 45vw, (max-width: 900px) 44vw, 260px" width="360" height="360" alt="Garage Raglan Baby Tee" loading="lazy" decoding="async"><span class="product-badge">Archival</span><span class="quick-view-badge">Quick view · 3D</span></div><div class="product-info"><div class="product-meta"><span>Tees</span><span>11 / 11</span></div><h3>Garage Raglan Baby Tee</h3><p>Vintage-inspired waffle knit raglan baseball tee with contrast crimson sleeves.</p><div class="product-bottom"><span class="product-price">₱1,100</span><button class="add-button" type="button" data-add="garage-raglan-baby-tee">Add to bag</button></div></div></article>
+  </div>
+  <p class="catalog-message" id="catalogMessage" role="status"></p>
+ </section>
+
+ <!-- Recently Viewed Section -->
+ <section class="wrap recently-viewed-section" id="recentlyViewedSection" hidden>
+  <div class="gold-line"></div>
+  <p class="eyebrow">Your browsing history</p>
+  <h2 style="font-family:var(--display);font-size:38px;margin:0 0 24px;font-weight:500">Recently <em>viewed.</em></h2>
+  <div class="recently-viewed-grid" id="recentlyViewedGrid"></div>
+ </section>
+
+ <!-- Looks Editorial Section -->
+ <section class="section looks-section" id="looks">
+  <div class="wrap">
+   <div class="section-heading">
+    <div>
+     <p class="eyebrow">Styled in real life</p>
+     <h2>The <em>looks.</em></h2>
+    </div>
+    <p>Four model perspectives from the Dia studio. Framed at native resolution for editorial clarity.</p>
+   </div>
+   <div class="looks-grid">
+    <!-- Look 1: Ember Plaid Overshirt (02-model-plaid-flannel-look) -->
+    <a class="look-card" href="#shop" data-product="ember-plaid-embroidered-overshirt">
+     <img src="/images/02-model-plaid-flannel-look.webp" srcset="/images/02-model-plaid-flannel-look-480w.webp 480w, /images/02-model-plaid-flannel-look-960w.webp 960w, /images/02-model-plaid-flannel-look-1600w.webp 1600w, /images/02-model-plaid-flannel-look.webp 736w" sizes="(max-width: 620px) 48vw, 32vw" width="360" height="470" alt="Ember Plaid Embroidered Overshirt" loading="lazy" decoding="async">
+     <span class="look-caption"><span>The Plaid Edit</span><span>LOOK 01 ↗</span></span>
+    </a>
+    <!-- Look 2: Slim Noir Tee & Trousers (03-model-black-tee-wide-trousers) -->
+    <a class="look-card" href="#shop" data-product="slim-noir-tee">
+     <img src="/images/03-model-black-tee-wide-trousers.webp" srcset="/images/03-model-black-tee-wide-trousers-480w.webp 480w, /images/03-model-black-tee-wide-trousers-960w.webp 960w, /images/03-model-black-tee-wide-trousers-1600w.webp 1600w, /images/03-model-black-tee-wide-trousers.webp 736w" sizes="(max-width: 620px) 48vw, 32vw" width="340" height="480" alt="Slim Noir Tee" loading="lazy" decoding="async">
+     <span class="look-caption"><span>Noir & Wide Leg</span><span>LOOK 02 ↗</span></span>
+    </a>
+    <!-- Look 3: Ivory Gather Cap-Sleeve Shirt (04-model-ivory-cap-sleeve-shirt) -->
+    <a class="look-card" href="#shop" data-product="ivory-gather-cap-sleeve-shirt">
+     <img src="/images/04-model-ivory-cap-sleeve-shirt.webp" srcset="/images/04-model-ivory-cap-sleeve-shirt-480w.webp 480w, /images/04-model-ivory-cap-sleeve-shirt-960w.webp 960w, /images/04-model-ivory-cap-sleeve-shirt-1600w.webp 1600w, /images/04-model-ivory-cap-sleeve-shirt.webp 735w" sizes="(max-width: 620px) 48vw, 32vw" width="320" height="480" alt="Ivory Gather Cap-Sleeve Shirt" loading="lazy" decoding="async">
+     <span class="look-caption"><span>Ivory Gather</span><span>LOOK 03 ↗</span></span>
+    </a>
+    <!-- Look 4: Garage Raglan Baby Tee (07-model-vintage-raglan-tee) -->
+    <a class="look-card" href="#shop" data-product="garage-raglan-baby-tee">
+     <img src="/images/07-model-vintage-raglan-tee.webp" srcset="/images/07-model-vintage-raglan-tee-480w.webp 480w, /images/07-model-vintage-raglan-tee-960w.webp 960w, /images/07-model-vintage-raglan-tee-1600w.webp 1600w, /images/07-model-vintage-raglan-tee.webp 736w" sizes="(max-width: 620px) 48vw, 32vw" width="360" height="480" alt="Garage Raglan Baby Tee" loading="lazy" decoding="async">
+     <span class="look-caption"><span>Garage Raglan</span><span>LOOK 04 ↗</span></span>
+    </a>
+   </div>
+  </div>
+ </section>
+
+ <!-- Atelier Story & Newsletter -->
+ <section class="story-band wrap" id="story">
+  <p class="eyebrow">Notes from the Dia atelier</p>
+  <h2>Clothes that carry<br><em>your story.</em></h2>
+  <p>Small-batch drops, fabric developments, and styling perspectives from our Cebu workshop. Delivered only when there is something genuine to share.</p>
+  <form class="newsletter-form" id="newsletterForm">
+   <label class="visually-hidden" for="newsletterEmail">Email address</label>
+   <input id="newsletterEmail" name="email" type="email" autocomplete="email" placeholder="Your email address" maxlength="254" required>
+   <button class="gold-button" type="submit">Join the atelier list <span aria-hidden="true">↗</span></button>
+  </form>
+  <p class="newsletter-status" id="newsletterStatus" role="status" aria-live="polite"></p>
+ </section>
+</main>
+
+<footer class="footer">
+ <div class="wrap footer-inner">
+  <div>
+   <a class="brand" href="/">Dia<span class="brand-mark">✦</span></a>
+   <p class="footer-tagline">Wear your story.</p>
+  </div>
+  <span class="footer-copy">© <span id="year"></span> Dia Studio · Cebu, Philippines</span>
+  <nav class="footer-links" aria-label="Footer navigation">
+   <a href="#shop">Collection</a>
+   <a href="#studio">3D Studio</a>
+   <a href="#looks">Looks</a>
+   <a href="/admin/login">Admin Studio</a>
+  </nav>
+ </div>
+</footer>
+
+<!-- Bag Drawer -->
+<div class="bag-backdrop" id="bagBackdrop" hidden></div>
+<aside class="bag-drawer" id="bagDrawer" role="dialog" aria-modal="true" aria-labelledby="bagTitle" aria-hidden="true" inert>
+ <header class="drawer-head">
+  <div>
+   <p class="eyebrow" style="margin-bottom:2px">Atelier Selection</p>
+   <h2 id="bagTitle" class="display">Your bag <span id="bagCountTitle" class="bag-count-badge">(0)</span></h2>
+  </div>
+  <button class="icon-button" id="bagClose" type="button" aria-label="Close bag">×</button>
+ </header>
+
+ <div class="bag-scroll-area" id="bagScrollArea">
+  <div class="shipping-bar-box">
+   <div class="shipping-bar-text">
+    <span id="shippingBarMsg">Add ₱2,500 for Free Delivery</span>
+    <span id="shippingBarPercent">0%</span>
+   </div>
+   <div class="shipping-bar-track">
+    <div class="shipping-bar-fill" id="shippingBarFill"></div>
+   </div>
+  </div>
+
+  <div class="bag-items" id="bagItems">
+   <p class="bag-empty">Your bag is waiting for something lovely.</p>
+  </div>
+ </div>
+
+ <footer class="drawer-foot">
+  <div class="drawer-line-item"><span>Subtotal</span><span id="bagSubtotal">₱0</span></div>
+  <div class="drawer-line-item"><span>Estimated Shipping</span><span id="bagShipping">₱0</span></div>
+  <div class="drawer-total"><span>Total</span><strong id="bagTotal">₱0</strong></div>
+  <button class="gold-button" id="checkoutOpen" type="button" disabled>Continue to checkout <span aria-hidden="true">↗</span></button>
+  <p class="drawer-note">Orders are safely recorded to your Dia account. No payment charged.</p>
+ </footer>
+</aside>
+
+<!-- Quick View & 3D Garment Modal -->
+<dialog id="quickViewDialog" aria-labelledby="quickViewTitle">
+ <button class="dialog-close" id="quickViewClose" type="button" aria-label="Close quick view">×</button>
+ <div class="quickview-layout">
+  <div class="quickview-media-col">
+   <div class="quickview-photo-container">
+    <img id="qvImage" src="/assets/dia-editorial.webp" alt="Product quick view" loading="lazy">
+   </div>
+  </div>
+
+  <div class="quickview-details">
+   <p class="eyebrow" id="qvCategory">Category</p>
+   <h2 id="quickViewTitle">Product Title</h2>
+   <div class="quickview-price" id="qvPrice">₱0</div>
+   <p class="quickview-desc" id="qvDescription">Product description</p>
+   <div class="quickview-fabric" id="qvFabric">Fabric & Fit details</div>
+
+   <div class="quickview-sizes">
+    <div class="quickview-size-header">
+     <label>Available sizes</label>
+     <button class="size-guide-trigger" id="openSizeGuide" type="button">Size Guide ↗</button>
+    </div>
+    <div class="size-chips" id="qvSizes"></div>
+   </div>
+
+   <div id="qvStockNotice" style="color:var(--sage);font-size:11px;margin-bottom:14px">In stock: 16 units</div>
+
+   <div class="qv-action-row">
+    <button class="gold-button" id="qvAddBag" type="button" style="flex:1">Add to bag <span aria-hidden="true">↗</span></button>
+    <button class="share-btn" id="qvShareBtn" type="button" title="Share product link">↗ Share</button>
+   </div>
+  </div>
+ </div>
+</dialog>
+
+<!-- Category Size Guide Modal -->
+<dialog id="sizeGuideDialog" aria-labelledby="sizeGuideTitle">
+ <button class="dialog-close" id="sizeGuideClose" type="button" aria-label="Close size guide">×</button>
+ <div class="checkout-head">
+  <p class="eyebrow">Atelier Measurement Chart</p>
+  <h2 id="sizeGuideTitle">Size <em>Guide.</em></h2>
+ </div>
+ <div id="sizeGuideContent"></div>
+</dialog>
+
+<!-- Checkout Modal -->
+<dialog id="checkoutDialog" aria-labelledby="checkoutTitle">
+ <button class="dialog-close" id="checkoutClose" type="button" aria-label="Close checkout">×</button>
+ <div id="checkoutFormView">
+  <div class="checkout-head">
+   <p class="eyebrow">Atelier checkout</p>
+   <h2 id="checkoutTitle">Make it <em>yours.</em></h2>
+   <p>Orders are placed securely with the Dia Atelier. No payment is charged.</p>
+  </div>
+  <form class="checkout-form" id="checkoutForm">
+   <label for="checkoutName">Full name</label>
+   <input id="checkoutName" name="customerName" autocomplete="name" required minlength="2" maxlength="120">
+   <label for="checkoutEmail">Email address</label>
+   <input id="checkoutEmail" name="customerEmail" type="email" autocomplete="email" required maxlength="254">
+   <label for="checkoutPhone">Phone number</label>
+   <input id="checkoutPhone" name="customerPhone" type="tel" autocomplete="tel" placeholder="09XXXXXXXXX or +639XXXXXXXXX" required>
+   <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+    <label for="checkoutAddress" style="margin:0">Delivery address</label>
+    <button type="button" id="diffAddressToggle" style="display:none;background:none;border:none;color:var(--gold-hi);text-decoration:underline;cursor:pointer;font-size:10px;font-weight:700">Use a different address</button>
+   </div>
+   <textarea id="checkoutAddress" name="customerAddress" rows="3" autocomplete="street-address" required minlength="6" maxlength="500"></textarea>
+   <label id="saveAddressLabel" style="display:none;align-items:center;gap:8px;font-size:11px;color:var(--sage);cursor:pointer;margin-top:2px">
+    <input type="checkbox" id="saveAddressToProfile" name="saveAddress" checked style="width:auto;min-height:auto;cursor:pointer">
+    <span>Save this delivery address to my Dia profile</span>
+   </label>
+   <p class="checkout-error" id="checkoutError" role="status"></p>
+   <button class="gold-button" type="submit" id="checkoutSubmit">Place order <span aria-hidden="true">↗</span></button>
+  </form>
+ </div>
+ <div class="checkout-success-view" id="checkoutSuccessView">
+  <h3>Order Confirmed</h3>
+  <p id="checkoutSuccessMsg">Your order has been recorded to your Dia account.</p>
+  <button class="gold-button" id="checkoutDoneBtn" type="button" style="margin-top:20px">Back to Collection</button>
+ </div>
+</dialog>
+
+<div class="store-toast" id="storeToast" role="status" aria-live="polite" hidden></div>
+<style>.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}</style>
+</body>
+</html>

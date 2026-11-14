@@ -1,0 +1,25 @@
+{
+  "name": "dia-plus-web-app",
+  "version": "2.2.0",
+  "private": true,
+  "description": "Dia luxury fashion static website powered by Supabase and ready for Netlify",
+  "scripts": {
+    "start": "npx serve site",
+    "dev": "npx serve site",
+    "check": "node --check site/config.js && node --check site/js/config.js && node --check site/js/supabase-client.js && node --check site/js/auth.js && node --check site/js/storefront.js && node --check site/admin.js && node --check site/login.js && node --check site/js/register.js && node --check site/admin-login.js && node --check site/dashboard.js",
+    "test": "node scripts/test-static-site.js",
+    "test:live": "node scripts/test-static-site.js --live",
+    "images:optimize": "node scripts/optimize-images.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.48.1"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.65.1",
+    "serve": "^14.2.8",
+    "sharp": "^0.35.5"
+  }
+}

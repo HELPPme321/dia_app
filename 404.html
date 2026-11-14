@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#06261C">
+  <meta name="description" content="The page you requested could not be found.">
+  <title>Dia · Page not found (404)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .not-found-layout {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      text-align: center;
+      background: radial-gradient(circle at 50% 20%, rgba(212,175,90,0.12), transparent 70%), var(--forest, #0a1f16);
+      color: var(--cream, #f6f1e4);
+    }
+    .not-found-card {
+      max-width: 520px;
+      padding: 48px 36px;
+      border: 1px solid rgba(212,175,90,0.25);
+      border-radius: 12px;
+      background: rgba(18,48,31,0.7);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+    }
+    .not-found-brand {
+      font-family: var(--display, 'Cormorant Garamond', serif);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--cream, #f6f1e4);
+      text-decoration: none;
+      letter-spacing: -0.05em;
+    }
+    .not-found-brand span {
+      color: #d4af5a;
+    }
+    .not-found-number {
+      font-family: var(--display, 'Cormorant Garamond', serif);
+      font-size: 80px;
+      font-weight: 400;
+      line-height: 1;
+      color: #d4af5a;
+      margin: 24px 0 8px;
+    }
+    .not-found-title {
+      font-family: var(--display, 'Cormorant Garamond', serif);
+      font-size: 32px;
+      font-weight: 500;
+      margin: 0 0 16px;
+      color: #f2ead7;
+    }
+    .not-found-desc {
+      color: #a3b8aa;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0 0 32px;
+    }
+    .gold-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: #d4af5a;
+      color: #061811;
+      font-family: var(--sans, 'Manrope', sans-serif);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+    .gold-button:hover {
+      background: #f0d58a;
+      box-shadow: 0 8px 24px rgba(212,175,90,0.25);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body class="not-found-page">
+  <main class="not-found-layout">
+    <div class="not-found-card">
+      <a class="not-found-brand" href="/">Dia<span>✳</span></a>
+      <div class="not-found-number">404</div>
+      <h1 class="not-found-title">Lost in the folds.</h1>
+      <p class="not-found-desc">The piece or page you are looking for has been moved, archived, or does not exist.</p>
+      <a class="gold-button" href="/">Return to Collection <span aria-hidden="true">↗</span></a>
+    </div>
+  </main>
+</body>
+</html>

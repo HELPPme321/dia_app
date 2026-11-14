@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#06261C">
+  <meta name="description" content="Your Dia account and order dashboard.">
+  <title>Dia · My account</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .dashboard-tabs{display:flex;gap:12px;margin:28px 0 18px;border-bottom:1px solid var(--line,#2c4d3b);padding-bottom:10px}
+    .dashboard-tab-btn{background:none;border:none;color:#a3b8aa;font:700 12px var(--sans,sans-serif);letter-spacing:.1em;text-transform:uppercase;cursor:pointer;padding:8px 16px;border-radius:6px;transition:all .2s ease}
+    .dashboard-tab-btn:hover{color:#f0d58a;background:rgba(212,175,90,.08)}
+    .dashboard-tab-btn.active{color:#142318;background:#d4af5a}
+    .dashboard-status{display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+    .dashboard-status.pending{background:rgba(212,175,90,.2);color:#f0d58a;border:1px solid #d4af5a}
+    .dashboard-status.confirmed,.dashboard-status.processing{background:rgba(85,150,230,.2);color:#9cc8ff;border:1px solid #5b9bf3}
+    .dashboard-status.shipped,.dashboard-status.completed{background:rgba(85,190,120,.2);color:#9cebb5;border:1px solid #50c878}
+    .dashboard-status.cancelled,.dashboard-status.refunded{background:rgba(230,90,90,.2);color:#ff9e9e;border:1px solid #e06060}
+    .wishlist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:16px}
+    .wishlist-card{border:1px solid var(--line,#2c4d3b);border-radius:8px;padding:14px;background:rgba(18,48,31,.6);display:flex;flex-direction:column;gap:8px}
+    .wishlist-card img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:6px}
+    .profile-card{border:1px solid var(--line,#2c4d3b);border-radius:8px;padding:24px;background:rgba(18,48,31,.6);display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    @media(max-width:640px){.profile-card{grid-template-columns:1fr}}
+    .profile-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+    @media(max-width:640px){.profile-form-grid{grid-template-columns:1fr}}
+    .profile-field{display:flex;flex-direction:column;gap:6px}
+    .profile-field.full{grid-column:1 / -1}
+    .profile-field label{color:#a3b8aa;font-size:10px;text-transform:uppercase;font-weight:800;letter-spacing:.08em}
+    .profile-field input,.profile-field textarea{padding:10px 14px;border:1px solid var(--line,#2c4d3b);border-radius:6px;background:rgba(10,31,22,.8);color:#f2ead7;font:500 13px var(--sans,sans-serif)}
+    .profile-field input:focus,.profile-field textarea:focus{border-color:#d4af5a;outline:none;box-shadow:0 0 0 2px rgba(212,175,90,.16)}
+    .profile-field input[readonly]{opacity:.7;cursor:not-allowed;background:rgba(18,48,31,.3)}
+    .avatar-section{display:flex;align-items:center;gap:20px;padding:20px;border:1px solid var(--line,#2c4d3b);border-radius:8px;background:rgba(18,48,31,.6);margin-bottom:20px}
+    .avatar-preview{width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #d4af5a;background:#0d2319;display:grid;place-items:center;overflow:hidden;flex-shrink:0}
+    .avatar-preview img{width:100%;height:100%;object-fit:cover}
+    .avatar-placeholder{font-size:28px;font-family:var(--display,serif);color:#d4af5a;font-weight:600}
+    .header-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid #d4af5a;vertical-align:middle;margin-right:8px}
+  </style>
+  <script src="/js/vendor/supabase.js"></script>
+  <script src="/config.js"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/dashboard.js" defer></script>
+</head>
+<body>
+  <main class="dashboard-shell">
+    <header class="dashboard-header">
+      <a class="brand" href="/">Dia<span class="brand-mark">✳</span></a>
+      <div class="dashboard-actions">
+        <img id="headerAvatar" class="header-avatar" alt="User avatar" src="" hidden>
+        <a class="dashboard-button" href="/">Back to Dia</a>
+        <button id="dashboardSignOut" class="dashboard-button primary" type="button">Sign out ↗</button>
+      </div>
+    </header>
+    <section class="dashboard-content">
+      <div class="dashboard-hero">
+        <div><p class="eyebrow">YOUR DIA ACCOUNT</p><h1>Good to see you,<br><em id="customerName">there.</em></h1></div>
+        <p>Your private space for account details, orders, and saved wishlist pieces. Protected by your Dia session.</p>
+      </div>
+      <div id="dashboardNotice" class="auth-notice" role="status" aria-live="polite" hidden></div>
+      <div class="dashboard-stats">
+        <article class="dashboard-stat"><span>Account status</span><strong id="accountStatus">—</strong></article>
+        <article class="dashboard-stat"><span>Your role</span><strong id="accountRole">—</strong></article>
+        <article class="dashboard-stat"><span>Total orders</span><strong id="orderCount">—</strong></article>
+      </div>
+
+      <div class="dashboard-tabs" role="tablist">
+        <button id="tabOrders" class="dashboard-tab-btn active" role="tab" type="button" aria-selected="true">Orders</button>
+        <button id="tabWishlist" class="dashboard-tab-btn" role="tab" type="button" aria-selected="false">Wishlist</button>
+        <button id="tabProfile" class="dashboard-tab-btn" role="tab" type="button" aria-selected="false">Profile</button>
+      </div>
+
+      <!-- Orders Panel -->
+      <section class="dashboard-panel" id="panelOrders" aria-labelledby="ordersHeading">
+        <div class="dashboard-panel-head"><h2 id="ordersHeading">Your orders</h2><a class="dashboard-button" href="/#shop">Explore Collection</a></div>
+        <div id="orderList" aria-live="polite"><p class="dashboard-empty">Loading your order history…</p></div>
+      </section>
+
+      <!-- Wishlist Panel -->
+      <section class="dashboard-panel" id="panelWishlist" hidden>
+        <div class="dashboard-panel-head"><h2>Saved Pieces</h2><a class="dashboard-button" href="/#shop">Shop Collection</a></div>
+        <div id="wishlistContainer" aria-live="polite"><p class="dashboard-empty">No pieces saved yet. Explore the shop and tap ♡ to save your favorites.</p></div>
+      </section>
+
+      <!-- Profile Panel -->
+      <section class="dashboard-panel" id="panelProfile" hidden>
+        <div class="dashboard-panel-head"><h2>Profile Information</h2></div>
+        
+        <!-- Avatar Uploader -->
+        <div class="avatar-section">
+          <div class="avatar-preview" id="profAvatarPreview">
+            <img id="profAvatarImg" src="" alt="Profile preview" hidden>
+            <span id="profAvatarPlaceholder" class="avatar-placeholder">D</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <strong style="color:#f2ead7;font-size:14px">Profile Picture</strong>
+            <small style="color:#a3b8aa;font-size:11px">Auto-cropped and resized to 256×256 JPEG (~30 KB) before upload.</small>
+            <div style="display:flex;gap:10px;margin-top:4px">
+              <input type="file" id="profAvatarInput" accept="image/jpeg,image/png,image/webp" style="display:none">
+              <button type="button" id="profAvatarChooseBtn" class="dashboard-button" style="padding:6px 14px;font-size:11px">Choose photo</button>
+              <button type="button" id="profAvatarRemoveBtn" class="dashboard-button" style="padding:6px 14px;font-size:11px" hidden>Remove photo</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="profNotice" class="auth-notice" role="status" aria-live="polite" hidden style="margin-bottom:16px"></div>
+
+        <!-- Profile Form -->
+        <form id="profileForm" class="profile-card" style="display:block">
+          <div class="profile-form-grid">
+            <div class="profile-field">
+              <label for="profNameInput">Full Name</label>
+              <input id="profNameInput" name="name" type="text" required minlength="2" maxlength="120" autocomplete="name">
+            </div>
+            <div class="profile-field">
+              <label for="profPhoneInput">Mobile Phone (PH)</label>
+              <input id="profPhoneInput" name="phone" type="tel" placeholder="09171234567 or +639171234567" autocomplete="tel">
+            </div>
+            <div class="profile-field">
+              <label for="profEmailDisplay">Email Address</label>
+              <input id="profEmailDisplay" type="email" readonly>
+            </div>
+            <div class="profile-field">
+              <label for="profUsernameDisplay">Username</label>
+              <input id="profUsernameDisplay" type="text" readonly>
+            </div>
+            <div class="profile-field full">
+              <label for="profAddressInput">Street Address / Unit / Building</label>
+              <input id="profAddressInput" name="addressLine" type="text" maxlength="200" placeholder="Unit, Street name" autocomplete="address-line1">
+            </div>
+            <div class="profile-field">
+              <label for="profBarangayInput">Barangay</label>
+              <input id="profBarangayInput" name="barangay" type="text" maxlength="100" placeholder="Barangay">
+            </div>
+            <div class="profile-field">
+              <label for="profCityInput">City / Municipality</label>
+              <input id="profCityInput" name="city" type="text" maxlength="100" placeholder="City or Municipality" autocomplete="address-level2">
+            </div>
+            <div class="profile-field">
+              <label for="profProvinceInput">Province / Region</label>
+              <input id="profProvinceInput" name="province" type="text" maxlength="100" placeholder="Province or Metro Manila" autocomplete="address-level1">
+            </div>
+            <div class="profile-field">
+              <label for="profPostalInput">Postal Code</label>
+              <input id="profPostalInput" name="postalCode" type="text" maxlength="4" placeholder="4 digits e.g. 1000" autocomplete="postal-code">
+            </div>
+          </div>
+          <div style="margin-top:20px;display:flex;justify-content:flex-end">
+            <button type="submit" id="profSaveBtn" class="dashboard-button primary">Save Profile Changes</button>
+          </div>
+        </form>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

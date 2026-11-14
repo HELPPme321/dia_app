@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#06261C">
+  <meta name="description" content="Secure administrator sign-in for Dia.">
+  <title>Dia · Administrator sign in</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/vendor/supabase.js"></script>
+  <script src="/config.js"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/fashion.js" defer></script>
+  <script src="/admin-login.js" defer></script>
+</head>
+<body class="login-page">
+  <main class="login-layout">
+    <section class="login-showcase" aria-label="Dia atelier fashion showcase">
+      <div class="login-showcase__top">
+        <a class="brand" href="/" aria-label="Dia home">Dia<span class="brand-mark">✳</span></a>
+        <span class="login-showcase__edition">THE DIA ATELIER</span>
+      </div>
+      <div class="fashion-stage" data-fashion-stage aria-hidden="true"></div>
+      <div class="login-showcase__bottom">
+        <div><span class="login-showcase__wordmark shim">Dia</span><p class="login-showcase__tag">STAFF ACCESS ONLY</p></div>
+        <span class="login-showcase__number">04 / 04</span>
+      </div>
+    </section>
+
+    <section class="login-main">
+      <div class="login-card" id="loginCard">
+        <div class="login-card__top"><a class="brand" href="/">Dia<span class="brand-mark">✳</span></a><span>STAFF PORTAL</span></div>
+        <h1 id="authTitle">Staff portal</h1>
+        <p class="login-subtitle" id="authDescription">Sign in with an active Dia administrator account.</p>
+        <div class="auth-notice" id="adminNotice" role="status" aria-live="polite" hidden></div>
+
+        <form id="adminLoginForm" class="auth-form" novalidate>
+          <label for="adminIdentifier">Email address</label>
+          <input class="auth-input" id="adminIdentifier" name="email" type="email" autocomplete="email" required placeholder="admin@dia.local">
+
+          <label for="adminPassword">Password</label>
+          <div class="auth-password-wrap">
+            <input class="auth-input" id="adminPassword" name="password" type="password" autocomplete="current-password" required minlength="8">
+            <button class="password-toggle" type="button" data-password-toggle="adminPassword" aria-label="Show password" aria-pressed="false">Show</button>
+          </div>
+
+          <button class="auth-submit" type="submit" id="adminSubmit"><span>Access studio</span><span aria-hidden="true">↗</span></button>
+        </form>
+
+        <p class="auth-switch">Customer account? <a href="/login">Customer sign in</a></p>
+        <div class="login-card__foot"><a href="/login">← Customer sign in</a><a href="/">← Return to Dia</a></div>
+      </div>
+      <footer class="login-footer">© <span id="adminYear"></span> DIA · ATELIER MANAGEMENT</footer>
+    </section>
+  </main>
+</body>
+</html>
