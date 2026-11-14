@@ -1,0 +1,329 @@
+'use strict';
+const {test,beforeEach,afterEach}=require('node:test');
+const assert=require('node:assert/strict');
+const request=require('supertest');
+const bcrypt=require('bcryptjs');
+const {createDatabase}=require('../src/db');
+const {createApp}=require('../src/server');
+const {provisionAdmin}=require('../scripts/provision-admin');
+
+let db,agent,app;
+const valid='valid-google-id-token-sentinel-for-a-mocked-verifier';
+const verifier={async verifyIdToken({idToken,audience}){if(audience!=='test-client'||idToken!==valid)throw Error('bad token');return{getPayload:()=>({sub:'google-sub-1',email:'member@example.com',email_verified:true,name:'Dia Member',picture:'https://example.com/avatar.png'})};}};
+beforeEach(()=>{db=createDatabase(':memory:');({app}=createApp({db,env:{NODE_ENV:'test',APP_ORIGIN:'http://localhost:3000',GOOGLE_CLIENT_ID:'test-client'},googleClient:verifier}));agent=request.agent(app);});
+afterEach(()=>db.close());
+async function csrf(a=agent){return(await a.get('/api/auth/csrf').expect(200)).body.csrfToken;}
+function admin(){const now=new Date().toISOString(),password='a-unique-test-password-at-least-14';db.prepare("INSERT INTO users(id,email,password_hash,name,role,status,created_at,updated_at) VALUES('admin-1','admin@example.com',?,'Admin','admin','active',?,?)").run(bcrypt.hashSync(password,4),now,now);return password;}
+async function register(a,email='member@example.net',password='A-strong-password-123',username='dia-customer'){const c=await csrf(a);return a.post('/api/auth/register').set('x-csrf-token',c).send({name:'Dia Customer',email,password,confirmPassword:password,username});}
+async function login(a,email='member@example.net',password='A-strong-password-123',rememberMe=false){const c=await csrf(a);return a.post('/api/auth/login').set('x-csrf-token',c).send({email,password,rememberMe});}
+
+test('standard registration creates a hashed customer account without Google',async()=>{
+  const r=await register(agent,'Person@Example.net');assert.equal(r.status,201);
+  assert.equal(r.body.user.role,'user');assert.equal(r.body.user.email,'person@example.net');assert.ok(r.body.csrfToken);
+  const saved=db.prepare('SELECT password_hash,google_sub,role FROM users WHERE email=?').get('person@example.net');
+  assert.notEqual(saved.password_hash,'A-strong-password-123');assert.ok(saved.password_hash.startsWith('$2'));assert.equal(saved.google_sub,null);assert.equal(saved.role,'user');
+  await agent.get('/api/auth/me').expect(200);
+});
+test('registration normalizes email and prevents duplicate accounts',async()=>{
+  assert.equal((await register(agent,'Person@Example.net')).status,201);
+  const r=await register(agent,' person@example.NET ');assert.equal(r.status,409);
+  assert.equal(r.body.error.code,'EMAIL_ALREADY_REGISTERED');
+  assert.equal(db.prepare('SELECT COUNT(*) count FROM users').get().count,1);
+});
+test('registration rejects weak or mismatched passwords',async()=>{
+  const c=await csrf();
+  await agent.post('/api/auth/register').set('x-csrf-token',c).send({name:'Dia Customer',username:'weak-member',email:'weak@example.net',password:'short1',confirmPassword:'short1'}).expect(400);
+  const c2=await csrf();
+  const r=await agent.post('/api/auth/register').set('x-csrf-token',c2).send({name:'Dia Customer',username:'mismatch-member',email:'mismatch@example.net',password:'A-strong-password-123',confirmPassword:'A-different-password-456'}).expect(400);
+  assert.equal(r.body.error.code,'PASSWORD_MISMATCH');
+});
+test('customer can log in with email and password and session persists',async()=>{
+  assert.equal((await register(agent)).status,201);
+  const browser=request.agent(app);
+  const r=await login(browser);assert.equal(r.status,200);
+  assert.equal(r.body.user.role,'user');assert.equal(r.body.user.email,'member@example.net');
+  const profile=await browser.get('/api/profile').expect(200);assert.equal(profile.body.user.email,'member@example.net');
+  assert.equal((await browser.get('/api/auth/me').expect(200)).body.authenticated,true);
+});
+test('invalid customer credentials produce a generic error',async()=>{
+  assert.equal((await register(agent)).status,201);
+  const browser=request.agent(app);
+  const r=await login(browser,'member@example.net','wrong-password-123');assert.equal(r.status,401);
+  assert.equal(r.body.error.code,'INVALID_CREDENTIALS');assert.equal(r.body.error.message,'Email, username, or password is incorrect.');
+});
+test('logout invalidates the customer session',async()=>{
+  assert.equal((await register(agent)).status,201);
+  await agent.get('/api/profile').expect(200);
+  const c=await csrf();
+  await agent.post('/api/auth/logout').set('x-csrf-token',c).send({}).expect(200);
+  await agent.get('/api/profile').expect(401);
+});
+test('Google sign-in creates a customer only after server token verification',async()=>{
+  const c=await csrf();
+  const r=await agent.post('/api/auth/google').set('x-csrf-token',c).send({credential:valid}).expect(200);
+  assert.equal(r.body.user.role,'user');assert.equal(r.body.user.email,'member@example.com');assert.ok(r.body.csrfToken);
+  assert.equal(db.prepare('SELECT google_sub FROM users WHERE email=?').get('member@example.com').google_sub,'google-sub-1');
+});
+test('Google login rejects an invalid ID token',async()=>{
+  const c=await csrf();
+  const r=await agent.post('/api/auth/google').set('x-csrf-token',c).send({credential:'this-is-definitely-not-a-valid-google-token-and-is-long-enough'}).expect(401);
+  assert.equal(r.body.error.code,'GOOGLE_SIGN_IN_FAILED');
+});
+test('state-changing authentication endpoints require CSRF',async()=>{
+  await csrf();
+  const r=await agent.post('/api/auth/register').send({name:'No CSRF',email:'no-csrf@example.net',password:'A-strong-password-123',confirmPassword:'A-strong-password-123'}).expect(403);
+  assert.equal(r.body.error.code,'CSRF_VALIDATION_FAILED');
+});
+test('customer session cannot access administrator API',async()=>{
+  assert.equal((await register(agent)).status,201);
+  const r=await agent.get('/api/admin/stats').expect(403);
+  assert.equal(r.body.error.code,'ADMIN_ACCESS_REQUIRED');
+});
+test('admin provisioning repairs an existing account and enables the protected dashboard',async()=>{
+  assert.equal((await register(agent,'admin.candidate@example.net','A-customer-password-123')).status,201);
+  await agent.get('/api/profile').expect(200);
+  const previousSessions=db.prepare("SELECT COUNT(*) count FROM sessions WHERE user_id=(SELECT id FROM users WHERE email=?)").get('admin.candidate@example.net').count;
+  assert.ok(previousSessions>0);
+
+  const password='A-new-admin-password-2026';
+  const result=await provisionAdmin({
+    db,
+    env:{ADMIN_EMAIL:' Admin.Candidate@Example.NET ',ADMIN_PASSWORD:password,DATABASE_PATH:':memory:'},
+    logger:{log(){}}
+  });
+  assert.equal(result.created,false);
+  const saved=db.prepare('SELECT role,status,password_hash,is_demo FROM users WHERE email=?').get('admin.candidate@example.net');
+  assert.equal(saved.role,'admin');
+  assert.equal(saved.status,'active');
+  assert.equal(saved.is_demo,0);
+  assert.notEqual(saved.password_hash,password);
+  assert.equal(await bcrypt.compare(password,saved.password_hash),true);
+  assert.equal(db.prepare("SELECT COUNT(*) count FROM sessions WHERE user_id=(SELECT id FROM users WHERE email=?)").get('admin.candidate@example.net').count,0);
+
+  const adminBrowser=request.agent(app);
+  const c=await csrf(adminBrowser);
+  const response=await adminBrowser.post('/api/auth/admin-login').set('x-csrf-token',c).send({email:'admin.candidate@example.net',password}).expect(200);
+  assert.equal(response.body.user.role,'admin');
+  assert.equal(response.body.authenticated,true);
+  const me=await adminBrowser.get('/api/auth/me').expect(200);
+  assert.equal(me.body.authMethod,'admin');
+  await adminBrowser.get('/admin').expect(200);
+  const stats=await adminBrowser.get('/api/admin/stats').expect(200);
+  assert.equal(stats.body.stats.administrators,1);
+});
+
+test('a signed-in customer cannot open the admin page',async()=>{
+  assert.equal((await register(agent,'store.customer@example.net')).status,201);
+  await agent.get('/admin').expect(403);
+  const stats=await agent.get('/api/admin/stats').expect(403);
+  assert.equal(stats.body.error.code,'ADMIN_ACCESS_REQUIRED');
+});
+
+test('admin session accesses live database statistics',async()=>{
+  const password=admin(),c=await csrf();
+  await agent.post('/api/auth/admin-login').set('x-csrf-token',c).send({email:'admin@example.com',password}).expect(200);
+  const r=await agent.get('/api/admin/stats').expect(200);assert.equal(r.body.stats.administrators,1);
+});
+test('promoting a customer to admin revokes their existing customer session',async()=>{
+  const adminPassword=admin(),now=new Date().toISOString();
+  db.prepare("INSERT INTO users(id,email,password_hash,name,role,status,created_at,updated_at) VALUES('promoted-1','promoted@example.com',?,'Promoted','user','active',?,?)")
+    .run(bcrypt.hashSync('Customer-Password-2026',4),now,now);
+  const customerBrowser=request.agent(app);
+  const customerCsrf=await csrf(customerBrowser);
+  await customerBrowser.post('/api/auth/login').set('x-csrf-token',customerCsrf).send({email:'promoted@example.com',password:'Customer-Password-2026'}).expect(200);
+  await customerBrowser.get('/api/profile').expect(200);
+
+  const adminCsrf=await csrf(agent);
+  await agent.post('/api/auth/admin-login').set('x-csrf-token',adminCsrf).send({email:'admin@example.com',password:adminPassword}).expect(200);
+  const password='A-promoted-admin-password-2026';
+  const promoteCsrf=await csrf(agent);
+  await agent.patch('/api/admin/users/promoted-1').set('x-csrf-token',promoteCsrf)
+    .send({role:'admin',adminPassword:password}).expect(200);
+
+  await customerBrowser.get('/api/profile').expect(401);
+  await customerBrowser.get('/admin').expect(302).expect('Location','/admin/login');
+  const adminPage=await customerBrowser.get('/admin/login').expect(200);
+  assert.match(adminPage.text,/id="adminLoginForm"/);
+  const nextCsrf=await csrf(customerBrowser);
+  const adminLogin=await customerBrowser.post('/api/auth/admin-login').set('x-csrf-token',nextCsrf)
+    .send({email:'promoted@example.com',password}).expect(200);
+  assert.equal(adminLogin.body.user.role,'admin');
+  assert.equal((await customerBrowser.get('/api/admin/stats').expect(200)).body.stats.administrators,2);
+});
+
+test('admin cannot demote own account',async()=>{
+  const password=admin(),c=await csrf();
+  await agent.post('/api/auth/admin-login').set('x-csrf-token',c).send({email:'admin@example.com',password}).expect(200);
+  const c2=await csrf();
+  const r=await agent.patch('/api/admin/users/admin-1').set('x-csrf-token',c2).send({role:'user'}).expect(400);
+  assert.equal(r.body.error.code,'SELF_LOCKOUT_PREVENTED');
+});
+test('admin user list returns pagination metadata without password hashes',async()=>{
+  const password=admin(),now=new Date().toISOString();
+  db.prepare("INSERT INTO users(id,email,name,role,status,created_at,updated_at) VALUES('customer-1','customer@example.com','Customer','user','active',?,?)").run(now,now);
+  const c=await csrf();await agent.post('/api/auth/admin-login').set('x-csrf-token',c).send({email:'admin@example.com',password}).expect(200);
+  const r=await agent.get('/api/admin/users?page=1&limit=10').expect(200);
+  assert.equal(r.body.pagination.total,2);assert.ok(r.body.users.every(u=>!Object.hasOwn(u,'password_hash')));
+});
+test('customer can sign up and sign in with a trimmed, case-insensitive username without an @ sign',async()=>{
+  const created=await register(agent,'customer-username@example.net','A-strong-password-123','  MilesAdmin  ');
+  assert.equal(created.status,201);
+  assert.equal(created.body.user.username,'milesadmin');
+  const duplicate=await register(agent,'another-customer@example.net','A-strong-password-123','MILESADMIN');
+  assert.equal(duplicate.status,409);
+  assert.equal(duplicate.body.error.code,'USERNAME_ALREADY_TAKEN');
+  const browser=request.agent(app);
+  const c=await csrf(browser);
+  const response=await browser.post('/api/auth/login').set('x-csrf-token',c)
+    .send({identifier:'MILESADMIN',password:'A-strong-password-123'}).expect(200);
+  assert.equal(response.body.user.role,'user');
+  assert.equal(response.body.user.username,'milesadmin');
+  await browser.get('/api/profile').expect(200);
+});
+
+test('registration requires a non-empty username after trimming',async()=>{
+  const empty=await register(agent,'empty-username@example.net','A-strong-password-123','   ');
+  assert.equal(empty.status,400);
+  assert.equal(empty.body.error.code,'USERNAME_REQUIRED');
+  assert.equal(empty.body.error.message,'Enter a username.');
+  assert.equal(db.prepare('SELECT COUNT(*) count FROM users').get().count,0);
+});
+
+test('customer usernames accept punctuation and are not limited by username length',async()=>{
+  const rawUsername=('Long username with punctuation! @ # $ % ^ & * ( ) - _ + = / ? <tag> ').repeat(8);
+  const expected=rawUsername.trim().toLowerCase();
+  const created=await register(agent,'long-username@example.net','A-strong-password-123','  '+rawUsername+'  ');
+  assert.equal(created.status,201);
+  assert.equal(created.body.user.username,expected);
+  const browser=request.agent(app);
+  const c=await csrf(browser);
+  const response=await browser.post('/api/auth/login').set('x-csrf-token',c)
+    .send({identifier:expected.toUpperCase(),password:'A-strong-password-123'}).expect(200);
+  assert.equal(response.body.user.username,expected);
+});
+
+test('administrator can sign in using the milesadmin username and reaches the dashboard',async()=>{
+  const password='milesadmin-secret-2026';
+  const now=new Date().toISOString();
+  db.prepare("INSERT INTO users(id,email,username,password_hash,name,role,status,created_at,updated_at) VALUES('miles-admin','milesadmin@example.net','milesadmin',?,'Administrator','admin','active',?,?)")
+    .run(bcrypt.hashSync(password,4),now,now);
+  const browser=request.agent(app);
+  const c=await csrf(browser);
+  const response=await browser.post('/api/auth/admin-login').set('x-csrf-token',c)
+    .send({identifier:'MilesAdmin',password}).expect(200);
+  assert.equal(response.body.user.role,'admin');
+  assert.equal(response.body.user.username,'milesadmin');
+  const me=await browser.get('/api/auth/me').expect(200);
+  assert.equal(me.body.authMethod,'admin');
+  await browser.get('/admin').expect(200);
+  await browser.get('/api/admin/stats').expect(200);
+});
+
+test('legacy non-email admin identifier remains usable through email-column fallback',async()=>{
+  const password='legacy-admin-secret-2026';
+  const now=new Date().toISOString();
+  db.prepare("INSERT INTO users(id,email,password_hash,name,role,status,created_at,updated_at) VALUES('legacy-admin','milesadmin',?,'Administrator','admin','active',?,?)")
+    .run(bcrypt.hashSync(password,4),now,now);
+  const browser=request.agent(app);
+  const c=await csrf(browser);
+  const response=await browser.post('/api/auth/admin-login').set('x-csrf-token',c)
+    .send({identifier:'MILESADMIN',password}).expect(200);
+  assert.equal(response.body.user.role,'admin');
+  assert.equal(response.body.user.email,'milesadmin');
+  await browser.get('/admin').expect(200);
+});
+
+test('empty identifiers and wrong username passwords are handled safely',async()=>{
+  const c=await csrf();
+  const empty=await agent.post('/api/auth/admin-login').set('x-csrf-token',c)
+    .send({identifier:'',password:'anything'}).expect(400);
+  assert.equal(empty.body.error.code,'INVALID_INPUT');
+  const password='admin-account-password-2026';
+  const now=new Date().toISOString();
+  db.prepare("INSERT INTO users(id,email,username,password_hash,name,role,status,created_at,updated_at) VALUES('wrong-password-admin','wrong-admin@example.net','wrongadmin',?,'Administrator','admin','active',?,?)")
+    .run(bcrypt.hashSync(password,4),now,now);
+  const browser=request.agent(app);
+  const token=await csrf(browser);
+  const wrong=await browser.post('/api/auth/admin-login').set('x-csrf-token',token)
+    .send({identifier:'wrongadmin',password:'incorrect-password'}).expect(401);
+  assert.equal(wrong.body.error.code,'INVALID_ADMIN_CREDENTIALS');
+  assert.match(wrong.body.error.message,/username.*password/i);
+});
+
+test('desktop Dia pages are separate, role-aware, and protected',async()=>{
+  await agent.get('/').expect(200).expect((r)=>{
+    assert.match(r.text,/class="site-header"/);
+    assert.match(r.text,/id="heroTrack"/);
+    assert.match(r.text,/id="productGrid"/);
+    assert.match(r.text,/id="bagDrawer"/);
+    assert.match(r.text,/id="newsletterForm"/);
+    assert.match(r.text,/Wear your/);
+    assert.match(r.text,/images.unsplash.com/);
+    assert.match(r.text,/id="looks"/);
+    assert.match(r.text,/id="story"/);
+    assert.match(r.text,/nonce="[^"]+"/);
+    assert.doesNotMatch(r.text,/phone-frame|appScreen|bottom-nav|src="\/js\/storefront.js/);
+  });
+  await agent.get('/login').expect(200).expect((r)=>{
+    assert.match(r.text,/id="loginForm"/);
+    assert.match(r.text,/id="loginIdentifier"[^>]*type="text"/);
+    assert.match(r.text,/placeholder="Email or Username"/);
+    assert.ok(r.text.includes('href="/register"'), 'Login page must link to the separate registration page.');
+    assert.doesNotMatch(r.text,/3–32 characters|Use 3–32 characters|\(optional\)/i);
+    assert.ok(r.text.includes('href="/forgot.html"'));
+    assert.doesNotMatch(r.text,/id="intro"|id="diaIntro"/);
+    assert.ok(r.text.includes('<script src="/js/auth.js?v=dia-cinematic-login-20261031" defer></script>'));
+    assert.ok(r.text.includes('<script src="/login.js?v=dia-post-login-cinematic-20261031" defer></script>'));
+  });
+  await agent.get('/register').expect(200).expect((r)=>{
+    assert.match(r.text,/id="registerForm"/);
+    const signupUsername=r.text.match(/<input[^>]*id="registerUsername"[^>]*>/)?.[0]||'';
+    assert.ok(signupUsername.includes('required'));
+    assert.doesNotMatch(signupUsername,/maxlength|minlength|pattern/i);
+    assert.ok(r.text.includes('src="/js/register.js?v=dia-register-page-20261031"'));
+  });
+  await agent.get('/admin/login').expect(200).expect((r)=>{
+    assert.match(r.text,/id="adminLoginForm"/);
+    assert.match(r.text,/id="adminIdentifier"[^>]*type="text"/);
+    assert.doesNotMatch(r.text,/id="adminIdentifier"[^>]*maxlength=/i);
+    assert.match(r.text,/Email or Username/);
+    assert.match(r.text,/placeholder="Email or Username"/);
+    assert.match(r.text,/milesadmin/);
+    assert.doesNotMatch(r.text,/id="intro"|id="diaIntro"/);
+  });
+  await agent.get('/forgot.html').expect(200).expect((r)=>assert.match(r.text,/password-reset email service has not been configured/));
+  await agent.get('/forgot-password').expect(200).expect((r)=>assert.match(r.text,/password-reset email service has not been configured/));
+  await agent.get('/dashboard').expect(302).expect('Location','/login');
+  const password=admin();
+  const c=await csrf();
+  await agent.post('/api/auth/admin-login').set('x-csrf-token',c).send({email:'admin@example.com',password}).expect(200);
+  await agent.get('/dashboard').expect(302).expect('Location','/admin');
+});
+
+test('successful customer login arms a one-shot cinematic redirect while returning sessions do not',async()=>{
+  const fs=require('node:fs'),path=require('node:path');
+  const authJs=fs.readFileSync(path.join(__dirname,'../js/auth.js'),'utf8');
+  const loginJs=fs.readFileSync(path.join(__dirname,'../login.js'),'utf8');
+  const fashionJs=fs.readFileSync(path.join(__dirname,'../js/fashion.js'),'utf8');
+  assert.match(authJs,/options\.cinematic === true/);
+  assert.match(authJs,/sessionStorage\.setItem\('dia_intro_pending','1'\)/);
+  assert.match(authJs,/window\.location\.replace\('\/'\)/);
+  assert.match(loginJs,/redirectByRole\(result\.user, result\.authMethod, \{ cinematic: true \}\)/);
+  assert.match(fashionJs,/getItem\('dia_intro_pending'\)/);
+  assert.match(fashionJs,/removeItem\('dia_intro_pending'\)/);
+  assert.match(fashionJs,/skip\.addEventListener\('click', finish/);
+  assert.match(fashionJs,/sound\.addEventListener\('click'/);
+  assert.match(fashionJs,/prefers-reduced-motion/);
+});
+
+test('normal password login cannot be used for administrator accounts',async()=>{
+  const password=admin(),c=await csrf();
+  const r=await agent.post('/api/auth/login').set('x-csrf-token',c).send({email:'admin@example.com',password}).expect(401);
+  assert.equal(r.body.error.code,'INVALID_CREDENTIALS');
+});
+
+test('static server does not expose backend source or package metadata',async()=>{
+  await agent.get('/src/server.js').expect(404);
+  await agent.get('/package.json').expect(404);
+  await agent.get('/.env.example').expect(404);
+});

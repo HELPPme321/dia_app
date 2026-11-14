@@ -1,0 +1,20 @@
+/* Shared Dia brand foundations for the storefront and studio dashboard. */
+:root {
+  --dia-forest: #0a1f16;
+  --dia-gold: #d4af5a;
+  --dia-gold-highlight: #f0d58a;
+  --dia-cream: #f2ead7;
+  --dia-sage: #a3b8aa;
+}
+img { image-rendering: auto; }
+a, button, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline-color: var(--dia-gold-highlight); }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
